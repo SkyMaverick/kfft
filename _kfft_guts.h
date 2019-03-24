@@ -32,6 +32,7 @@ struct kiss_fft_state {
     int nfft;
     int inverse;
     int delta;
+    int step;
     int factors[2*MAXFACTORS];
     kiss_fft_cpx twiddles[1];
 };

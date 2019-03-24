@@ -1,9 +1,9 @@
 KFVER=130
 
 ifeq ($(shell uname -s),Darwin)
-	SHARED := -Wl,-install_name,libkissfft.dylib -o libkfft.dylib
+	SHARED := -Wl,-install_name,libkfft.dylib -o libkfft.dylib
 else
-	SHARED := -Wl,-soname,libkissfft.so -o libkfft.so
+	SHARED := -Wl,-soname,libkfft.so -o libkfft.so
 endif
 
 AppName=app

@@ -14,7 +14,7 @@ main (int argc, char* argv[])
 
         kiss_fft_cpx* FOut = calloc (argc, sizeof(kiss_fft_cpx));
 
-        kiss_fft_cfg  FCfg = kiss_fft_alloc (argc-1, 0, 0, NULL, NULL);
+        kiss_fft_cfg  FCfg = kiss_fft_alloc (argc-1, 0, 0, 0, NULL, NULL);
 
         kiss_fft (FCfg, amp_scalar, FOut);
         

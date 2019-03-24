@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2010, Mark Borgerding
+              2018-2019, Alexander Smirnov
 
 All rights reserved.
 
@@ -169,12 +170,14 @@ static inline void
 __kiss_fft_init (__fft_cfg   st,
                  int         nfft,
                  int         inverse_fft,
-                 int         delta)
+                 int         delta,
+                 int         step)
 {
         int i;
         st->nfft=nfft;
         st->inverse = inverse_fft;
         st->delta   = delta;
+        st->step    = step;
 
         kf_factor(nfft,st->factors);
 
@@ -201,7 +204,9 @@ static __fft_cfg
 __kiss_fft_alloc (int nfft,
                   int inverse_fft,
                   int delta,
-                  void * mem,size_t * lenmem )
+                  int step,
+                  void * mem,
+                  size_t * lenmem )
 {
     __fft_cfg st=NULL;
     size_t memneeded = sizeof(struct kiss_fft_state)
@@ -215,7 +220,7 @@ __kiss_fft_alloc (int nfft,
         *lenmem = memneeded;
     }
     if (st) {
-        __kiss_fft_init(st, nfft, inverse_fft, delta);
+        __kiss_fft_init(st, nfft, inverse_fft, delta, step);
     }
     return st;
 }
@@ -264,6 +269,7 @@ kiss_fft_cfg
 kiss_fft_alloc (int         nfft,
                 int         inverse_fft,
                 int         delta,
+                int         step,
                 void *      mem,
                 size_t *    lenmem)
 {
@@ -271,14 +277,7 @@ kiss_fft_alloc (int         nfft,
     kiss_fft_cfg st = NULL;
     size_t subsize = 0, memneeded = 0;
 
-//    if (nfft & 1) {
-//        fprintf(stderr,"Real FFT optimization must be even.\n");
-//        // TODO
-//    } else {
-        // TODO operation if nfft not even
-//        nfft >>= 1;
-
-        __kiss_fft_alloc (nfft, inverse_fft, delta, NULL, &subsize);
+        __kiss_fft_alloc (nfft, inverse_fft, delta, step, NULL, &subsize);
         memneeded = sizeof(struct kiss_fftr_state) + subsize + sizeof(kiss_fft_cpx) * ( nfft * 3 / 2);
 
         if (lenmem == NULL) {
@@ -294,7 +293,7 @@ kiss_fft_alloc (int         nfft,
         st->substate = (__fft_cfg) (st + 1); /*just beyond kiss_fftr_state struct */
         st->tmpbuf = (kiss_fft_cpx *) (((char *) st->substate) + subsize);
         st->super_twiddles = st->tmpbuf + nfft;
-        __kiss_fft_alloc(nfft, inverse_fft, delta, st->substate, &subsize);
+        __kiss_fft_alloc(nfft, inverse_fft, delta, step, st->substate, &subsize);
 
         for (i = 0; i < nfft/2; ++i) {
             double phase =
@@ -303,7 +302,6 @@ kiss_fft_alloc (int         nfft,
                 phase *= -1;
             kf_cexp (st->super_twiddles+i,phase);
         }
-//    }
     return st;
 }
 
@@ -322,23 +320,20 @@ kiss_fft (kiss_fft_cfg             st,
     }
 
     ncfft = st->substate->nfft;
-
-    for (int i=0; i < ncfft; i++) {
-        st->tmpbuf[i].r = timedata [i];
-        st->tmpbuf[i].i = 0;
+    
+    if (st->substate->delta || st->substate->step) {
+        for (int i=0; i < ncfft; i++) {
+            st->tmpbuf[i].r = timedata [i * st->substate->step + st->substate->delta];
+            st->tmpbuf[i].i = 0;
+        }
+    } else {
+        for (int i=0; i < ncfft; i++) {
+            st->tmpbuf[i].r = timedata [i];
+            st->tmpbuf[i].i = 0;
+        }
     }
 
-    /*perform the parallel fft of two real signals packed in real,imag*/
     __kiss_fft( st->substate , st->tmpbuf, st->tmpbuf );
-    /* The real part of the DC element of the frequency spectrum in st->tmpbuf
-     * contains the sum of the even-numbered elements of the input time sequence
-     * The imag part is the sum of the odd-numbered elements
-     *
-     * The sum of tdc.r and tdc.i is the sum of the input time sequence. 
-     *      yielding DC of input time sequence
-     * The difference of tdc.r - tdc.i is the sum of the input (dot product) [1,-1,1,-1... 
-     *      yielding Nyquist bin of input time sequence
-     */
  
     tdc.r = st->tmpbuf[0].r;
     tdc.i = st->tmpbuf[0].i;

@@ -59,6 +59,7 @@ kiss_fft_cfg
 kiss_fft_alloc (int         nfft,
                 int         inverse_fft,
                 int         delta,
+                int         step,
                 void *      mem,
                 size_t *    lenmem);
 /*
