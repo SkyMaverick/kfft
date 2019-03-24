@@ -19,7 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma once
 
-#include "kiss_fft.h"
+#include "kfft.h"
 #include <limits.h>
 
 #define MAXFACTORS 32

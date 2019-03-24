@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "kiss_fft.h"
+#include "kfft.h"
 
 int
 main (int argc, char* argv[])
