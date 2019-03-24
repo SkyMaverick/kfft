@@ -11,7 +11,7 @@ all:
 	ar crus libkissfft.a kiss_fft.o
 	gcc -shared $(SHARED) kiss_fft.o
 # ===================================
-	gcc -Wall -g -Dkiss_fft_scalar=double -L. -I. test/testapp.c -lkissfft -lm -o app
+	gcc -Wall -g -Dkiss_fft_scalar=double -L. -I. test/testapp.c -lkissfft -lm -Wl,-rpath,. -o app
 doc:
 	@echo "Start by reading the README file.  If you want to build and test lots of stuff, do a 'make testall'"
 	@echo "but be aware that 'make testall' has dependencies that the basic kissfft software does not."
