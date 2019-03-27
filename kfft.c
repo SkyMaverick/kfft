@@ -225,7 +225,7 @@ kiss_fft_config  (int         nfft,
     int i;
     kiss_fft_cfg st = NULL;
     size_t subsize = 0, memneeded = 0;
-
+        
         __kiss_fft_config (nfft, inverse_fft, delta, step, NULL, &subsize);
         memneeded = sizeof(struct kiss_fftr_state) + subsize + sizeof(kiss_fft_cpx) * ( nfft * 3 / 2);
 
@@ -256,7 +256,7 @@ kiss_fft_config  (int         nfft,
 }
 
 void
-kiss_fft (kiss_fft_cfg             st,
+kiss_fft (kiss_fft_cfg               st,
           const kiss_fft_scalar     *timedata,
           kiss_fft_cpx              *freqdata)
 {
@@ -331,8 +331,8 @@ kiss_ffti (kiss_fft_cfg         st,
 
     ncfft = st->substate->nfft;
 
-    st->tmpbuf[0].r = freqdata[0].r + freqdata[ncfft-1].r;
-    st->tmpbuf[0].i = freqdata[0].r - freqdata[ncfft-1].r;
+    st->tmpbuf[0].r = freqdata[0].r + freqdata[ncfft].r;
+    st->tmpbuf[0].i = freqdata[0].r - freqdata[ncfft].r;
     C_FIXDIV(st->tmpbuf[0],2);
 
     for (k = 1; k <= ncfft / 2; ++k) {
@@ -354,7 +354,18 @@ kiss_ffti (kiss_fft_cfg         st,
         st->tmpbuf[ncfft - k].i *= -1;
 #endif
     }
-    __kiss_fft (st->substate, st->tmpbuf, (kiss_fft_cpx *) timedata);
+    __kiss_fft (st->substate, st->tmpbuf, st->tmpbuf);
+
+    if (st->substate->delta || st->substate->step) {
+        for (int i=0; i < ncfft; i++) {
+            timedata [i * st->substate->step + st->substate->delta] = st->tmpbuf[i].r / (2 * st->substate->nfft);
+        }
+    } else {
+        for (int i=0; i < ncfft; i++) {
+            timedata[i] = st->tmpbuf[i].r / (2 * st->substate->nfft);
+        }
+    }
+
 }
 
 void
