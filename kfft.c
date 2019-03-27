@@ -287,7 +287,6 @@ kiss_fft (kiss_fft_cfg               st,
 
     tdc.r = st->tmpbuf[0].r;
     tdc.i = st->tmpbuf[0].i;
-    C_FIXDIV(tdc,2);
     CHECK_OVERFLOW_OP(tdc.r ,+, tdc.i);
     CHECK_OVERFLOW_OP(tdc.r ,-, tdc.i);
     freqdata[0].r = tdc.r + tdc.i;
@@ -302,8 +301,6 @@ kiss_fft (kiss_fft_cfg               st,
         fpk    = st->tmpbuf[k];
         fpnk.r =   st->tmpbuf[ncfft-k].r;
         fpnk.i = - st->tmpbuf[ncfft-k].i;
-        C_FIXDIV(fpk,2);
-        C_FIXDIV(fpnk,2);
 
         C_ADD( f1k, fpk , fpnk );
         C_SUB( f2k, fpk , fpnk );
@@ -333,15 +330,12 @@ kiss_ffti (kiss_fft_cfg         st,
 
     st->tmpbuf[0].r = freqdata[0].r + freqdata[ncfft].r;
     st->tmpbuf[0].i = freqdata[0].r - freqdata[ncfft].r;
-    C_FIXDIV(st->tmpbuf[0],2);
 
     for (k = 1; k <= ncfft / 2; ++k) {
         kiss_fft_cpx fk, fnkc, fek, fok, tmp;
         fk = freqdata[k];
         fnkc.r = freqdata[ncfft - k].r;
         fnkc.i = -freqdata[ncfft - k].i;
-        C_FIXDIV( fk , 2 );
-        C_FIXDIV( fnkc , 2 );
 
         C_ADD (fek, fk, fnkc);
         C_SUB (tmp, fk, fnkc);

@@ -24,28 +24,18 @@ extern "C" {
 */
 
 #ifdef USE_SIMD
-# include <xmmintrin.h>
-# define kiss_fft_scalar __m128
-#define KISS_FFT_MALLOC(nbytes) _mm_malloc(nbytes,16)
-#define KISS_FFT_FREE _mm_free
+    #include <xmmintrin.h>
+    #define kiss_fft_scalar __m128
+    #define KISS_FFT_MALLOC(nbytes) _mm_malloc(nbytes,16)
+    #define KISS_FFT_FREE _mm_free
 #else
-#define KISS_FFT_MALLOC malloc
-#define KISS_FFT_FREE free
+    #define KISS_FFT_MALLOC malloc
+    #define KISS_FFT_FREE free
 #endif
 
 
-#ifdef FIXED_POINT
-#include <sys/types.h>
-# if (FIXED_POINT == 32)
-#  define kiss_fft_scalar int32_t
-# else
-#  define kiss_fft_scalar int16_t
-# endif
-#else
-# ifndef kiss_fft_scalar
-/*  default is float */
-#   define kiss_fft_scalar float
-# endif
+#ifndef kiss_fft_scalar
+    #define kiss_fft_scalar double
 #endif
 
 typedef struct {
@@ -92,6 +82,13 @@ kiss_fft_next_fast_size(int n);
 
 void
 kiss_fft_free (kiss_fft_cfg* cfg);
+
+static inline size_t
+kiss_fft_get_size (const int n) {
+    size_t memneeded = 0;
+    kiss_fft_config (n, 0, 0, 0, NULL, &memneeded);
+    return memneeded;
+}
 
 #ifdef __cplusplus
 }

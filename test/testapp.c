@@ -14,9 +14,8 @@ main (int argc, char* argv[])
         printf ("\n");
 
         kiss_fft_cpx* FOut = calloc (argc, sizeof(kiss_fft_cpx));
-        size_t memneed = 0;
 
-        kiss_fft_config (argc-1, 0, 0, 0, NULL, &memneed);
+        size_t memneed = kiss_fft_get_size(argc-1);
 
         kiss_fft_cfg  FCfg = kiss_fft_config (argc-1, 0, 0, 0, NULL, NULL);
 
