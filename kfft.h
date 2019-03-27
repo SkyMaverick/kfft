@@ -28,17 +28,17 @@ extern "C" {
 # define kiss_fft_scalar __m128
 #define KISS_FFT_MALLOC(nbytes) _mm_malloc(nbytes,16)
 #define KISS_FFT_FREE _mm_free
-#else	
+#else
 #define KISS_FFT_MALLOC malloc
 #define KISS_FFT_FREE free
-#endif	
+#endif
 
 
 #ifdef FIXED_POINT
-#include <sys/types.h>	
+#include <sys/types.h>
 # if (FIXED_POINT == 32)
 #  define kiss_fft_scalar int32_t
-# else	
+# else
 #  define kiss_fft_scalar int16_t
 # endif
 #else
@@ -65,7 +65,7 @@ kiss_fft_config  (int         nfft,
 /*
  nfft must be even
 
- If you don't care to allocate space, use mem = lenmem = NULL 
+ If you don't care to allocate space, use mem = lenmem = NULL
 */
 
 
@@ -94,7 +94,7 @@ void
 kiss_fft_free (kiss_fft_cfg* cfg);
 
 #ifdef __cplusplus
-} 
+}
 #endif
 
 #endif

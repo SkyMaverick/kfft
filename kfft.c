@@ -20,57 +20,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  fixed or floating point complex numbers.  It also delares the kf_ internal functions.
  */
 
-static void kf_bluestein_algo (
-        kiss_fft_cpx * Fout,
-        const size_t fstride,
-        const __fft_cfg st,
-        int m,
-        int p
-        )
-{
-    // TODO
-}
-
-/* perform the butterfly for one stage of a mixed radix FFT */
-static void kf_bfly_generic(
-        kiss_fft_cpx * Fout,
-        const size_t fstride,
-        const __fft_cfg st,
-        int m,
-        int p
-        )
-{
-    int u,k,q1,q;
-    kiss_fft_cpx * twiddles = st->twiddles;
-    kiss_fft_cpx t;
-    int Norig = st->nfft;
-
-    kiss_fft_cpx * scratch = (kiss_fft_cpx*)KISS_FFT_TMP_ALLOC(sizeof(kiss_fft_cpx)*p);
-
-    for ( u=0; u<m; ++u ) {
-        k=u;
-        for ( q1=0 ; q1<p ; ++q1 ) {
-            scratch[q1] = Fout[ k  ];
-            C_FIXDIV(scratch[q1],p);
-            k += m;
-        }
-
-        k=u;
-        for ( q1=0 ; q1<p ; ++q1 ) {
-            int twidx=0;
-            Fout[ k ] = scratch[0];
-            for (q=1;q<p;++q ) {
-                twidx += fstride * k;
-                if (twidx>=Norig) twidx-=Norig;
-                C_MUL(t,scratch[q] , twiddles[twidx] );
-                C_ADDTO( Fout[ k ] ,t);
-            }
-            k += m;
-        }
-    }
-    KISS_FFT_TMP_FREE(scratch);
-}
-
 static
 void kf_work(
         kiss_fft_cpx * Fout,
@@ -382,8 +331,8 @@ kiss_ffti (kiss_fft_cfg         st,
 
     ncfft = st->substate->nfft;
 
-    st->tmpbuf[0].r = freqdata[0].r + freqdata[ncfft].r;
-    st->tmpbuf[0].i = freqdata[0].r - freqdata[ncfft].r;
+    st->tmpbuf[0].r = freqdata[0].r + freqdata[ncfft-1].r;
+    st->tmpbuf[0].i = freqdata[0].r - freqdata[ncfft-1].r;
     C_FIXDIV(st->tmpbuf[0],2);
 
     for (k = 1; k <= ncfft / 2; ++k) {
