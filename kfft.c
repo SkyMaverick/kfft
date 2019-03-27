@@ -87,7 +87,7 @@ void kf_work(
     const kiss_fft_cpx * Fout_end = Fout + p*m;
 
 #ifdef _OPENMP
-    // use openmp extensions at the 
+    // use openmp extensions at the
     // top-level (not recursive)
     if (fstride==1 && p<=5)
     {
@@ -95,15 +95,15 @@ void kf_work(
 
         // execute the p different work units in different threads
 #       pragma omp parallel for
-        for (k=0;k<p;++k) 
+        for (k=0;k<p;++k)
             kf_work( Fout +k*m, f+ fstride*in_stride*k,fstride*p,in_stride,factors,st);
         // all threads have joined by this point
 
         switch (p) {
             case 2: kf_bfly2(Fout,fstride,st,m); break;
-            case 3: kf_bfly3(Fout,fstride,st,m); break; 
+            case 3: kf_bfly3(Fout,fstride,st,m); break;
             case 4: kf_bfly4(Fout,fstride,st,m); break;
-            case 5: kf_bfly5(Fout,fstride,st,m); break; 
+            case 5: kf_bfly5(Fout,fstride,st,m); break;
             default: kf_bfly_generic(Fout,fstride,st,m,p); break;
         }
         return;
@@ -119,7 +119,7 @@ void kf_work(
         do{
             // recursive call:
             // DFT of size m*p performed by doing
-            // p instances of smaller DFTs of size m, 
+            // p instances of smaller DFTs of size m,
             // each one takes a decimated version of the input
             kf_work( Fout , f, fstride*p, in_stride, factors,st);
             f += fstride*in_stride;
@@ -128,21 +128,21 @@ void kf_work(
 
     Fout=Fout_beg;
 
-    // recombine the p smaller DFTs 
+    // recombine the p smaller DFTs
     switch (p) {
         case 2: kf_bfly2(Fout,fstride,st,m); break;
-        case 3: kf_bfly3(Fout,fstride,st,m); break; 
+        case 3: kf_bfly3(Fout,fstride,st,m); break;
         case 4: kf_bfly4(Fout,fstride,st,m); break;
-        case 5: kf_bfly5(Fout,fstride,st,m); break; 
+        case 5: kf_bfly5(Fout,fstride,st,m); break;
         default: kf_bfly_generic(Fout,fstride,st,m,p); break;
     }
 }
 
 /*  facbuf is populated by p1,m1,p2,m2, ...
-    where 
+    where
     p[i] * m[i] = m[i-1]
     m0 = n                  */
-static 
+static
 void kf_factor(int n,int * facbuf)
 {
     int p=4;
@@ -200,22 +200,20 @@ __kiss_fft_init (__fft_cfg   st,
  * The return value is a contiguous block of memory, allocated with malloc.  As such,
  * It can be freed with free(), rather than a kiss_fft-specific function.
  * */
-static __fft_cfg 
-__kiss_fft_alloc (int nfft,
-                  int inverse_fft,
-                  int delta,
-                  int step,
-                  void * mem,
-                  size_t * lenmem )
+static __fft_cfg
+__kiss_fft_config (int nfft,
+                   int inverse_fft,
+                   int delta,
+                   int step,
+                   void * mem,
+                   size_t * lenmem )
 {
     __fft_cfg st=NULL;
     size_t memneeded = sizeof(struct kiss_fft_state)
         + sizeof(kiss_fft_cpx)*(nfft-1); /* twiddle factors*/
 
-    if ( lenmem==NULL || *lenmem == 0) {
+    if ( lenmem==NULL) {
         st = ( __fft_cfg)KISS_FFT_MALLOC( memneeded );
-        if (lenmem)
-            *lenmem = memneeded;
     }else{
         if (mem != NULL && *lenmem >= memneeded)
             st = (__fft_cfg)mem;
@@ -228,7 +226,7 @@ __kiss_fft_alloc (int nfft,
 }
 
 
-static inline void 
+static inline void
 __kiss_fft_stride(__fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,int in_stride)
 {
     if (fin == fout) {
@@ -243,7 +241,7 @@ __kiss_fft_stride(__fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,int in
     }
 }
 
-static void 
+static void
 __kiss_fft(__fft_cfg cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout)
 {
     __kiss_fft_stride (cfg,fin,fout,1);
@@ -264,32 +262,29 @@ int kiss_fft_next_fast_size(int n)
 }
 
 /* ********************************************************************************
-      TODO  Functionality    
+      TODO  Functionality
 ******************************************************************************** */
 
 kiss_fft_cfg
-kiss_fft_init  (int         nfft,
-                int         inverse_fft,
-                int         delta,
-                int         step,
-                void *      mem,
-                size_t *    lenmem)
+kiss_fft_config  (int         nfft,
+                  int         inverse_fft,
+                  int         delta,
+                  int         step,
+                  void *      mem,
+                  size_t *    lenmem)
 {
     int i;
     kiss_fft_cfg st = NULL;
     size_t subsize = 0, memneeded = 0;
 
-        __kiss_fft_alloc (nfft, inverse_fft, delta, step, NULL, &subsize);
+        __kiss_fft_config (nfft, inverse_fft, delta, step, NULL, &subsize);
         memneeded = sizeof(struct kiss_fftr_state) + subsize + sizeof(kiss_fft_cpx) * ( nfft * 3 / 2);
 
-        if (lenmem == NULL || *lenmem = 0) {
+        if (lenmem == NULL) {
             st = (kiss_fft_cfg) KISS_FFT_MALLOC (memneeded);
-            if (lenmem)
-                *lenmem = memneeded;
         } else {
             if (*lenmem >= memneeded) {
                 st = (kiss_fft_cfg) mem;
-                memset (st, 0, *lenmem);
             }
             *lenmem = memneeded;
         }
@@ -299,7 +294,7 @@ kiss_fft_init  (int         nfft,
         st->substate = (__fft_cfg) (st + 1); /*just beyond kiss_fftr_state struct */
         st->tmpbuf = (kiss_fft_cpx *) (((char *) st->substate) + subsize);
         st->super_twiddles = st->tmpbuf + nfft;
-        __kiss_fft_alloc(nfft, inverse_fft, delta, step, st->substate, &subsize);
+        __kiss_fft_config(nfft, inverse_fft, delta, step, st->substate, &subsize);
 
         for (i = 0; i < nfft/2; ++i) {
             double phase =
@@ -326,7 +321,7 @@ kiss_fft (kiss_fft_cfg             st,
     }
 
     ncfft = st->substate->nfft;
-    
+
     if (st->substate->delta || st->substate->step) {
         for (int i=0; i < ncfft; i++) {
             st->tmpbuf[i].r = timedata [i * st->substate->step + st->substate->delta];
@@ -340,7 +335,7 @@ kiss_fft (kiss_fft_cfg             st,
     }
 
     __kiss_fft( st->substate , st->tmpbuf, st->tmpbuf );
- 
+
     tdc.r = st->tmpbuf[0].r;
     tdc.i = st->tmpbuf[0].i;
     C_FIXDIV(tdc,2);
@@ -348,14 +343,14 @@ kiss_fft (kiss_fft_cfg             st,
     CHECK_OVERFLOW_OP(tdc.r ,-, tdc.i);
     freqdata[0].r = tdc.r + tdc.i;
     freqdata[ncfft].r = tdc.r - tdc.i;
-#ifdef USE_SIMD    
+#ifdef USE_SIMD
     freqdata[ncfft].i = freqdata[0].i = _mm_set1_ps(0);
 #else
     freqdata[ncfft].i = freqdata[0].i = 0;
 #endif
 
     for ( k=1;k <= ncfft/2 ; ++k ) {
-        fpk    = st->tmpbuf[k]; 
+        fpk    = st->tmpbuf[k];
         fpnk.r =   st->tmpbuf[ncfft-k].r;
         fpnk.i = - st->tmpbuf[ncfft-k].i;
         C_FIXDIV(fpk,2);
@@ -404,7 +399,7 @@ kiss_ffti (kiss_fft_cfg         st,
         C_MUL (fok, tmp, st->super_twiddles[k-1]);
         C_ADD (st->tmpbuf[k],     fek, fok);
         C_SUB (st->tmpbuf[ncfft - k], fek, fok);
-#ifdef USE_SIMD        
+#ifdef USE_SIMD
         st->tmpbuf[ncfft - k].i *= _mm_set1_ps(-1.0);
 #else
         st->tmpbuf[ncfft - k].i *= -1;
@@ -421,5 +416,5 @@ kiss_fft_free (kiss_fft_cfg* cfg) {
     }
 }
 /* ********************************************************************************
-      TODO  Functionality    
+      TODO  Functionality
 ******************************************************************************** */
