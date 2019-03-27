@@ -56,7 +56,7 @@ typedef struct {
 typedef struct kiss_fftr_state * kiss_fft_cfg;
 
 kiss_fft_cfg
-kiss_fft_alloc (int         nfft,
+kiss_fft_init  (int         nfft,
                 int         inverse_fft,
                 int         delta,
                 int         step,

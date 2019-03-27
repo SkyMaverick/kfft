@@ -212,8 +212,10 @@ __kiss_fft_alloc (int nfft,
     size_t memneeded = sizeof(struct kiss_fft_state)
         + sizeof(kiss_fft_cpx)*(nfft-1); /* twiddle factors*/
 
-    if ( lenmem==NULL ) {
+    if ( lenmem==NULL || *lenmem == 0) {
         st = ( __fft_cfg)KISS_FFT_MALLOC( memneeded );
+        if (lenmem)
+            *lenmem = memneeded;
     }else{
         if (mem != NULL && *lenmem >= memneeded)
             st = (__fft_cfg)mem;
@@ -266,7 +268,7 @@ int kiss_fft_next_fast_size(int n)
 ******************************************************************************** */
 
 kiss_fft_cfg
-kiss_fft_alloc (int         nfft,
+kiss_fft_init  (int         nfft,
                 int         inverse_fft,
                 int         delta,
                 int         step,
@@ -280,11 +282,15 @@ kiss_fft_alloc (int         nfft,
         __kiss_fft_alloc (nfft, inverse_fft, delta, step, NULL, &subsize);
         memneeded = sizeof(struct kiss_fftr_state) + subsize + sizeof(kiss_fft_cpx) * ( nfft * 3 / 2);
 
-        if (lenmem == NULL) {
+        if (lenmem == NULL || *lenmem = 0) {
             st = (kiss_fft_cfg) KISS_FFT_MALLOC (memneeded);
+            if (lenmem)
+                *lenmem = memneeded;
         } else {
-            if (*lenmem >= memneeded)
+            if (*lenmem >= memneeded) {
                 st = (kiss_fft_cfg) mem;
+                memset (st, 0, *lenmem);
+            }
             *lenmem = memneeded;
         }
         if (!st)
