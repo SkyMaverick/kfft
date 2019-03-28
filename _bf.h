@@ -14,8 +14,6 @@ static void kf_bfly2(
     kiss_fft_cpx t;
     Fout2 = Fout + m;
     do{
-//        C_FIXDIV(*Fout,2); C_FIXDIV(*Fout2,2);
-
         C_MUL (t,  *Fout2 , *tw1);
         tw1 += fstride;
         C_SUB( *Fout2 ,  *Fout , t );
@@ -42,8 +40,6 @@ static void kf_bfly4(
     tw3 = tw2 = tw1 = st->twiddles;
 
     do {
-//        C_FIXDIV(*Fout,4); C_FIXDIV(Fout[m],4); C_FIXDIV(Fout[m2],4); C_FIXDIV(Fout[m3],4);
-
         C_MUL(scratch[0],Fout[m] , *tw1 );
         C_MUL(scratch[1],Fout[m2] , *tw2 );
         C_MUL(scratch[2],Fout[m3] , *tw3 );
@@ -90,8 +86,6 @@ static void kf_bfly3(
      tw1=tw2=st->twiddles;
 
      do{
-//         C_FIXDIV(*Fout,3); C_FIXDIV(Fout[m],3); C_FIXDIV(Fout[m2],3);
-
          C_MUL(scratch[1],Fout[m] , *tw1);
          C_MUL(scratch[2],Fout[m2] , *tw2);
 
@@ -141,7 +135,6 @@ static void kf_bfly5(
 
     tw=st->twiddles;
     for ( u=0; u<m; ++u ) {
-//        C_FIXDIV( *Fout0,5); C_FIXDIV( *Fout1,5); C_FIXDIV( *Fout2,5); C_FIXDIV( *Fout3,5); C_FIXDIV( *Fout4,5);
         scratch[0] = *Fout0;
 
         C_MUL(scratch[1] ,*Fout1, tw[u*fstride]);
@@ -209,7 +202,6 @@ static void kf_bfly_generic(
         k=u;
         for ( q1=0 ; q1<p ; ++q1 ) {
             scratch[q1] = Fout[ k  ];
-//            C_FIXDIV(scratch[q1],p);
             k += m;
         }
 
