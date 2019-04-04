@@ -130,8 +130,6 @@ __kiss_fft_init (__fft_cfg   st,
 
         kf_factor(nfft,st->factors);
 
-#ifdef KISS_FFT_USE_BLUESTEIN
-#else
         for (i=0;i<nfft;++i) {
             const double pi=3.141592653589793238462643383279502884197169399375105820974944;
             double phase = -2*pi*i / nfft;
@@ -139,7 +137,6 @@ __kiss_fft_init (__fft_cfg   st,
                 phase *= -1;
             kf_cexp(st->twiddles+i, phase );
         }
-#endif
 }
 
 /*
@@ -225,7 +222,7 @@ kiss_fft_config  (int         nfft,
     int i;
     kiss_fft_cfg st = NULL;
     size_t subsize = 0, memneeded = 0;
-        
+
         __kiss_fft_config (nfft, inverse_fft, delta, step, NULL, &subsize);
         memneeded = sizeof(struct kiss_fftr_state) + subsize + sizeof(kiss_fft_cpx) * ( nfft * 3 / 2);
 
@@ -244,6 +241,8 @@ kiss_fft_config  (int         nfft,
         st->tmpbuf = (kiss_fft_cpx *) (((char *) st->substate) + subsize);
         st->super_twiddles = st->tmpbuf + nfft;
         __kiss_fft_config(nfft, inverse_fft, delta, step, st->substate, &subsize);
+
+        kfft_trace ("%s:\t%zu\n", "Memory allocate", memneeded);
 
         for (i = 0; i < nfft/2; ++i) {
             double phase =
@@ -287,8 +286,6 @@ kiss_fft (kiss_fft_cfg               st,
 
     tdc.r = st->tmpbuf[0].r;
     tdc.i = st->tmpbuf[0].i;
-    CHECK_OVERFLOW_OP(tdc.r ,+, tdc.i);
-    CHECK_OVERFLOW_OP(tdc.r ,-, tdc.i);
     freqdata[0].r = tdc.r + tdc.i;
     freqdata[ncfft].r = tdc.r - tdc.i;
 #ifdef USE_SIMD
@@ -352,11 +349,11 @@ kiss_ffti (kiss_fft_cfg         st,
 
     if (st->substate->delta || st->substate->step) {
         for (int i=0; i < ncfft; i++) {
-            timedata [i * st->substate->step + st->substate->delta] = st->tmpbuf[i].r / (2 * st->substate->nfft);
+            timedata [i * st->substate->step + st->substate->delta] = S_DIV(st->tmpbuf[i].r ,(2 * st->substate->nfft));
         }
     } else {
         for (int i=0; i < ncfft; i++) {
-            timedata[i] = st->tmpbuf[i].r / (2 * st->substate->nfft);
+            timedata[i] = S_DIV(st->tmpbuf[i].r, (2 * st->substate->nfft));
         }
     }
 

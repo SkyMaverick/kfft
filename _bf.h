@@ -171,17 +171,6 @@ static void kf_bfly5(
     }
 }
 
-static void kf_bluestein_algo (
-        kiss_fft_cpx * Fout,
-        const size_t fstride,
-        const __fft_cfg st,
-        int m,
-        int p
-        )
-{
-    // TODO
-}
-
 /* perform the butterfly for one stage of a mixed radix FFT */
 static void kf_bfly_generic(
         kiss_fft_cpx * Fout,

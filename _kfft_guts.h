@@ -58,41 +58,33 @@ struct kiss_fftr_state {
  * */
 
 #define S_MUL(a,b) ( (a)*(b) )
+#define S_DIV(a,b) ( (a)/(b) )
+
 #define C_MUL(m,a,b) \
     do{ (m).r = (a).r*(b).r - (a).i*(b).i;\
         (m).i = (a).r*(b).i + (a).i*(b).r; }while(0)
 #define C_MULBYSCALAR( c, s ) \
     do{ (c).r *= (s);\
         (c).i *= (s); }while(0)
-
-
-#ifndef CHECK_OVERFLOW_OP
-    #define CHECK_OVERFLOW_OP(a,op,b) /* noop */
-#endif
+#define C_DIVBYSCALAR( c, s ) \
+    do{ (c).r /= (s);\
+        (c).i /= (s); }while(0)
 
 #define  C_ADD( res, a,b)\
     do { \
-	    CHECK_OVERFLOW_OP((a).r,+,(b).r)\
-	    CHECK_OVERFLOW_OP((a).i,+,(b).i)\
 	    (res).r=(a).r+(b).r;  (res).i=(a).i+(b).i; \
     }while(0)
 #define  C_SUB( res, a,b)\
     do { \
-	    CHECK_OVERFLOW_OP((a).r,-,(b).r)\
-	    CHECK_OVERFLOW_OP((a).i,-,(b).i)\
 	    (res).r=(a).r-(b).r;  (res).i=(a).i-(b).i; \
     }while(0)
 #define C_ADDTO( res , a)\
     do { \
-	    CHECK_OVERFLOW_OP((res).r,+,(a).r)\
-	    CHECK_OVERFLOW_OP((res).i,+,(a).i)\
 	    (res).r += (a).r;  (res).i += (a).i;\
     }while(0)
 
 #define C_SUBFROM( res , a)\
     do {\
-	    CHECK_OVERFLOW_OP((res).r,-,(a).r)\
-	    CHECK_OVERFLOW_OP((res).i,-,(a).i)\
 	    (res).r -= (a).r;  (res).i -= (a).i; \
     }while(0)
 
@@ -130,4 +122,10 @@ struct kiss_fftr_state {
 #else
     #define  KISS_FFT_TMP_ALLOC(nbytes) KISS_FFT_MALLOC(nbytes)
     #define  KISS_FFT_TMP_FREE(ptr) KISS_FFT_FREE(ptr)
+#endif
+
+#ifdef DEBUG
+    #define kfft_trace(fmt, ...) fprintf(stdout, fmt, __VA_ARGS__)
+#else
+    #define kfft_trace(fmt, ...) // noop
 #endif
