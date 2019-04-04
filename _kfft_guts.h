@@ -124,7 +124,7 @@ struct kiss_fftr_state {
     #define  KISS_FFT_TMP_FREE(ptr) KISS_FFT_FREE(ptr)
 #endif
 
-#ifdef DEBUG
+#if (defined TRACE)
     #define kfft_trace(fmt, ...) fprintf(stdout, fmt, __VA_ARGS__)
 #else
     #define kfft_trace(fmt, ...) // noop

@@ -185,6 +185,8 @@ static void kf_bfly_generic(
     kiss_fft_cpx t;
     int Norig = st->nfft;
 
+    kfft_trace ("%s:\t m: %d\tp: %d\n", "Generic FFT", m, p);
+
     kiss_fft_cpx * scratch = (kiss_fft_cpx*)KISS_FFT_TMP_ALLOC(sizeof(kiss_fft_cpx)*p);
 
     for ( u=0; u<m; ++u ) {

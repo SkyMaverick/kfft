@@ -242,7 +242,15 @@ kiss_fft_config  (int         nfft,
         st->super_twiddles = st->tmpbuf + nfft;
         __kiss_fft_config(nfft, inverse_fft, delta, step, st->substate, &subsize);
 
+#if defined (TRACE)
         kfft_trace ("%s:\t%zu\n", "Memory allocate", memneeded);
+        kfft_trace ("%s:\t", "Factors");
+        for (i = 0; st->substate->factors[i] != 0; i++) {
+            kfft_trace("%d ", st->substate->factors[i]);
+        }
+        kfft_trace ("\n", "");
+
+#endif
 
         for (i = 0; i < nfft/2; ++i) {
             double phase =

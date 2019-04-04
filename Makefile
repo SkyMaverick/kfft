@@ -6,16 +6,21 @@ else
 	SHARED := -Wl,-soname,libkfft.so -o libkfft.so
 endif
 
-CFLAGS= -Wall -g -Dkiss_fft_scalar=double -DDEBUG
+CFLAGS= -Wall -g -Dkiss_fft_scalar=double
 
 AppName=app
 
-all:
+all: lib app
+# ===================================
+
+app:
+	gcc ${CFLAGS} -L. -I. test/testapp.c -lkfft -lm -Wl,-rpath,. -o ${AppName}
+
+lib:
 	gcc ${CFLAGS} -fPIC -c *.c  -o kfft.o
 	ar crus libkfft.a kfft.o
 	gcc -shared ${CFLAGS} $(SHARED) kfft.o
-# ===================================
-	gcc ${CFLAGS} -L. -I. test/testapp.c -lkfft -lm -Wl,-rpath,. -o ${AppName}
+    
 doc:
 	@echo "Start by reading the README file.  If you want to build and test lots of stuff, do a 'make testall'"
 	@echo "but be aware that 'make testall' has dependencies that the basic kissfft software does not."
