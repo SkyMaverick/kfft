@@ -1,0 +1,2 @@
+#!/bin/sh
+CFLAGS="-Wall -O3 -mtune=native -ffast-math -fomit-frame-pointer -unroll-loops -USE_SIMD" make

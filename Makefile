@@ -7,7 +7,6 @@ else
 endif
 
 CC=gcc
-CFLAGS= -Wall -g -Dkiss_fft_scalar=double
 
 DemoApp=demo
 UTestSimple=ustest
@@ -39,12 +38,6 @@ lib:
 	gcc ${CFLAGS} -fPIC -c *.c  -o kfft.o
 	ar crus libkfft.a kfft.o
 	gcc -shared ${CFLAGS} $(SHARED) kfft.o
-
-doc:
-	@echo "Start by reading the README file.  If you want to build and test lots of stuff, do a 'make testall'"
-	@echo "but be aware that 'make testall' has dependencies that the basic kissfft software does not."
-	@echo "It is generally unneeded to run these tests yourself, unless you plan on changing the inner workings"
-	@echo "of kissfft and would like to make use of its regression tests."
 
 clean:
 	rm -f kfft*.tar.gz *~ *.pyc kfft*.zip *.a *.o *.so ${AppAll}
