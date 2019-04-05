@@ -16,6 +16,7 @@ UAutoTestCmp=aukfcmp
 UAutoTestCmpWP=aukfcmpwp
 
 AppAll=${DemoApp} ${UTestSimple} ${UTestCmp} ${UTestCmpWP} ${UAutoTestCmp} ${UAutoTestCmpWP}
+KfftSrc=kfft.c kfft.h _kfft_guts.h _kfft_bf.h
 
 all: lib ${AppAll}
 
@@ -40,12 +41,11 @@ lib:
 	gcc -shared ${CFLAGS} $(SHARED) kfft.o
 
 clean:
-	rm -f kfft*.tar.gz *~ *.pyc kfft*.zip *.a *.o *.so ${AppAll}
+	rm -f kfft*.tar.gz *~ *.pyc kfft*.zip *.a *.o *.so *.s ${AppAll}
 
 asm: kfft.s
 
-kfft.s: kfft.c kfft.h _kfft_guts.h
+kfft.s: ${KfftSrc}
 	[ -e kfft.s ] && mv kfft.s kfft.s~ || true
-	gcc -S kfft.c -O3 -mtune=native -ffast-math -fomit-frame-pointer -unroll-loops -dA -fverbose-asm
-	gcc -o kfft_short.s -S kfft.c -O3 -mtune=native -ffast-math -fomit-frame-pointer -dA -fverbose-asm -DFIXED_POINT
-	[ -e kfft.s~ ] && diff kfft.s~ kfft.s || true
+	gcc -S kfft.c ${CFLAGS} -dA -fverbose-asm
+	[ -e kfft.s~ ] && diff --color=auto kfft.s~ kfft.s || true

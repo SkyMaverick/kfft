@@ -2,6 +2,10 @@
 *.o
 *.so
 *.swp
+*.s
+*.s~
+~*
+
 aukfcmp
 aukfcmpwp
 demo

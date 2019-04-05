@@ -1,3 +1,2 @@
 #!/bin/sh
-
-CFLAGS="-Wall -g -O0 -USE_SIMD" make
+CFLAGS="-Wall -g -O0 -USE_SIMD" make $1

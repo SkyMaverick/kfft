@@ -1,2 +1,2 @@
 #!/bin/sh
-CFLAGS="-Wall -O3 -mtune=native -ffast-math -fomit-frame-pointer -unroll-loops" make
+CFLAGS="-Wall -O3 -mtune=native -ffast-math -fomit-frame-pointer -unroll-loops" make $1
