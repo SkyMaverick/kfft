@@ -38,6 +38,13 @@ extern "C" {
     #define kiss_fft_scalar double
 #endif
 
+#ifndef KFFT_RADER_LEVEL
+    #define KFFT_RADER_LEVEL 3
+#endif
+#ifndef KFFR_RADER_LIMIT
+    #define KFFT_RADER_LIMIT 50
+#endif
+
 typedef struct {
     kiss_fft_scalar r;
     kiss_fft_scalar i;

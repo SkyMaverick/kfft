@@ -36,6 +36,7 @@ static void kf_bfly4(
     const size_t m2=2*m;
     const size_t m3=3*m;
 
+    kfft_trace ("%s: %zu\n", "Stride", fstride);
 
     tw3 = tw2 = tw1 = st->twiddles;
 
