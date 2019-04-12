@@ -8,8 +8,12 @@
     #include <fftw3.h>
 #endif
 
-#ifndef TEST_COUNT
-    #define TEST_COUNT 50
+#ifndef SIMPLE_APP
+    #ifndef TEST_COUNT
+        #define TEST_COUNT 50
+    #endif
+#else
+    #define TEST_COUNT 1
 #endif
 
 #define VALS_KFFT   0

@@ -9,13 +9,14 @@ endif
 CC=gcc
 
 DemoApp=demo
+UDemo=usdemo
 UTestSimple=ustest
 UTestCmp=ukfcmp
 UTestCmpWP=ukfcmpwp
 UAutoTestCmp=aukfcmp
 UAutoTestCmpWP=aukfcmpwp
 
-AppAll=${DemoApp} ${UTestSimple} ${UTestCmp} ${UTestCmpWP} ${UAutoTestCmp} ${UAutoTestCmpWP}
+AppAll=${DemoApp} ${UDemo} ${UTestSimple} ${UTestCmp} ${UTestCmpWP} ${UAutoTestCmp} ${UAutoTestCmpWP}
 KfftSrc=kfft.c kfft.h _kfft_guts.h _kfft_bf.h
 KfftObjs=kfft.o kfft_core.o
 
@@ -27,6 +28,8 @@ demo: lib
 	${CC} ${CFLAGS} -L. -I. test/demo.c -lkfft -lm -Wl,-rpath,. -o ${DemoApp}
 ustest: lib
 	${CC} ${CFLAGS} -L. -I. test/test.c -lkfft -lm -Wl,-rpath,. -o ${UTestSimple}
+usdemo: lib
+	${CC} ${CFLAGS} -L. -I. test/test.c -DSIMPLE_APP -lkfft -lm -Wl,-rpath,. -o ${UDemo}
 ukfcmp: lib
 	${CC} ${CFLAGS} -L. -I. test/test.c -DFFTW_COMPARE -lkfft -lfftw3 -lm -Wl,-rpath,. -o ${UTestCmp}
 ukfcmpwp: lib
