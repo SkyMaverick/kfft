@@ -1,6 +1,6 @@
 #include "_kfft_guts.h"
 #include "_kfft_bf.h"
-#include "_kfft_rader.h"
+#include "_kfft_gen.h"
 
 static
 void kf_work(
