@@ -3,6 +3,7 @@
 #include "_kfft_guts.h"
 #include "kfft_core.h"
 
+#if defined (USE_RADER_ALGO) 
 static inline __fft_cfg
 __fft_recursive_alloc (const __fft_cfg st,
                        int p)
@@ -26,6 +27,7 @@ static void kf_rader (
     
     __kiss_fft_free(st_req);
 }
+#endif /* USE_RADER_ALGO */
 
 /* perform the butterfly for one stage of a mixed radix FFT */
 static void kf_bfly_generic(
@@ -44,27 +46,36 @@ static void kf_bfly_generic(
     kfft_trace ("%s:\t m: %d\tp: %d\n", "Generic FFT", m, p);
 
     kiss_fft_cpx * scratch = (kiss_fft_cpx*)KISS_FFT_TMP_ALLOC(sizeof(kiss_fft_cpx)*p);
-
-    for ( u=0; u<m; ++u ) {
-        k=u;
-        for ( q1=0 ; q1<p ; ++q1 ) {
-            scratch[q1] = Fout[ k  ];
-            k += m;
-        }
-
-        k=u;
-        for ( q1=0 ; q1<p ; ++q1 ) {
-            int twidx=0;
-            Fout[ k ] = scratch[0];
-            for (q=1;q<p;++q ) {
-                twidx += fstride * k;
-                if (twidx>=Norig) twidx-=Norig;
-                C_MUL(t,scratch[q] , twiddles[twidx] );
-                C_ADDTO( Fout[ k ] ,t);
+    
+    // TODO Maybe use Rader for FFT bufer
+#if defined ( USE_RADER_ALGO )
+    if (( p < KFFT_RADER_LIMIT) || (st->level > KFFT_RADER_LEVEL)) {
+#endif
+        for ( u=0; u<m; ++u ) {
+            k=u;
+            for ( q1=0 ; q1<p ; ++q1 ) {
+                scratch[q1] = Fout[ k  ];
+                k += m;
             }
-            k += m;
+
+            k=u;
+            for ( q1=0 ; q1<p ; ++q1 ) {
+                int twidx=0;
+                Fout[ k ] = scratch[0];
+                for (q=1;q<p;++q ) {
+                    twidx += fstride * k;
+                    if (twidx>=Norig) twidx-=Norig;
+                    C_MUL(t,scratch[q] , twiddles[twidx] );
+                    C_ADDTO( Fout[ k ] ,t);
+                }
+                k += m;
+            }
         }
+#if defined (USE_RADER_ALGO)
+    } else {
+        // TODO Rader here
     }
+#endif
     KISS_FFT_TMP_FREE(scratch);
 }
 

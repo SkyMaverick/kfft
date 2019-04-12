@@ -40,7 +40,7 @@ aukfcmpwp: lib
 	${CC} ${CFLAGS} -L. -I. test/test.c -DFFTW_COMPARE -DCHECK_WITHOUT_PLAN -DLOG_AUTO -lkfft -lfftw3 -lm -Wl,-rpath,. -o ${UAutoTestCmpWP}
 
 %.o: %.c
-	 ${CC} ${CFLAGS} ${LIBFLAGS} -fPIC -c $< -o $@
+	 ${CC} ${CFLAGS} ${LIBFLAGS} -fPIC -DUSE_RADER_ALGO -c $< -o $@
     
 lib: kfft.o kfft_core.o
 	ar crus libkfft.a ${KfftObjs}

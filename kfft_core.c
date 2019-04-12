@@ -35,15 +35,7 @@ void kf_work(
             case 3: kf_bfly3(Fout,fstride,st,m); break;
             case 4: kf_bfly4(Fout,fstride,st,m); break;
             case 5: kf_bfly5(Fout,fstride,st,m); break;
-            default:
-                {
-                    if ( (p < KFFT_RADER_LIMIT) || (st->level > KFFT_RADER_LEVEL)) {
-                        kf_bfly_generic(Fout,fstride,st,m,p);
-                    } else {
-                        kf_rader (Fout,fstride,st,m,p);
-                    }
-                    break;
-                }
+            default: kf_bfly_generic(Fout,fstride,st,m,p);break;
         }
         return;
     }
@@ -73,15 +65,7 @@ void kf_work(
         case 3: kf_bfly3(Fout,fstride,st,m); break;
         case 4: kf_bfly4(Fout,fstride,st,m); break;
         case 5: kf_bfly5(Fout,fstride,st,m); break;
-        default:
-            {
-                if ( (p < KFFT_RADER_LIMIT) || (st->level > KFFT_RADER_LEVEL)) {
-                    kf_bfly_generic(Fout,fstride,st,m,p);
-                } else {
-                    kf_rader (Fout,fstride,st,m,p);
-                }
-                break;
-            }
+        default: kf_bfly_generic(Fout,fstride,st,m,p);break;
     }
 }
 
