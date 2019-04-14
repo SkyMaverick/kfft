@@ -4,30 +4,18 @@
 #include "kfft_core.h"
 
 #if defined (USE_RADER_ALGO) 
-static inline __fft_cfg
-__fft_recursive_alloc (const __fft_cfg st,
-                       int p)
+
+static inline int
+__kfr_prime_root (int p)
 {
-    return __kiss_fft_config ( p, st->inverse, st->delta, st->step, st->level + 1, NULL, NULL);
+    return 0;
 }
 
-static void kf_rader (
-        kiss_fft_cpx * Fout,
-        const size_t fstride,
-        const __fft_cfg st,
-        int m,
-        int p
-        )
-{
-    kfft_trace ("%s:\t m: %d\tp: %d\tlvl: %d\n", "Generic FFT use Rader", m, p, st->level);
-    // TODO Add Rader algo and strart recursive FFT with new buffer
-    __fft_cfg st_req = __fft_recursive_alloc (st, p);
-    
-    // TODO Traditional FFT with new buffer
-    
-    __kiss_fft_free(st_req);
-}
 #endif /* USE_RADER_ALGO */
+
+
+
+
 
 /* perform the butterfly for one stage of a mixed radix FFT */
 static void kf_bfly_generic(
@@ -73,7 +61,18 @@ static void kf_bfly_generic(
         }
 #if defined (USE_RADER_ALGO)
     } else {
-        // TODO Rader here
+        __fft_cfg tmp_cfg = __kiss_fft_config (p, st->inverse, 0, 0, st->level + 1, NULL, NULL);
+        for ( u=0; u<m; ++u ) {
+            k=u;
+            for ( q1=0 ; q1<p ; ++q1 ) {
+                scratch[q1] = Fout[ k  ];
+                k += m;
+            }
+
+            k=u;
+            // TODO Rader here
+        }
+        __kiss_fft_free(tmp_cfg);
     }
 #endif
     KISS_FFT_TMP_FREE(scratch);
