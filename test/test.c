@@ -28,7 +28,7 @@ __kfft_test (kiss_fft_scalar*   amp_scalar,
 #ifndef CHECK_WITHOUT_PLAN
     clock_t t_start = clock();
 
-    FCfg = kiss_fft_config (size, 0, 0, 0, NULL, NULL);
+    FCfg = kiss_fft_config (size, 0, NULL, NULL);
     if (FCfg == NULL) {
         assert("Allocation FAIL");
     }
@@ -38,7 +38,7 @@ __kfft_test (kiss_fft_scalar*   amp_scalar,
     return (clock() - t_start) * 1000 / CLOCKS_PER_SEC;
 #else
 
-    FCfg = kiss_fft_config (size, 0, 0, 0, NULL, NULL);
+    FCfg = kiss_fft_config (size, 0, NULL, NULL);
     if (FCfg == NULL) {
         assert("Allocation FAIL");
     }

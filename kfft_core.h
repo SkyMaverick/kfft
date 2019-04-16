@@ -5,8 +5,6 @@
 __fft_cfg
 __kiss_fft_config (int nfft,
                    int inverse_fft,
-                   int delta,
-                   int step,
                    int level,
                    void * mem,
                    size_t * lenmem );

@@ -42,8 +42,6 @@ int kiss_fft_next_fast_size(int n)
 kiss_fft_cfg
 kiss_fft_config  (int         nfft,
                   int         inverse_fft,
-                  int         delta,
-                  int         step,
                   void *      mem,
                   size_t *    lenmem)
 {
@@ -51,42 +49,42 @@ kiss_fft_config  (int         nfft,
     kiss_fft_cfg st = NULL;
     size_t subsize = 0, memneeded = 0;
 
-        __kiss_fft_config (nfft, inverse_fft, delta, step, 0, NULL, &subsize);
-        memneeded = sizeof(struct kiss_fftr_state) + subsize + sizeof(kiss_fft_cpx) * ( nfft * 3 / 2);
+    __kiss_fft_config (nfft, inverse_fft, 0, NULL, &subsize);
+    memneeded = sizeof(struct kiss_fftr_state) + subsize + sizeof(kiss_fft_cpx) * ( nfft * 3 / 2);
 
-        if (lenmem == NULL) {
-            st = (kiss_fft_cfg) KISS_FFT_MALLOC (memneeded);
-        } else {
-            if (*lenmem >= memneeded) {
-                st = (kiss_fft_cfg) mem;
-            }
-            *lenmem = memneeded;
+    if (lenmem == NULL) {
+        st = (kiss_fft_cfg) KISS_FFT_MALLOC (memneeded);
+    } else {
+        if (*lenmem >= memneeded) {
+            st = (kiss_fft_cfg) mem;
         }
-        if (!st)
-            return NULL;
+        *lenmem = memneeded;
+    }
+    if (!st)
+        return NULL;
 
-        st->substate = (__fft_cfg) (st + 1); /*just beyond kiss_fftr_state struct */
-        st->tmpbuf = (kiss_fft_cpx *) (((char *) st->substate) + subsize);
-        st->super_twiddles = st->tmpbuf + nfft;
-        __kiss_fft_config(nfft, inverse_fft, delta, step, 0, st->substate, &subsize);
+    st->substate = (__fft_cfg) (st + 1); /*just beyond kiss_fftr_state struct */
+    st->tmpbuf = (kiss_fft_cpx *) (((char *) st->substate) + subsize);
+    st->super_twiddles = st->tmpbuf + nfft;
+    __kiss_fft_config(nfft, inverse_fft, 0, st->substate, &subsize);
 
 #if defined (TRACE)
-        kfft_trace ("%s:\t%zu\n", "Memory allocate", memneeded);
-        kfft_trace ("%s:\t", "Factors");
-        for (i = 0; st->substate->factors[i] != 0; i++) {
-            kfft_trace("%d ", st->substate->factors[i]);
-        }
-        kfft_trace ("\n", "");
+    kfft_trace ("%s:\t%zu\n", "Memory allocate", memneeded);
+    kfft_trace ("%s:\t", "Factors");
+    for (i = 0; st->substate->factors[i] != 0; i++) {
+        kfft_trace("%d ", st->substate->factors[i]);
+    }
+    kfft_trace ("\n", "");
 
 #endif
 
-        for (i = 0; i < nfft/2; ++i) {
-            double phase =
-                -3.14159265358979323846264338327 * ((double) (i+1) / nfft + .5);
-            if (inverse_fft)
-                phase *= -1;
-            kf_cexp (st->super_twiddles+i,phase);
-        }
+    for (i = 0; i < nfft/2; ++i) {
+        double phase =
+            -3.14159265358979323846264338327 * ((double) (i+1) / nfft + .5);
+        if (inverse_fft)
+            phase *= -1;
+        kf_cexp (st->super_twiddles+i,phase);
+    }
     return st;
 }
 
@@ -106,16 +104,9 @@ kiss_fft (kiss_fft_cfg               st,
 
     ncfft = st->substate->nfft;
 
-    if (st->substate->delta || st->substate->step) {
-        for (int i=0; i < ncfft; i++) {
-            st->tmpbuf[i].r = timedata [i * st->substate->step + st->substate->delta];
-            st->tmpbuf[i].i = 0;
-        }
-    } else {
-        for (int i=0; i < ncfft; i++) {
-            st->tmpbuf[i].r = timedata [i];
-            st->tmpbuf[i].i = 0;
-        }
+    for (int i=0; i < ncfft; i++) {
+        st->tmpbuf[i].r = timedata [i];
+        st->tmpbuf[i].i = 0;
     }
 
     __kiss_fft( st->substate , st->tmpbuf, st->tmpbuf );
@@ -183,16 +174,9 @@ kiss_ffti (kiss_fft_cfg         st,
     }
     __kiss_fft (st->substate, st->tmpbuf, st->tmpbuf);
 
-    if (st->substate->delta || st->substate->step) {
-        for (int i=0; i < ncfft; i++) {
-            timedata [i * st->substate->step + st->substate->delta] = S_DIV(st->tmpbuf[i].r ,(2 * st->substate->nfft));
-        }
-    } else {
-        for (int i=0; i < ncfft; i++) {
-            timedata[i] = S_DIV(st->tmpbuf[i].r, (2 * st->substate->nfft));
-        }
+    for (int i=0; i < ncfft; i++) {
+        timedata[i] = S_DIV(st->tmpbuf[i].r, (2 * st->substate->nfft));
     }
-
 }
 
 void

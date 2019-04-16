@@ -55,8 +55,6 @@ typedef struct kiss_fftr_state * kiss_fft_cfg;
 kiss_fft_cfg
 kiss_fft_config  (int         nfft,
                   int         inverse_fft,
-                  int         delta,
-                  int         step,
                   void *      mem,
                   size_t *    lenmem);
 /*
@@ -93,7 +91,7 @@ kiss_fft_free (kiss_fft_cfg* cfg);
 static inline size_t
 kiss_fft_get_size (const int n) {
     size_t memneeded = 0;
-    kiss_fft_config (n, 0, 0, 0, NULL, &memneeded);
+    kiss_fft_config (n, 0, NULL, &memneeded);
     return memneeded;
 }
 

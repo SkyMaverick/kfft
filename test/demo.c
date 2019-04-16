@@ -17,7 +17,7 @@ main (int argc, char* argv[])
 
         size_t memneed = kiss_fft_get_size(argc-1);
 
-        kiss_fft_cfg  FCfg = kiss_fft_config (argc-1, 0, 0, 0, NULL, NULL);
+        kiss_fft_cfg  FCfg = kiss_fft_config (argc-1, 0, NULL, NULL);
 
         kiss_fft (FCfg, amp_scalar, FOut);
 
@@ -26,7 +26,7 @@ main (int argc, char* argv[])
         }
         printf ("\n\n\n");
 
-        kiss_fft_config (argc-1, 1, 0, 0, FCfg, &memneed);
+        kiss_fft_config (argc-1, 1, FCfg, &memneed);
         memset (amp_scalar, 0, argc * sizeof(double));
 
         kiss_ffti (FCfg, FOut, amp_scalar);

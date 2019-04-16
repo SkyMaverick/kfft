@@ -25,7 +25,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "kfft.h"
 
 
-#define MAXFACTORS 32
+#define MAX_FACTORS 32
+
+#define MAX_ROOTS   32
 /* e.g. an fft of length 128 has 4 factors 
  as far as kissfft is concerned
  4*4*4*2
@@ -34,10 +36,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 struct kiss_fft_state {
     int nfft;
     int inverse;
-    int delta;
-    int step;
     int level;
-    int factors[2*MAXFACTORS];
+    int factors[2*MAX_FACTORS];
+#if defined (USE_RADER_ALGO)
+    unsigned prime_root;
+#endif
     kiss_fft_cpx twiddles[1];
 };
 

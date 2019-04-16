@@ -2,6 +2,61 @@
 #include "_kfft_bf.h"
 #include "_kfft_gen.h"
 
+#if defined (USE_RADER_ALGO)
+static inline int
+_kfr_ispower ( unsigned a,
+               unsigned b,
+               unsigned p )
+{
+    uint64_t res = 1;           // Initialize result
+    uint64_t x = (uint64_t)a;   // Potential overflow fix
+    uint64_t y = (uint64_t)b;   // Potential overflow fix
+
+    x = x % p; // Update x if it is more than or equal to p
+
+    while (y > 0)
+    {
+        // If y is odd, multiply x with result
+        if (y & 1)
+            res = (res * x) % p; // FIXME Maybe integer overflow
+        // y must be even now
+        y = y >> 1; // y = y/2
+        x = (x * x) % p; // FIXME Maybe integer overflow
+    }
+    return (res != 1) ? 1 : 0;
+}
+
+// WARNING in kfft num - always prime. Don't check this
+static unsigned
+_kfr_find_root (unsigned num) {
+    unsigned phi = num - 1;
+    unsigned n = phi;
+
+    unsigned primes [MAX_ROOTS];
+    unsigned count = 0;
+
+    for (unsigned i = 2; i*i <= n; i++) {
+        if (n % i == 0){
+            primes [count++] = i;
+            while (n % i == 0)
+                n /= i;
+        }
+    }
+    if (n > 1)
+        primes [ count++ ] = n;
+
+    for (unsigned res=2; res<=num; ++res) {
+		int ok = 1;
+		for (unsigned i = 0; count > i && ok; ++i) {
+			ok &= _kfr_ispower (res, phi / primes [i], num);
+            kfft_trace ("%d\t%d\t%d\n", res, i, primes [i]);
+        }
+        if (ok)  return res;
+	}
+    return 0;
+}
+#endif /* USE_RADER_ALGO */
+
 static
 void kf_work(
         kiss_fft_cpx * Fout,
@@ -101,26 +156,30 @@ static inline void
 __kiss_fft_init (__fft_cfg   st,
                  int         nfft,
                  int         inverse_fft,
-                 int         delta,
-                 int         step,
                  int         level)
 {
         int i;
         st->nfft=nfft;
         st->inverse = inverse_fft;
-        st->delta   = delta;
-        st->step    = step;
         st->level   = level;
 
         kf_factor(nfft,st->factors);
-        
-        for (i=0;i<nfft;++i) {
-            const double pi=3.141592653589793238462643383279502884197169399375105820974944;
-            double phase = -2*pi*i / nfft;
-            if (st->inverse)
-                phase *= -1;
-            kf_cexp(st->twiddles+i, phase );
+#if defined (USE_RADER_ALGO)
+        if (level > 0) {
+            // TODO Rader initialization
+            st->prime_root = _kfr_find_root (nfft);
+        } else {
+#endif /* USE_RADER_ALGO */
+            for (i=0;i<nfft;++i) {
+                const double pi=3.141592653589793238462643383279502884197169399375105820974944;
+                double phase = -2*pi*i / nfft;
+                if (st->inverse)
+                    phase *= -1;
+                kf_cexp(st->twiddles+i, phase );
+            }
+#if defined (USE_RADER_ALGO)
         }
+#endif
 }
 
 /*
@@ -133,8 +192,6 @@ __kiss_fft_init (__fft_cfg   st,
 __fft_cfg
 __kiss_fft_config (int nfft,
                    int inverse_fft,
-                   int delta,
-                   int step,
                    int level,
                    void * mem,
                    size_t * lenmem )
@@ -151,7 +208,7 @@ __kiss_fft_config (int nfft,
         *lenmem = memneeded;
     }
     if (st) {
-        __kiss_fft_init(st, nfft, inverse_fft, delta, step, level);
+        __kiss_fft_init(st, nfft, inverse_fft, level);
     }
     return st;
 }
