@@ -26,9 +26,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 #define MAX_FACTORS 32
-
 #define MAX_ROOTS   32
-/* e.g. an fft of length 128 has 4 factors 
+
+#ifndef USE_SYSMATH
+    #define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
+#else
+    #include <math.h>
+    #define KFFT_CONST_PI M_PI
+#endif
+
+/* e.g. an fft of length 128 has 4 factors
  as far as kissfft is concerned
  4*4*4*2
  */
@@ -120,12 +127,12 @@ struct kiss_fftr_state {
 
 #ifdef KISS_FFT_USE_ALLOCA
     // define this to allow use of alloca instead of malloc for temporary buffers
-    // Temporary buffers are used in two case: 
+    // Temporary buffers are used in two case:
     // 1. FFT sizes that have "bad" factors. i.e. not 2,3 and 5
     // 2. "in-place" FFTs.  Notice the quotes, since kissfft does not really do an in-place transform.
     #include <alloca.h>
     #define  KISS_FFT_TMP_ALLOC(nbytes) alloca(nbytes)
-    #define  KISS_FFT_TMP_FREE(ptr) 
+    #define  KISS_FFT_TMP_FREE(ptr)
 #else
     #define  KISS_FFT_TMP_ALLOC(nbytes) KISS_FFT_MALLOC(nbytes)
     #define  KISS_FFT_TMP_FREE(ptr) KISS_FFT_FREE(ptr)

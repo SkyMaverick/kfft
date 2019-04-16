@@ -80,7 +80,7 @@ kiss_fft_config  (int         nfft,
 
     for (i = 0; i < nfft/2; ++i) {
         double phase =
-            -3.14159265358979323846264338327 * ((double) (i+1) / nfft + .5);
+            -KFFT_CONST_PI * ((double) (i+1) / nfft + .5);
         if (inverse_fft)
             phase *= -1;
         kf_cexp (st->super_twiddles+i,phase);

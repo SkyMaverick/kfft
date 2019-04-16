@@ -9,10 +9,6 @@
 
 #endif /* USE_RADER_ALGO */
 
-
-
-
-
 /* perform the butterfly for one stage of a mixed radix FFT */
 static void kf_bfly_generic(
         kiss_fft_cpx * Fout,

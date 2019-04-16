@@ -159,19 +159,21 @@ __kiss_fft_init (__fft_cfg   st,
                  int         level)
 {
         int i;
+        kf_factor(nfft,st->factors);
+
         st->nfft=nfft;
         st->inverse = inverse_fft;
         st->level   = level;
-
-        kf_factor(nfft,st->factors);
 #if defined (USE_RADER_ALGO)
+        st->prime_root = 0;
+
         if (level > 0) {
             // TODO Rader initialization
             st->prime_root = _kfr_find_root (nfft);
         } else {
 #endif /* USE_RADER_ALGO */
             for (i=0;i<nfft;++i) {
-                const double pi=3.141592653589793238462643383279502884197169399375105820974944;
+                const double pi= KFFT_CONST_PI;
                 double phase = -2*pi*i / nfft;
                 if (st->inverse)
                     phase *= -1;

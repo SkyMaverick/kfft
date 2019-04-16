@@ -16,4 +16,4 @@ __kiss_fft(__fft_cfg cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout);
     do {                    \
         free(X);            \
         X=NULL;             \
-    }while(0)           
+    }while(0)
