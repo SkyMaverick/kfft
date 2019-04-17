@@ -20,33 +20,33 @@
 #define VALS_FFTW   1
 
 static double
-__kfft_test (kiss_fft_scalar*   amp_scalar,
-             kiss_fft_cpx*      tmp_buffer,
+__kfft_test (kfft_scalar*   amp_scalar,
+             kfft_cpx*      tmp_buffer,
              size_t             size)
 {
-    kiss_fft_cfg FCfg = NULL;
+    kfft_cfg FCfg = NULL;
 #ifndef CHECK_WITHOUT_PLAN
     clock_t t_start = clock();
 
-    FCfg = kiss_fft_config (size, 0, NULL, NULL);
+    FCfg = kfft_config (size, 0, NULL, NULL);
     if (FCfg == NULL) {
         assert("Allocation FAIL");
     }
-    kiss_fft (FCfg, amp_scalar, tmp_buffer);
-    kiss_fft_free(&FCfg);
+    kfft (FCfg, amp_scalar, tmp_buffer);
+    kfft_free(&FCfg);
 
     return (clock() - t_start) * 1000 / CLOCKS_PER_SEC;
 #else
 
-    FCfg = kiss_fft_config (size, 0, NULL, NULL);
+    FCfg = kfft_config (size, 0, NULL, NULL);
     if (FCfg == NULL) {
         assert("Allocation FAIL");
     }
     clock_t t_start = clock();
-    kiss_fft (FCfg, amp_scalar, tmp_buffer);
+    kfft (FCfg, amp_scalar, tmp_buffer);
     clock_t t_ret = clock();
 
-    kiss_fft_free(&FCfg);
+    kfft_free(&FCfg);
 
     return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
 #endif
@@ -131,16 +131,16 @@ main (int argc, char* argv[])
         double ivals [TEST_COUNT][2];
         size_t size = atoi(argv[1]);
 
-        kiss_fft_scalar* amp_scalar = malloc ((size + 1) * sizeof(kiss_fft_scalar));
-        kiss_fft_cpx* kfft_spectr = malloc ((size + 1) * sizeof(kiss_fft_cpx));
+        kfft_scalar* amp_scalar = malloc ((size + 1) * sizeof(kfft_scalar));
+        kfft_cpx* kfft_spectr = malloc ((size + 1) * sizeof(kfft_cpx));
 #if defined FFTW_COMPARE
         fftw_complex* fftw_spectr = malloc ((size + 1) * sizeof(fftw_complex));
 #endif
 
         for (int i = 0; i < TEST_COUNT; i++) {
             // Zero memory
-            memset (amp_scalar, 0, size * sizeof(kiss_fft_scalar));
-            memset (kfft_spectr, 0, size * sizeof(kiss_fft_cpx));
+            memset (amp_scalar, 0, size * sizeof(kfft_scalar));
+            memset (kfft_spectr, 0, size * sizeof(kfft_cpx));
 
             srand( (unsigned)time(NULL) );
             for (int i = 0; i < size; i++) {

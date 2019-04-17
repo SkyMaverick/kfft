@@ -59,18 +59,18 @@ _kfr_find_root (unsigned num) {
 
 static
 void kf_work(
-        kiss_fft_cpx * Fout,
-        const kiss_fft_cpx * f,
+        kfft_cpx * Fout,
+        const kfft_cpx * f,
         const size_t fstride,
         int in_stride,
         int * factors,
         const __fft_cfg st
         )
 {
-    kiss_fft_cpx * Fout_beg=Fout;
+    kfft_cpx * Fout_beg=Fout;
     const int p=*factors++; /* the radix  */
     const int m=*factors++; /* stage's fft length/p */
-    const kiss_fft_cpx * Fout_end = Fout + p*m;
+    const kfft_cpx * Fout_end = Fout + p*m;
 
 #ifdef _OPENMP
     // use openmp extensions at the
@@ -153,7 +153,7 @@ void kf_factor(int n,int * facbuf)
 }
 
 static inline void
-__kiss_fft_init (__fft_cfg   st,
+__kfft_init (__fft_cfg   st,
                  int         nfft,
                  int         inverse_fft,
                  int         level)
@@ -189,50 +189,50 @@ __kiss_fft_init (__fft_cfg   st,
  * User-callable function to allocate all necessary storage space for the fft.
  *
  * The return value is a contiguous block of memory, allocated with malloc.  As such,
- * It can be freed with free(), rather than a kiss_fft-specific function.
+ * It can be freed with free(), rather than a kfft-specific function.
  * */
 __fft_cfg
-__kiss_fft_config (int nfft,
+__kfft_config (int nfft,
                    int inverse_fft,
                    int level,
                    void * mem,
                    size_t * lenmem )
 {
     __fft_cfg st=NULL;
-    size_t memneeded = sizeof(struct kiss_fft_state)
-        + sizeof(kiss_fft_cpx)*(nfft-1); /* twiddle factors*/
+    size_t memneeded = sizeof(struct kfft_state)
+        + sizeof(kfft_cpx)*(nfft-1); /* twiddle factors*/
 
     if ( lenmem==NULL) {
-        st = ( __fft_cfg)KISS_FFT_MALLOC( memneeded );
+        st = ( __fft_cfg)KFFT_MALLOC( memneeded );
     }else{
         if (mem != NULL && *lenmem >= memneeded)
             st = (__fft_cfg)mem;
         *lenmem = memneeded;
     }
     if (st) {
-        __kiss_fft_init(st, nfft, inverse_fft, level);
+        __kfft_init(st, nfft, inverse_fft, level);
     }
     return st;
 }
 
 
 static inline void
-__kiss_fft_stride(__fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,int in_stride)
+__kfft_stride(__fft_cfg st,const kfft_cpx *fin,kfft_cpx *fout,int in_stride)
 {
     if (fin == fout) {
         //NOTE: this is not really an in-place FFT algorithm.
         //It just performs an out-of-place FFT into a temp buffer
-        kiss_fft_cpx * tmpbuf = (kiss_fft_cpx*)KISS_FFT_TMP_ALLOC( sizeof(kiss_fft_cpx)*st->nfft);
+        kfft_cpx * tmpbuf = (kfft_cpx*)KFFT_TMP_ALLOC( sizeof(kfft_cpx)*st->nfft);
         kf_work(tmpbuf,fin,1,in_stride, st->factors,st);
-        memcpy(fout,tmpbuf,sizeof(kiss_fft_cpx)*st->nfft);
-        KISS_FFT_TMP_FREE(tmpbuf);
+        memcpy(fout,tmpbuf,sizeof(kfft_cpx)*st->nfft);
+        KFFT_TMP_FREE(tmpbuf);
     }else{
         kf_work( fout, fin, 1,in_stride, st->factors,st );
     }
 }
 
 void
-__kiss_fft(__fft_cfg cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout)
+__kfft(__fft_cfg cfg,const kfft_cpx *fin,kfft_cpx *fout)
 {
-    __kiss_fft_stride (cfg,fin,fout,1);
+    __kfft_stride (cfg,fin,fout,1);
 }

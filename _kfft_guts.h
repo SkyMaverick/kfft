@@ -12,10 +12,10 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/* kiss_fft.h
-   defines kiss_fft_scalar as either short or a float type
+/* kfft.h
+   defines kfft_scalar as either short or a float type
    and defines
-   typedef struct { kiss_fft_scalar r; kiss_fft_scalar i; }kiss_fft_cpx; */
+   typedef struct { kfft_scalar r; kfft_scalar i; }kfft_cpx; */
 
 #pragma once
 
@@ -40,7 +40,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  4*4*4*2
  */
 
-struct kiss_fft_state {
+struct kfft_state {
     int nfft;
     int inverse;
     int level;
@@ -48,15 +48,15 @@ struct kiss_fft_state {
 #if defined (USE_RADER_ALGO)
     unsigned prime_root;
 #endif
-    kiss_fft_cpx twiddles[1];
+    kfft_cpx twiddles[1];
 };
 
-typedef struct kiss_fft_state * __fft_cfg;
+typedef struct kfft_state * __fft_cfg;
 
-struct kiss_fftr_state {
+struct kfftr_state {
     __fft_cfg       substate;
-    kiss_fft_cpx *  tmpbuf;
-    kiss_fft_cpx *  super_twiddles;
+    kfft_cpx *  tmpbuf;
+    kfft_cpx *  super_twiddles;
 #ifdef USE_SIMD
     void *          pad;
 #endif
@@ -104,19 +104,19 @@ struct kiss_fftr_state {
 
 
 #if defined(USE_SIMD)
-    #define KISS_FFT_COS(phase) _mm_set1_ps( cos(phase) )
-    #define KISS_FFT_SIN(phase) _mm_set1_ps( sin(phase) )
+    #define KFFT_COS(phase) _mm_set1_ps( cos(phase) )
+    #define KFFT_SIN(phase) _mm_set1_ps( sin(phase) )
     #define HALF_OF(x) ((x)*_mm_set1_ps(.5))
 #else
-    #define KISS_FFT_COS(phase) (kiss_fft_scalar) cos(phase)
-    #define KISS_FFT_SIN(phase) (kiss_fft_scalar) sin(phase)
+    #define KFFT_COS(phase) (kfft_scalar) cos(phase)
+    #define KFFT_SIN(phase) (kfft_scalar) sin(phase)
     #define HALF_OF(x) ((x)*.5)
 #endif
 
 #define  kf_cexp(x,phase) \
 	do{ \
-		(x)->r = KISS_FFT_COS(phase);\
-		(x)->i = KISS_FFT_SIN(phase);\
+		(x)->r = KFFT_COS(phase);\
+		(x)->i = KFFT_SIN(phase);\
 	}while(0)
 
 
@@ -125,17 +125,17 @@ struct kiss_fftr_state {
     fprintf(stderr,"%g + %gi\n",(double)((c)->r),(double)((c)->i) )
 
 
-#ifdef KISS_FFT_USE_ALLOCA
+#ifdef KFFT_USE_ALLOCA
     // define this to allow use of alloca instead of malloc for temporary buffers
     // Temporary buffers are used in two case:
     // 1. FFT sizes that have "bad" factors. i.e. not 2,3 and 5
     // 2. "in-place" FFTs.  Notice the quotes, since kissfft does not really do an in-place transform.
     #include <alloca.h>
-    #define  KISS_FFT_TMP_ALLOC(nbytes) alloca(nbytes)
-    #define  KISS_FFT_TMP_FREE(ptr)
+    #define  KFFT_TMP_ALLOC(nbytes) alloca(nbytes)
+    #define  KFFT_TMP_FREE(ptr)
 #else
-    #define  KISS_FFT_TMP_ALLOC(nbytes) KISS_FFT_MALLOC(nbytes)
-    #define  KISS_FFT_TMP_FREE(ptr) KISS_FFT_FREE(ptr)
+    #define  KFFT_TMP_ALLOC(nbytes) KFFT_MALLOC(nbytes)
+    #define  KFFT_TMP_FREE(ptr) KFFT_FREE(ptr)
 #endif
 
 #if (defined TRACE)

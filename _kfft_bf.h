@@ -3,15 +3,15 @@
 #include "_kfft_guts.h"
 
 static void kf_bfly2(
-        kiss_fft_cpx * Fout,
+        kfft_cpx * Fout,
         const size_t fstride,
         const __fft_cfg st,
         int m
         )
 {
-    kiss_fft_cpx * Fout2;
-    kiss_fft_cpx * tw1 = st->twiddles;
-    kiss_fft_cpx t;
+    kfft_cpx * Fout2;
+    kfft_cpx * tw1 = st->twiddles;
+    kfft_cpx t;
     Fout2 = Fout + m;
     do{
         C_MUL (t,  *Fout2 , *tw1);
@@ -24,14 +24,14 @@ static void kf_bfly2(
 }
 
 static void kf_bfly4(
-        kiss_fft_cpx * Fout,
+        kfft_cpx * Fout,
         const size_t fstride,
         const __fft_cfg st,
         const size_t m
         )
 {
-    kiss_fft_cpx *tw1,*tw2,*tw3;
-    kiss_fft_cpx scratch[6];
+    kfft_cpx *tw1,*tw2,*tw3;
+    kfft_cpx scratch[6];
     size_t k=m;
     const size_t m2=2*m;
     const size_t m3=3*m;
@@ -71,7 +71,7 @@ static void kf_bfly4(
 }
 
 static void kf_bfly3(
-         kiss_fft_cpx * Fout,
+         kfft_cpx * Fout,
          const size_t fstride,
          const __fft_cfg st,
          size_t m
@@ -79,9 +79,9 @@ static void kf_bfly3(
 {
      size_t k=m;
      const size_t m2 = 2*m;
-     kiss_fft_cpx *tw1,*tw2;
-     kiss_fft_cpx scratch[5];
-     kiss_fft_cpx epi3;
+     kfft_cpx *tw1,*tw2;
+     kfft_cpx scratch[5];
+     kfft_cpx epi3;
      epi3 = st->twiddles[fstride*m];
 
      tw1=tw2=st->twiddles;
@@ -113,18 +113,18 @@ static void kf_bfly3(
 }
 
 static void kf_bfly5(
-        kiss_fft_cpx * Fout,
+        kfft_cpx * Fout,
         const size_t fstride,
         const __fft_cfg st,
         int m
         )
 {
-    kiss_fft_cpx *Fout0,*Fout1,*Fout2,*Fout3,*Fout4;
+    kfft_cpx *Fout0,*Fout1,*Fout2,*Fout3,*Fout4;
     int u;
-    kiss_fft_cpx scratch[13];
-    kiss_fft_cpx * twiddles = st->twiddles;
-    kiss_fft_cpx *tw;
-    kiss_fft_cpx ya,yb;
+    kfft_cpx scratch[13];
+    kfft_cpx * twiddles = st->twiddles;
+    kfft_cpx *tw;
+    kfft_cpx ya,yb;
     ya = twiddles[fstride*m];
     yb = twiddles[fstride*2*m];
 

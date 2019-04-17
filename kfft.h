@@ -1,5 +1,5 @@
-#ifndef KISS_FFT_H
-#define KISS_FFT_H
+#ifndef KFFT_H
+#define KFFT_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,23 +19,23 @@ extern "C" {
  -- a command-line utility to perform ffts
  -- a command-line utility to perform fast-convolution filtering
 
- Then see kfc.h kiss_fftr.h kiss_fftnd.h fftutil.c kiss_fastfir.c
+ Then see kfc.h kfftr.h kfftnd.h fftutil.c kiss_fastfir.c
   in the tools/ directory.
 */
 
 #ifdef USE_SIMD
     #include <xmmintrin.h>
-    #define kiss_fft_scalar __m128
-    #define KISS_FFT_MALLOC(nbytes) _mm_malloc(nbytes,16)
-    #define KISS_FFT_FREE _mm_free
+    #define kfft_scalar __m128
+    #define KFFT_MALLOC(nbytes) _mm_malloc(nbytes,16)
+    #define KFFT_FREE _mm_free
 #else
-    #define KISS_FFT_MALLOC malloc
-    #define KISS_FFT_FREE free
+    #define KFFT_MALLOC malloc
+    #define KFFT_FREE free
 #endif
 
 
-#ifndef kiss_fft_scalar
-    #define kiss_fft_scalar double
+#ifndef kfft_scalar
+    #define kfft_scalar double
 #endif
 
 #ifndef KFFT_RADER_LEVEL
@@ -46,14 +46,14 @@ extern "C" {
 #endif
 
 typedef struct {
-    kiss_fft_scalar r;
-    kiss_fft_scalar i;
-}kiss_fft_cpx;
+    kfft_scalar r;
+    kfft_scalar i;
+}kfft_cpx;
 
-typedef struct kiss_fftr_state * kiss_fft_cfg;
+typedef struct kfftr_state * kfft_cfg;
 
-kiss_fft_cfg
-kiss_fft_config  (int         nfft,
+kfft_cfg
+kfft_config  (int         nfft,
                   int         inverse_fft,
                   void *      mem,
                   size_t *    lenmem);
@@ -65,33 +65,33 @@ kiss_fft_config  (int         nfft,
 
 
 void
-kiss_fft (kiss_fft_cfg              cfg,
-          const kiss_fft_scalar *   timedata,
-          kiss_fft_cpx *            freqdata);
+kfft (kfft_cfg              cfg,
+          const kfft_scalar *   timedata,
+          kfft_cpx *            freqdata);
 /*
  input timedata has nfft scalar points
  output freqdata has nfft/2+1 complex points
 */
 
 void
-kiss_ffti (kiss_fft_cfg             cfg,
-           const kiss_fft_cpx *     freqdata,
-           kiss_fft_scalar *        timedata);
+kffti (kfft_cfg             cfg,
+           const kfft_cpx *     freqdata,
+           kfft_scalar *        timedata);
 /*
  input freqdata has  nfft/2+1 complex points
  output timedata has nfft scalar points
 */
 
 int
-kiss_fft_next_fast_size(int n);
+kfft_next_fast_size(int n);
 
 void
-kiss_fft_free (kiss_fft_cfg* cfg);
+kfft_free (kfft_cfg* cfg);
 
 static inline size_t
-kiss_fft_get_size (const int n) {
+kfft_get_size (const int n) {
     size_t memneeded = 0;
-    kiss_fft_config (n, 0, NULL, &memneeded);
+    kfft_config (n, 0, NULL, &memneeded);
     return memneeded;
 }
 

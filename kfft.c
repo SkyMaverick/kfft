@@ -21,7 +21,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  */
 
 
-int kiss_fft_next_fast_size(int n)
+int kfft_next_fast_size(int n)
 {
     while(1) {
         int m=n;
@@ -39,34 +39,34 @@ int kiss_fft_next_fast_size(int n)
       TODO  Functionality
 ******************************************************************************** */
 
-kiss_fft_cfg
-kiss_fft_config  (int         nfft,
+kfft_cfg
+kfft_config  (int         nfft,
                   int         inverse_fft,
                   void *      mem,
                   size_t *    lenmem)
 {
     int i;
-    kiss_fft_cfg st = NULL;
+    kfft_cfg st = NULL;
     size_t subsize = 0, memneeded = 0;
 
-    __kiss_fft_config (nfft, inverse_fft, 0, NULL, &subsize);
-    memneeded = sizeof(struct kiss_fftr_state) + subsize + sizeof(kiss_fft_cpx) * ( nfft * 3 / 2);
+    __kfft_config (nfft, inverse_fft, 0, NULL, &subsize);
+    memneeded = sizeof(struct kfftr_state) + subsize + sizeof(kfft_cpx) * ( nfft * 3 / 2);
 
     if (lenmem == NULL) {
-        st = (kiss_fft_cfg) KISS_FFT_MALLOC (memneeded);
+        st = (kfft_cfg) KFFT_MALLOC (memneeded);
     } else {
         if (*lenmem >= memneeded) {
-            st = (kiss_fft_cfg) mem;
+            st = (kfft_cfg) mem;
         }
         *lenmem = memneeded;
     }
     if (!st)
         return NULL;
 
-    st->substate = (__fft_cfg) (st + 1); /*just beyond kiss_fftr_state struct */
-    st->tmpbuf = (kiss_fft_cpx *) (((char *) st->substate) + subsize);
+    st->substate = (__fft_cfg) (st + 1); /*just beyond kfftr_state struct */
+    st->tmpbuf = (kfft_cpx *) (((char *) st->substate) + subsize);
     st->super_twiddles = st->tmpbuf + nfft;
-    __kiss_fft_config(nfft, inverse_fft, 0, st->substate, &subsize);
+    __kfft_config(nfft, inverse_fft, 0, st->substate, &subsize);
 
 #if defined (TRACE)
     kfft_trace ("%s:\t%zu\n", "Memory allocate", memneeded);
@@ -89,13 +89,13 @@ kiss_fft_config  (int         nfft,
 }
 
 void
-kiss_fft (kiss_fft_cfg               st,
-          const kiss_fft_scalar     *timedata,
-          kiss_fft_cpx              *freqdata)
+kfft (kfft_cfg               st,
+          const kfft_scalar     *timedata,
+          kfft_cpx              *freqdata)
 {
     /* input buffer timedata is stored row-wise */
     int k,ncfft;
-    kiss_fft_cpx fpnk,fpk,f1k,f2k,tw,tdc;
+    kfft_cpx fpnk,fpk,f1k,f2k,tw,tdc;
 
     if ( st->substate->inverse) {
         fprintf(stderr,"kiss fft usage error: improper alloc\n");
@@ -109,7 +109,7 @@ kiss_fft (kiss_fft_cfg               st,
         st->tmpbuf[i].i = 0;
     }
 
-    __kiss_fft( st->substate , st->tmpbuf, st->tmpbuf );
+    __kfft( st->substate , st->tmpbuf, st->tmpbuf );
 
     tdc.r = st->tmpbuf[0].r;
     tdc.i = st->tmpbuf[0].i;
@@ -138,9 +138,9 @@ kiss_fft (kiss_fft_cfg               st,
 }
 
 void
-kiss_ffti (kiss_fft_cfg         st,
-           const kiss_fft_cpx    *freqdata,
-           kiss_fft_scalar       *timedata)
+kffti (kfft_cfg         st,
+           const kfft_cpx    *freqdata,
+           kfft_scalar       *timedata)
 {
     /* input buffer timedata is stored row-wise */
     int k, ncfft;
@@ -156,7 +156,7 @@ kiss_ffti (kiss_fft_cfg         st,
     st->tmpbuf[0].i = freqdata[0].r - freqdata[ncfft].r;
 
     for (k = 1; k <= ncfft / 2; ++k) {
-        kiss_fft_cpx fk, fnkc, fek, fok, tmp;
+        kfft_cpx fk, fnkc, fek, fok, tmp;
         fk = freqdata[k];
         fnkc.r = freqdata[ncfft - k].r;
         fnkc.i = -freqdata[ncfft - k].i;
@@ -172,7 +172,7 @@ kiss_ffti (kiss_fft_cfg         st,
         st->tmpbuf[ncfft - k].i *= -1;
 #endif
     }
-    __kiss_fft (st->substate, st->tmpbuf, st->tmpbuf);
+    __kfft (st->substate, st->tmpbuf, st->tmpbuf);
 
     for (int i=0; i < ncfft; i++) {
         timedata[i] = S_DIV(st->tmpbuf[i].r, (2 * st->substate->nfft));
@@ -180,7 +180,7 @@ kiss_ffti (kiss_fft_cfg         st,
 }
 
 void
-kiss_fft_free (kiss_fft_cfg* cfg) {
+kfft_free (kfft_cfg* cfg) {
     if (cfg && *cfg) {
         free(*cfg);
         *cfg = NULL;

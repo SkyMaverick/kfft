@@ -13,23 +13,23 @@ main (int argc, char* argv[])
         }
         printf ("\n");
 
-        kiss_fft_cpx* FOut = calloc (argc, sizeof(kiss_fft_cpx));
+        kfft_cpx* FOut = calloc (argc, sizeof(kfft_cpx));
 
-        size_t memneed = kiss_fft_get_size(argc-1);
+        size_t memneed = kfft_get_size(argc-1);
 
-        kiss_fft_cfg  FCfg = kiss_fft_config (argc-1, 0, NULL, NULL);
+        kfft_cfg  FCfg = kfft_config (argc-1, 0, NULL, NULL);
 
-        kiss_fft (FCfg, amp_scalar, FOut);
+        kfft (FCfg, amp_scalar, FOut);
 
         for (int i = 0; i < argc-1; i++) {
             printf("r%5.3fi%5.3f | ", FOut[i].r, FOut[i].i);
         }
         printf ("\n\n\n");
 
-        kiss_fft_config (argc-1, 1, FCfg, &memneed);
+        kfft_config (argc-1, 1, FCfg, &memneed);
         memset (amp_scalar, 0, argc * sizeof(double));
 
-        kiss_ffti (FCfg, FOut, amp_scalar);
+        kffti (FCfg, FOut, amp_scalar);
 
         for (int i = 0; i < argc-1; i++) {
             printf("%5.3f | ", amp_scalar[i]);
@@ -39,7 +39,7 @@ main (int argc, char* argv[])
 
         free (FOut);
         free (amp_scalar);
-        kiss_fft_free (&FCfg);
+        kfft_free (&FCfg);
 
         return 0;
     } else {

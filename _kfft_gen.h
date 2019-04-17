@@ -11,7 +11,7 @@
 
 /* perform the butterfly for one stage of a mixed radix FFT */
 static void kf_bfly_generic(
-        kiss_fft_cpx * Fout,
+        kfft_cpx * Fout,
         const size_t fstride,
         const __fft_cfg st,
         int m,
@@ -19,13 +19,13 @@ static void kf_bfly_generic(
         )
 {
     int u,k,q1,q;
-    kiss_fft_cpx * twiddles = st->twiddles;
-    kiss_fft_cpx t;
+    kfft_cpx * twiddles = st->twiddles;
+    kfft_cpx t;
     int Norig = st->nfft;
 
     kfft_trace ("%s:\t m: %d\tp: %d\n", "Generic FFT", m, p);
 
-    kiss_fft_cpx * scratch = (kiss_fft_cpx*)KISS_FFT_TMP_ALLOC(sizeof(kiss_fft_cpx)*p);
+    kfft_cpx * scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx)*p);
 
     // TODO Maybe use Rader for FFT bufer
 #if defined ( USE_RADER_ALGO )
@@ -53,7 +53,7 @@ static void kf_bfly_generic(
         }
 #if defined (USE_RADER_ALGO)
     } else {
-        __fft_cfg tmp_cfg = __kiss_fft_config (p, st->inverse, st->level + 1, NULL, NULL);
+        __fft_cfg tmp_cfg = __kfft_config (p, st->inverse, st->level + 1, NULL, NULL);
         for ( u=0; u<m; ++u ) {
             k=u;
             for ( q1=0 ; q1<p ; ++q1 ) {
@@ -64,9 +64,9 @@ static void kf_bfly_generic(
             k=u;
             // TODO Rader here
         }
-        __kiss_fft_free(tmp_cfg);
+        __kfft_free(tmp_cfg);
     }
 #endif
-    KISS_FFT_TMP_FREE(scratch);
+    KFFT_TMP_FREE(scratch);
 }
 
