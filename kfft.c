@@ -69,13 +69,12 @@ kfft_config  (int         nfft,
     __kfft_config(nfft, inverse_fft, 0, st->substate, &subsize);
 
 #if defined (TRACE)
-    kfft_trace ("%s:\t%zu\n", "Memory allocate", memneeded);
-    kfft_trace ("%s:\t", "Factors");
+    kfft_trace ("%s: %zu\n", "Memory allocate", memneeded);
+    kfft_trace ("%s: ", "Factors");
     for (i = 0; st->substate->factors[i] != 0; i++) {
         kfft_trace("%d ", st->substate->factors[i]);
     }
-    kfft_trace ("\n", "");
-
+    kfft_trace ("%s\n","");
 #endif
 
     for (i = 0; i < nfft/2; ++i) {

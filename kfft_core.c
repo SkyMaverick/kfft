@@ -49,7 +49,6 @@ _kfr_find_root (unsigned num) {
 		int ok = 1;
 		for (unsigned i = 0; count > i && ok; ++i) {
 			ok &= _kfr_ispower (res, phi / primes [i], num);
-            kfft_trace ("%d\t%d\t%d\n", res, i, primes [i]);
         }
         if (ok)  return res;
 	}
@@ -154,9 +153,9 @@ void kf_factor(int n,int * facbuf)
 
 static inline void
 __kfft_init (__fft_cfg   st,
-                 int         nfft,
-                 int         inverse_fft,
-                 int         level)
+             int         nfft,
+             int         inverse_fft,
+             int         level)
 {
         int i;
         kf_factor(nfft,st->factors);
@@ -166,22 +165,16 @@ __kfft_init (__fft_cfg   st,
         st->level   = level;
 #if defined (USE_RADER_ALGO)
         st->prime_root = 0;
-
-        if (level > 0) {
-            // TODO Rader initialization
+        if (level > 0)
             st->prime_root = _kfr_find_root (nfft);
-        } else {
 #endif /* USE_RADER_ALGO */
-            for (i=0;i<nfft;++i) {
-                const double pi= KFFT_CONST_PI;
-                double phase = -2*pi*i / nfft;
-                if (st->inverse)
-                    phase *= -1;
-                kf_cexp(st->twiddles+i, phase );
-            }
-#if defined (USE_RADER_ALGO)
+        for (i=0;i<nfft;++i) {
+            const double pi= KFFT_CONST_PI;
+            double phase = -2*pi*i / nfft;
+            if (st->inverse)
+                phase *= -1;
+            kf_cexp(st->twiddles+i, phase );
         }
-#endif
 }
 
 /*
@@ -211,6 +204,13 @@ __kfft_config (int nfft,
     }
     if (st) {
         __kfft_init(st, nfft, inverse_fft, level);
+    
+        kfft_trace ("Config: nfft - %d | inv - %d | lvl - %d | root - %d\n",
+               st->nfft,
+               st->inverse,
+               st->level,
+               st->prime_root);
+        kfft_trace("        memory - %zu\n", memneeded);
     }
     return st;
 }

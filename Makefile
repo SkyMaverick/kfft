@@ -22,6 +22,16 @@ KfftObjs=kfft.o kfft_core.o
 
 all: lib ${AppAll}
 
+install: lib
+	cp libkfft.so /usr/lib
+	cp kfft.h /usr/include
+	chmod 0644 /usr/lib/libkfft.so
+	chmod 0644 /usr/include/kfft.h
+
+uninstall:
+	rm -f /usr/lib/libkfft.so
+	rm -f /usr/include/kfft.h
+
 # ===================================
 
 demo: lib
@@ -41,7 +51,7 @@ aukfcmpwp: lib
 
 %.o: %.c
 	 ${CC} ${CFLAGS} ${LIBFLAGS} -fPIC -DUSE_RADER_ALGO -c $< -o $@
-    
+
 lib: kfft.o kfft_core.o
 	ar crus libkfft.a ${KfftObjs}
 	gcc -shared ${CFLAGS} $(SHARED) ${KfftObjs}

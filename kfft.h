@@ -10,19 +10,6 @@
 extern "C" {
 #endif
 
-/*
- ATTENTION!
- If you would like a :
- -- a utility that will handle the caching of fft objects
- -- real-only (no imaginary time component ) FFT
- -- a multi-dimensional FFT
- -- a command-line utility to perform ffts
- -- a command-line utility to perform fast-convolution filtering
-
- Then see kfc.h kfftr.h kfftnd.h fftutil.c kiss_fastfir.c
-  in the tools/ directory.
-*/
-
 #ifdef USE_SIMD
     #include <xmmintrin.h>
     #define kfft_scalar __m128
@@ -54,9 +41,9 @@ typedef struct kfftr_state * kfft_cfg;
 
 kfft_cfg
 kfft_config  (int         nfft,
-                  int         inverse_fft,
-                  void *      mem,
-                  size_t *    lenmem);
+              int         inverse_fft,
+              void *      mem,
+              size_t *    lenmem);
 /*
  nfft must be even
 
@@ -66,8 +53,8 @@ kfft_config  (int         nfft,
 
 void
 kfft (kfft_cfg              cfg,
-          const kfft_scalar *   timedata,
-          kfft_cpx *            freqdata);
+      const kfft_scalar *   timedata,
+      kfft_cpx *            freqdata);
 /*
  input timedata has nfft scalar points
  output freqdata has nfft/2+1 complex points
@@ -75,8 +62,8 @@ kfft (kfft_cfg              cfg,
 
 void
 kffti (kfft_cfg             cfg,
-           const kfft_cpx *     freqdata,
-           kfft_scalar *        timedata);
+       const kfft_cpx *     freqdata,
+       kfft_scalar *        timedata);
 /*
  input freqdata has  nfft/2+1 complex points
  output timedata has nfft scalar points

@@ -4,9 +4,7 @@
 #include "kfft_core.h"
 
 #if defined (USE_RADER_ALGO)
-
-
-
+    // TODO Rader specific functions here
 #endif /* USE_RADER_ALGO */
 
 /* perform the butterfly for one stage of a mixed radix FFT */
@@ -23,11 +21,12 @@ static void kf_bfly_generic(
     kfft_cpx t;
     int Norig = st->nfft;
 
-    kfft_trace ("%s:\t m: %d\tp: %d\n", "Generic FFT", m, p);
+    kfft_trace ("%s: m - %d | p - %d\n", "Generic FFT", m, p);
 
     kfft_cpx * scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx)*p);
 
-    // TODO Maybe use Rader for FFT bufer
+    // TODO Maybe use Rader for FFT buffer
+
 #if defined ( USE_RADER_ALGO )
     if (( p < KFFT_RADER_LIMIT) || (st->level > KFFT_RADER_LEVEL)) {
 #endif
@@ -66,7 +65,7 @@ static void kf_bfly_generic(
         }
         __kfft_free(tmp_cfg);
     }
-#endif
+#endif /* USE_RADER_ALGO */
     KFFT_TMP_FREE(scratch);
 }
 
