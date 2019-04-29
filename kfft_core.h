@@ -2,17 +2,17 @@
 
 #include "_kfft_guts.h"
 
-__fft_cfg
-__kfft_config (int nfft,
-                   int inverse_fft,
-                   int level,
-                   void * mem,
-                   size_t * lenmem );
+kfft_kplan_p
+kfft_kconfig (int       nfft,
+              int       inverse_fft,
+              int       level,
+              void *    mem,
+              size_t *  lenmem );
 
 void
-__kfft(__fft_cfg cfg,const kfft_cpx *fin,kfft_cpx *fout);
+__kfft (kfft_kplan_p cfg,const kfft_cpx *fin,kfft_cpx *fout);
 
-#define __kfft_free(X)  \
+#define kfft_kfree(X)       \
     do {                    \
         free(X);            \
         X=NULL;             \

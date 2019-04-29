@@ -20,11 +20,11 @@
 #define VALS_FFTW   1
 
 static double
-__kfft_test (kfft_scalar*   amp_scalar,
+kfft_ktest (kfft_scalar*   amp_scalar,
              kfft_cpx*      tmp_buffer,
              size_t             size)
 {
-    kfft_cfg FCfg = NULL;
+    kfft_plan FCfg = NULL;
 #ifndef CHECK_WITHOUT_PLAN
     clock_t t_start = clock();
 
@@ -91,13 +91,23 @@ __report_func (double vals [][2])
 #else
     fprintf (stdout, "%s (%d - %s):\n\n", "Algoritm work time (without initialization)", TEST_COUNT, "checks");
 #endif
-    fprintf (stdout, "%s\n", " ---STEP------KFFT-------FFTW----");
+
+#if defined FFTW_COMPARE
+    fprintf (stdout, "%s\n", " --STEP-----KFFT-------FFTW----");
     for (int i = 0; i < TEST_COUNT; i++) {
-        fprintf(stdout, "| %3d ms. | %8.2f | %8.2f  |\n", i, vals [i] [VALS_KFFT], vals [i] [VALS_FFTW]);
+        fprintf(stdout, "| %5d | %8.2f | %8.2f  |\n", i, vals [i] [VALS_KFFT], vals [i] [VALS_FFTW]);
     }
-    fprintf (stdout, "%s\n", " --------------------------------");
-    fprintf(stdout, "%s:\t%8.2f ms.\n", "Average work time for KFFT", t_kavg / TEST_COUNT);
-    fprintf(stdout, "%s:\t%8.2f ms.\n", "Average work time for FFTW", t_favg / TEST_COUNT);
+    fprintf (stdout, "%s\n", " ------------------------------");
+    fprintf(stdout, "%s:\t%8.2f\n", "Average work time for KFFT", t_kavg / TEST_COUNT);
+    fprintf(stdout, "%s:\t%8.2f\n", "Average work time for FFTW", t_favg / TEST_COUNT);
+#else
+    fprintf (stdout, "%s\n", " --STEP------KFFT--");
+    for (int i = 0; i < TEST_COUNT; i++) {
+        fprintf(stdout, "| %5d | %8.2f |\n", i, vals [i] [VALS_KFFT]);
+    }
+    fprintf (stdout, "%s\n", " ------------------ ");
+    fprintf(stdout, "%s:\t%8.2f\n", "Average work time for KFFT", t_kavg / TEST_COUNT);
+#endif
 }
 
 #else
@@ -109,18 +119,24 @@ __report_func (double vals [][2])
 
     for (int i = 0; i < TEST_COUNT; i++) {
             t_kavg += vals [i] [VALS_KFFT];
+#if defined FFTW_COMPARE
             t_favg += vals [i] [VALS_FFTW];
+#endif
     }
     for (int i = 0; i < TEST_COUNT; i++) {
         fprintf(stdout, "%8.2f", vals [i] [VALS_KFFT]);
     }
+#if defined FFTW_COMPARE
     fprintf(stdout, "\n");
     for (int i = 0; i < TEST_COUNT; i++) {
         fprintf(stdout, "%8.2f", vals [i] [VALS_FFTW]);
     }
+#endif
     fprintf(stdout, "\n");
     fprintf(stdout, "%8.2f\n", t_kavg / TEST_COUNT);
+#if defined FFTW_COMPARE
     fprintf(stdout, "%8.2f\n", t_favg / TEST_COUNT);
+#endif
 }
 #endif
 
@@ -147,7 +163,7 @@ main (int argc, char* argv[])
                 amp_scalar[i] = rand();
             }
 
-            ivals [i] [VALS_KFFT] = __kfft_test (amp_scalar, kfft_spectr, size);
+            ivals [i] [VALS_KFFT] = kfft_ktest (amp_scalar, kfft_spectr, size);
 #if defined FFTW_COMPARE
             ivals [i] [VALS_FFTW] = __fftw_test ((double*)amp_scalar, fftw_spectr, size);
 #endif

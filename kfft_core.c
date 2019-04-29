@@ -63,7 +63,7 @@ void kf_work(
         const size_t fstride,
         int in_stride,
         int * factors,
-        const __fft_cfg st
+        const kfft_kplan_p st
         )
 {
     kfft_cpx * Fout_beg=Fout;
@@ -152,7 +152,7 @@ void kf_factor(int n,int * facbuf)
 }
 
 static inline void
-__kfft_init (__fft_cfg   st,
+kfft_kinit (kfft_kplan_p   st,
              int         nfft,
              int         inverse_fft,
              int         level)
@@ -184,26 +184,26 @@ __kfft_init (__fft_cfg   st,
  * The return value is a contiguous block of memory, allocated with malloc.  As such,
  * It can be freed with free(), rather than a kfft-specific function.
  * */
-__fft_cfg
-__kfft_config (int nfft,
+kfft_kplan_p
+kfft_kconfig (int nfft,
                    int inverse_fft,
                    int level,
                    void * mem,
                    size_t * lenmem )
 {
-    __fft_cfg st=NULL;
+    kfft_kplan_p st=NULL;
     size_t memneeded = sizeof(struct kfft_state)
         + sizeof(kfft_cpx)*(nfft-1); /* twiddle factors*/
 
     if ( lenmem==NULL) {
-        st = ( __fft_cfg)KFFT_MALLOC( memneeded );
+        st = ( kfft_kplan_p)KFFT_MALLOC( memneeded );
     }else{
         if (mem != NULL && *lenmem >= memneeded)
-            st = (__fft_cfg)mem;
+            st = (kfft_kplan_p)mem;
         *lenmem = memneeded;
     }
     if (st) {
-        __kfft_init(st, nfft, inverse_fft, level);
+        kfft_kinit(st, nfft, inverse_fft, level);
     
         kfft_trace ("Config: nfft - %d | inv - %d | lvl - %d | root - %d\n",
                st->nfft,
@@ -217,7 +217,7 @@ __kfft_config (int nfft,
 
 
 static inline void
-__kfft_stride(__fft_cfg st,const kfft_cpx *fin,kfft_cpx *fout,int in_stride)
+kfft_kstride(kfft_kplan_p st,const kfft_cpx *fin,kfft_cpx *fout,int in_stride)
 {
     if (fin == fout) {
         //NOTE: this is not really an in-place FFT algorithm.
@@ -232,7 +232,7 @@ __kfft_stride(__fft_cfg st,const kfft_cpx *fin,kfft_cpx *fout,int in_stride)
 }
 
 void
-__kfft(__fft_cfg cfg,const kfft_cpx *fin,kfft_cpx *fout)
+__kfft(kfft_kplan_p cfg,const kfft_cpx *fin,kfft_cpx *fout)
 {
-    __kfft_stride (cfg,fin,fout,1);
+    kfft_kstride (cfg,fin,fout,1);
 }

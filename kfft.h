@@ -37,9 +37,9 @@ typedef struct {
     kfft_scalar i;
 }kfft_cpx;
 
-typedef struct kfftr_state * kfft_cfg;
+typedef struct kfftr_state * kfft_plan;
 
-kfft_cfg
+kfft_plan
 kfft_config  (int         nfft,
               int         inverse_fft,
               void *      mem,
@@ -52,7 +52,7 @@ kfft_config  (int         nfft,
 
 
 void
-kfft (kfft_cfg              cfg,
+kfft (kfft_plan             cfg,
       const kfft_scalar *   timedata,
       kfft_cpx *            freqdata);
 /*
@@ -61,7 +61,7 @@ kfft (kfft_cfg              cfg,
 */
 
 void
-kffti (kfft_cfg             cfg,
+kffti (kfft_plan            cfg,
        const kfft_cpx *     freqdata,
        kfft_scalar *        timedata);
 /*
@@ -73,7 +73,7 @@ int
 kfft_next_fast_size(int n);
 
 void
-kfft_free (kfft_cfg* cfg);
+kfft_free (kfft_plan* cfg);
 
 static inline size_t
 kfft_get_size (const int n) {

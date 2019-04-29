@@ -40,7 +40,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  4*4*4*2
  */
 
-struct kfft_state {
+typedef struct kfft_state {
     int nfft;
     int inverse;
     int level;
@@ -49,18 +49,18 @@ struct kfft_state {
     unsigned prime_root;
 #endif
     kfft_cpx twiddles[1];
-};
+} kfft_kplan_t;
 
-typedef struct kfft_state * __fft_cfg;
+typedef kfft_kplan_t * kfft_kplan_p;
 
-struct kfftr_state {
-    __fft_cfg       substate;
-    kfft_cpx *  tmpbuf;
-    kfft_cpx *  super_twiddles;
+typedef struct kfftr_state {
+    kfft_kplan_t *substate;
+    kfft_cpx *tmpbuf;
+    kfft_cpx *super_twiddles;
 #ifdef USE_SIMD
     void *          pad;
 #endif
-};
+} kfft_plan_t;
 
 /*
   Explanation of macros dealing with complex math:

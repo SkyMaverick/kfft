@@ -17,7 +17,7 @@ main (int argc, char* argv[])
 
         size_t memneed = kfft_get_size(argc-1);
 
-        kfft_cfg  FCfg = kfft_config (argc-1, 0, NULL, NULL);
+        kfft_plan  FCfg = kfft_config (argc-1, 0, NULL, NULL);
 
         kfft (FCfg, amp_scalar, FOut);
 

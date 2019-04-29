@@ -11,7 +11,7 @@
 static void kf_bfly_generic(
         kfft_cpx * Fout,
         const size_t fstride,
-        const __fft_cfg st,
+        const kfft_kplan_p st,
         int m,
         int p
         )
@@ -52,7 +52,7 @@ static void kf_bfly_generic(
         }
 #if defined (USE_RADER_ALGO)
     } else {
-        __fft_cfg tmp_cfg = __kfft_config (p, st->inverse, st->level + 1, NULL, NULL);
+        kfft_kplan_p tmp_cfg = kfft_kconfig (p, st->inverse, st->level + 1, NULL, NULL);
         for ( u=0; u<m; ++u ) {
             k=u;
             for ( q1=0 ; q1<p ; ++q1 ) {
@@ -63,7 +63,7 @@ static void kf_bfly_generic(
             k=u;
             // TODO Rader here
         }
-        __kfft_free(tmp_cfg);
+        kfft_kfree(tmp_cfg);
     }
 #endif /* USE_RADER_ALGO */
     KFFT_TMP_FREE(scratch);

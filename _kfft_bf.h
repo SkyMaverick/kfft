@@ -5,7 +5,7 @@
 static void kf_bfly2(
         kfft_cpx * Fout,
         const size_t fstride,
-        const __fft_cfg st,
+        const kfft_kplan_p st,
         int m
         )
 {
@@ -26,7 +26,7 @@ static void kf_bfly2(
 static void kf_bfly4(
         kfft_cpx * Fout,
         const size_t fstride,
-        const __fft_cfg st,
+        const kfft_kplan_p st,
         const size_t m
         )
 {
@@ -71,7 +71,7 @@ static void kf_bfly4(
 static void kf_bfly3(
          kfft_cpx * Fout,
          const size_t fstride,
-         const __fft_cfg st,
+         const kfft_kplan_p st,
          size_t m
          )
 {
@@ -113,7 +113,7 @@ static void kf_bfly3(
 static void kf_bfly5(
         kfft_cpx * Fout,
         const size_t fstride,
-        const __fft_cfg st,
+        const kfft_kplan_p st,
         int m
         )
 {

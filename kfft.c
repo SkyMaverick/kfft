@@ -39,34 +39,34 @@ int kfft_next_fast_size(int n)
       TODO  Functionality
 ******************************************************************************** */
 
-kfft_cfg
+kfft_plan
 kfft_config  (int         nfft,
-                  int         inverse_fft,
-                  void *      mem,
-                  size_t *    lenmem)
+              int         inverse_fft,
+              void *      mem,
+              size_t *    lenmem)
 {
     int i;
-    kfft_cfg st = NULL;
+    kfft_plan st = NULL;
     size_t subsize = 0, memneeded = 0;
 
-    __kfft_config (nfft, inverse_fft, 0, NULL, &subsize);
-    memneeded = sizeof(struct kfftr_state) + subsize + sizeof(kfft_cpx) * ( nfft * 3 / 2);
+    kfft_kconfig (nfft, inverse_fft, 0, NULL, &subsize);
+    memneeded = sizeof(kfft_plan_t) + subsize + sizeof(kfft_cpx) * ( nfft * 3 / 2);
 
     if (lenmem == NULL) {
-        st = (kfft_cfg) KFFT_MALLOC (memneeded);
+        st = (kfft_plan) KFFT_MALLOC (memneeded);
     } else {
         if (*lenmem >= memneeded) {
-            st = (kfft_cfg) mem;
+            st = (kfft_plan) mem;
         }
         *lenmem = memneeded;
     }
     if (!st)
         return NULL;
 
-    st->substate = (__fft_cfg) (st + 1); /*just beyond kfftr_state struct */
+    st->substate = (kfft_kplan_p) (st + 1); /*just beyond kfftr_state struct */
     st->tmpbuf = (kfft_cpx *) (((char *) st->substate) + subsize);
     st->super_twiddles = st->tmpbuf + nfft;
-    __kfft_config(nfft, inverse_fft, 0, st->substate, &subsize);
+    kfft_kconfig(nfft, inverse_fft, 0, st->substate, &subsize);
 
 #if defined (TRACE)
     kfft_trace ("%s: %zu\n", "Memory allocate", memneeded);
@@ -88,9 +88,9 @@ kfft_config  (int         nfft,
 }
 
 void
-kfft (kfft_cfg               st,
-          const kfft_scalar     *timedata,
-          kfft_cpx              *freqdata)
+kfft (kfft_plan             st,
+      const kfft_scalar     *timedata,
+      kfft_cpx              *freqdata)
 {
     /* input buffer timedata is stored row-wise */
     int k,ncfft;
@@ -137,9 +137,9 @@ kfft (kfft_cfg               st,
 }
 
 void
-kffti (kfft_cfg         st,
-           const kfft_cpx    *freqdata,
-           kfft_scalar       *timedata)
+kffti (kfft_plan         st,
+       const kfft_cpx    *freqdata,
+       kfft_scalar       *timedata)
 {
     /* input buffer timedata is stored row-wise */
     int k, ncfft;
@@ -179,7 +179,7 @@ kffti (kfft_cfg         st,
 }
 
 void
-kfft_free (kfft_cfg* cfg) {
+kfft_free (kfft_plan* cfg) {
     if (cfg && *cfg) {
         free(*cfg);
         *cfg = NULL;
