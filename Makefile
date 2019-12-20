@@ -18,7 +18,7 @@ UAutoTestCmpWP=aukfcmpwp
 
 AppAll=${DemoApp} ${UDemo} ${UTestSimple} ${UTestCmp} ${UTestCmpWP} ${UAutoTestCmp} ${UAutoTestCmpWP}
 KfftSrc=kfft.c kfft.h _kfft_guts.h _kfft_bf.h
-KfftObjs=kfft.o kfft_core.o
+KfftObjs=kfft.o kfft_core.o kfft_rader.o
 
 all: lib ${AppAll}
 
@@ -50,11 +50,14 @@ aukfcmpwp: lib
 	${CC} ${CFLAGS} -L. -I. test/test.c -DFFTW_COMPARE -DCHECK_WITHOUT_PLAN -DLOG_AUTO -lkfft -lfftw3 -lm -Wl,-rpath,. -o ${UAutoTestCmpWP}
 
 %.o: %.c
-	 ${CC} ${CFLAGS} ${LIBFLAGS} -fPIC -DUSE_RADER_ALGO -c $< -o $@
+	 ${CC} ${CFLAGS} ${LIBFLAGS} -fPIC -c $< -o $@
 
-lib: kfft.o kfft_core.o
+lib: ${KfftObjs}
 	ar crus libkfft.a ${KfftObjs}
 	gcc -shared ${CFLAGS} $(SHARED) ${KfftObjs}
 
 clean:
 	rm -f kfft*.tar.gz *~ *.pyc kfft*.zip *.a *.o *.so *.s ${AppAll}
+
+format:
+	clang-format -i *.[c,h]

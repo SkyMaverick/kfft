@@ -1,2 +1,2 @@
 #!/bin/sh
-CFLAGS="-Wall -g -O0" make $1
+CFLAGS="${CFLAGS} -Wall -g -O0" make $1

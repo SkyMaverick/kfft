@@ -17,18 +17,22 @@ main (int argc, char* argv[])
 
         size_t memneed = kfft_get_size(argc-1);
 
+        printf ("Create forward config for %d len\n", argc-1);
         kfft_plan  FCfg = kfft_config (argc-1, 0, NULL, NULL);
-
+        
+        printf ("Forward FFT transform\n");
         kfft (FCfg, amp_scalar, FOut);
 
         for (int i = 0; i < argc-1; i++) {
             printf("r%5.3fi%5.3f | ", FOut[i].r, FOut[i].i);
         }
         printf ("\n\n\n");
-
+        
+        printf ("Create inverse config for %d len\n", argc-1);
         kfft_config (argc-1, 1, FCfg, &memneed);
         memset (amp_scalar, 0, argc * sizeof(double));
 
+        printf ("Inverse FFT transform\n");
         kffti (FCfg, FOut, amp_scalar);
 
         for (int i = 0; i < argc-1; i++) {
