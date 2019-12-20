@@ -24,12 +24,11 @@ kfft_ktest (kfft_scalar*   amp_scalar,
              kfft_cpx*      tmp_buffer,
              size_t             size)
 {
-    kfft_plan FCfg = NULL;
 #ifndef CHECK_WITHOUT_PLAN
     clock_t t_start = clock();
 
-    FCfg = kfft_config (size, 0, NULL, NULL);
-    if (FCfg == NULL) {
+    kfft_t FCfg = kfft_config (size, 0, 0, NULL);
+    if (kfft_isnull(FCfg)) {
         assert("Allocation FAIL");
     }
     kfft (FCfg, amp_scalar, tmp_buffer);
@@ -38,8 +37,8 @@ kfft_ktest (kfft_scalar*   amp_scalar,
     return (clock() - t_start) * 1000 / CLOCKS_PER_SEC;
 #else
 
-    FCfg = kfft_config (size, 0, NULL, NULL);
-    if (FCfg == NULL) {
+    kfft_t FCfg = kfft_config (size, 0, 0, NULL);
+    if (kfft_isnull(FCfg)) {
         assert("Allocation FAIL");
     }
     clock_t t_start = clock();
@@ -159,7 +158,7 @@ main (int argc, char* argv[])
             memset (kfft_spectr, 0, size * sizeof(kfft_cpx));
 
             srand( (unsigned)time(NULL) );
-            for (int i = 0; i < size; i++) {
+            for (size_t i = 0; i < size; i++) {
                 amp_scalar[i] = rand();
             }
 

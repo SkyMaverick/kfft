@@ -1,4 +1,6 @@
-#include "_kfft_guts.h"
+#pragma once
+
+#include "kfft_guts.h"
 
 typedef kfft_rplan_t* kfft_rplan;
 

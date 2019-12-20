@@ -18,7 +18,7 @@ main (int argc, char* argv[])
         size_t memneed = kfft_get_size(argc-1);
 
         printf ("Create forward config for %d len\n", argc-1);
-        kfft_plan  FCfg = kfft_config (argc-1, 0, NULL, NULL);
+        kfft_t FCfg = kfft_config (argc-1, 0, 0, NULL);
         
         printf ("Forward FFT transform\n");
         kfft (FCfg, amp_scalar, FOut);

@@ -25,7 +25,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "_kfft_guts.h"
+#include "kfft_guts.h"
 #include "kfft_core.h"
 /* The guts header contains all the multiplication and addition macros that are defined for
  fixed or floating point complex numbers.  It also delares the kf_ internal functions.
@@ -52,27 +52,27 @@ kfft_next_fast_size(int n) {
       TODO  Functionality
 ******************************************************************************** */
 
-kfft_plan
-kfft_config(int nfft, int inverse_fft, void* mem, size_t* lenmem) {
+uintptr_t
+kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
     int i;
-    kfft_plan st = NULL;
+    kfft_plan_t* st = NULL;
     size_t subsize = 0, memneeded = 0;
 
     kfft_kconfig(nfft, inverse_fft, 0, NULL, &subsize);
     memneeded = sizeof(kfft_plan_t) + subsize + sizeof(kfft_cpx) * (nfft * 3 / 2);
 
     if (lenmem == NULL) {
-        st = (kfft_plan)KFFT_MALLOC(memneeded);
+        st = (kfft_plan_t*)KFFT_MALLOC(memneeded);
     } else {
         if (*lenmem >= memneeded) {
-            st = (kfft_plan)mem;
+            st = (kfft_plan_t*)mem;
         }
         *lenmem = memneeded;
     }
     if (!st)
-        return NULL;
+        return 0;
 
-    st->substate = (kfft_kplan_p)(st + 1); /*just beyond kfftr_state struct */
+    st->substate = (kfft_kplan_t*)(st+1); /*just beyond kfftr_state struct */
     st->tmpbuf = (kfft_cpx*)(((char*)st->substate) + subsize);
     st->super_twiddles = st->tmpbuf + nfft;
     kfft_kconfig(nfft, inverse_fft, 0, st->substate, &subsize);
@@ -92,14 +92,16 @@ kfft_config(int nfft, int inverse_fft, void* mem, size_t* lenmem) {
             phase *= -1;
         kf_cexp(st->super_twiddles + i, phase);
     }
-    return st;
+    return (uintptr_t)st;
 }
 
 void
-kfft(kfft_plan st, const kfft_scalar* timedata, kfft_cpx* freqdata) {
+kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
     /* input buffer timedata is stored row-wise */
     int k, ncfft;
     kfft_cpx fpnk, fpk, f1k, f2k, tw, tdc;
+
+    kfft_plan_t* st = (kfft_plan_t*)stu;
 
     if (st->substate->inverse) {
         fprintf(stderr, "kiss fft usage error: improper alloc\n");
@@ -142,9 +144,11 @@ kfft(kfft_plan st, const kfft_scalar* timedata, kfft_cpx* freqdata) {
 }
 
 void
-kffti(kfft_plan st, const kfft_cpx* freqdata, kfft_scalar* timedata) {
+kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
     /* input buffer timedata is stored row-wise */
     int k, ncfft;
+
+    kfft_plan_t* st = (kfft_plan_t*)stu;
 
     if (st->substate->inverse == 0) {
         fprintf(stderr, "kiss fft usage error: improper alloc\n");
@@ -181,10 +185,11 @@ kffti(kfft_plan st, const kfft_cpx* freqdata, kfft_scalar* timedata) {
 }
 
 void
-kfft_free(kfft_plan* cfg) {
+kfft_free(uintptr_t* cfg) {
     if (cfg && *cfg) {
-        free(*cfg);
-        *cfg = NULL;
+        kfft_plan_t* st = (kfft_plan_t*)(*cfg);
+        free(st);
+        *cfg = 0;
     }
 }
 /* ********************************************************************************

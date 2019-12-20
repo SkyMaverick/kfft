@@ -1,6 +1,3 @@
-#pragma once
-
-#include "_kfft_guts.h"
 #include "kfft_core.h"
 #include "kfft_rader.h"
 
@@ -10,9 +7,9 @@
 
 /* perform the butterfly for one stage of a mixed radix FFT */
 static void
-kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_p st, int m, int p) {
+kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m, int p) {
     int u, k, q1, q;
-    kfft_cpx* twiddles = st->twiddles;
+    const kfft_cpx* twiddles = st->twiddles;
     kfft_cpx t;
     int Norig = st->nfft;
 
@@ -62,5 +59,5 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_p st, int
 #if defined(USE_RADER_ALGO)
     }
 #endif /* USE_RADER_ALGO */
-    // FIXME    KFFT_TMP_FREE(scratch);
+    KFFT_TMP_FREE(scratch);
 }

@@ -1,10 +1,11 @@
-#include "_kfft_guts.h"
-#include "_kfft_bf.h"
-#include "_kfft_gen.h"
+#include "kfft_guts.h"
+
+#include "kfft_generic.c"
+#include "kfft_bfly.c"
 
 static void
 kf_work(kfft_cpx* Fout, const kfft_cpx* f, const size_t fstride, int in_stride, int* factors,
-        const kfft_kplan_p st) {
+        const kfft_kplan_t* st) {
     kfft_cpx* Fout_beg = Fout;
     const int p = *factors++; /* the radix  */
     const int m = *factors++; /* stage's fft length/p */
@@ -87,7 +88,7 @@ kf_factor(int n, int* facbuf) {
 }
 
 static inline void
-kfft_kinit(kfft_kplan_p st, int nfft, int inverse_fft, int level) {
+kfft_kinit(kfft_kplan_t* st, int nfft, int inverse_fft, int level) {
     int i;
     kf_factor(nfft, st->factors);
 
@@ -111,16 +112,16 @@ kfft_kinit(kfft_kplan_p st, int nfft, int inverse_fft, int level) {
  * The return value is a contiguous block of memory, allocated with malloc.  As such,
  * It can be freed with free(), rather than a kfft-specific function.
  * */
-kfft_kplan_p
+kfft_kplan_t*
 kfft_kconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem) {
-    kfft_kplan_p st = NULL;
-    size_t memneeded = sizeof(struct kfft_state) + sizeof(kfft_cpx) * (nfft); /* twiddle factors*/
+    kfft_kplan_t* st = NULL;
+    size_t memneeded = sizeof(struct kfft_kstate) + sizeof(kfft_cpx) * (nfft); /* twiddle factors*/
 
     if (lenmem == NULL) {
-        st = (kfft_kplan_p)KFFT_MALLOC(memneeded);
+        st = (kfft_kplan_t*)KFFT_MALLOC(memneeded);
     } else {
         if (mem != NULL && *lenmem >= memneeded)
-            st = (kfft_kplan_p)mem;
+            st = (kfft_kplan_t*)mem;
         *lenmem = memneeded;
     }
     if (st) {
@@ -133,16 +134,16 @@ kfft_kconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem) {
 }
 
 static inline void
-kfft_kstride(kfft_kplan_p st, const kfft_cpx* fin, kfft_cpx* fout, int in_stride) {
+kfft_kstride(kfft_kplan_t* st, const kfft_cpx* fin, kfft_cpx* fout, int in_stride) {
     if (fin == fout) {
         // NOTE: this is not really an in-place FFT algorithm.
         // It just performs an out-of-place FFT into a temp buffer
         kfft_cpx* tmpbuf = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * st->nfft);
 
-        printf("ALLOC temp buffer: %p\n", tmpbuf);
+        printf("ALLOC temp buffer: %p\n", (void*)tmpbuf);
         kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
         memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
-        printf("FREE temp buffer: %p\n", tmpbuf);
+        printf("FREE temp buffer: %p\n", (void*)tmpbuf);
 
         KFFT_TMP_FREE(tmpbuf);
     } else {
@@ -151,6 +152,6 @@ kfft_kstride(kfft_kplan_p st, const kfft_cpx* fin, kfft_cpx* fout, int in_stride
 }
 
 void
-__kfft(kfft_kplan_p cfg, const kfft_cpx* fin, kfft_cpx* fout) {
+__kfft(kfft_kplan_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_kstride(cfg, fin, fout, 1);
 }

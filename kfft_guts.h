@@ -59,8 +59,6 @@ typedef struct kfft_kstate {
     kfft_cpx twiddles[1];
 } kfft_kplan_t;
 
-typedef kfft_kplan_t* kfft_kplan_p;
-
 typedef struct kfft_state {
     kfft_kplan_t* substate;
     kfft_cpx* tmpbuf;

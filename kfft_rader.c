@@ -1,4 +1,5 @@
-#include "_kfft_guts.h"
+#include "kfft_guts.h"
+
 #include "kfft_core.h"
 #include "kfft_rader.h"
 
@@ -72,7 +73,7 @@ kfft_rconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem) {
     if (!st)
         return NULL;
 
-    st->substate = (kfft_kplan_p)(st + 1);
+    st->substate = (kfft_kplan_t*)(st + 1);
     kfft_kconfig(nfft, inverse_fft, level, st->substate, &subsize);
 
 #if defined(TRACE)

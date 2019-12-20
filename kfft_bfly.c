@@ -1,11 +1,7 @@
-#pragma once
-
-#include "_kfft_guts.h"
-
-static void
-kf_bfly2(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_p st, int m) {
+static inline void
+kf_bfly2(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m) {
     kfft_cpx* Fout2;
-    kfft_cpx* tw1 = st->twiddles;
+    const kfft_cpx* tw1 = st->twiddles;
     kfft_cpx t;
     Fout2 = Fout + m;
     do {
@@ -18,9 +14,9 @@ kf_bfly2(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_p st, int m) {
     } while (--m);
 }
 
-static void
-kf_bfly4(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_p st, const size_t m) {
-    kfft_cpx *tw1, *tw2, *tw3;
+static inline void
+kf_bfly4(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, const size_t m) {
+    const kfft_cpx *tw1, *tw2, *tw3;
     kfft_cpx scratch[6];
     size_t k = m;
     const size_t m2 = 2 * m;
@@ -58,11 +54,11 @@ kf_bfly4(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_p st, const size
     } while (--k);
 }
 
-static void
-kf_bfly3(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_p st, size_t m) {
+static inline void
+kf_bfly3(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, size_t m) {
     size_t k = m;
     const size_t m2 = 2 * m;
-    kfft_cpx *tw1, *tw2;
+    const kfft_cpx *tw1, *tw2;
     kfft_cpx scratch[5];
     kfft_cpx epi3;
     epi3 = st->twiddles[fstride * m];
@@ -95,13 +91,13 @@ kf_bfly3(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_p st, size_t m) 
     } while (--k);
 }
 
-static void
-kf_bfly5(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_p st, int m) {
+static inline void
+kf_bfly5(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m) {
     kfft_cpx *Fout0, *Fout1, *Fout2, *Fout3, *Fout4;
     int u;
     kfft_cpx scratch[13];
-    kfft_cpx* twiddles = st->twiddles;
-    kfft_cpx* tw;
+    const kfft_cpx* twiddles = st->twiddles;
+    const kfft_cpx* tw;
     kfft_cpx ya, yb;
     ya = twiddles[fstride * m];
     yb = twiddles[fstride * 2 * m];

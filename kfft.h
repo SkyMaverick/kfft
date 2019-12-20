@@ -1,10 +1,10 @@
-#ifndef KFFT_H
-#define KFFT_H
+#pragma once
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,10 +36,10 @@ typedef struct {
     kfft_scalar i;
 } kfft_cpx;
 
-typedef struct kfft_state* kfft_plan;
+typedef uintptr_t kfft_t;
 
-kfft_plan
-kfft_config(int nfft, int inverse_fft, void* mem, size_t* lenmem);
+kfft_t
+kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem);
 /*
  nfft must be even
 
@@ -47,14 +47,14 @@ kfft_config(int nfft, int inverse_fft, void* mem, size_t* lenmem);
 */
 
 void
-kfft(kfft_plan cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
+kfft(kfft_t cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
 /*
  input timedata has nfft scalar points
  output freqdata has nfft/2+1 complex points
 */
 
 void
-kffti(kfft_plan cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
+kffti(kfft_t cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
 /*
  input freqdata has  nfft/2+1 complex points
  output timedata has nfft scalar points
@@ -64,17 +64,20 @@ int
 kfft_next_fast_size(int n);
 
 void
-kfft_free(kfft_plan* cfg);
+kfft_free(kfft_t* cfg);
 
 static inline size_t
 kfft_get_size(const int n) {
     size_t memneeded = 0;
-    kfft_config(n, 0, NULL, &memneeded);
+    kfft_config(n, 0, 0, &memneeded);
     return memneeded;
+}
+
+static inline int
+kfft_isnull(kfft_t in) {
+    return (in == 0) ? 1 : 0;
 }
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

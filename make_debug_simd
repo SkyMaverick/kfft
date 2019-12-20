@@ -1,2 +1,2 @@
 #!/bin/sh
-CFLAGS="${CFLAGS} -Wall -g -O0 -USE_SIMD" make $1
+CFLAGS="${CFLAGS} -Wall -Wextra -Wpedantic -g -O0 -USE_SIMD" make $1
