@@ -54,7 +54,6 @@ kfft_next_fast_size(int n) {
 
 uintptr_t
 kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
-    int i;
     kfft_plan_t* st = NULL;
     size_t subsize = 0, memneeded = 0;
 
@@ -78,7 +77,7 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
     st->tmpbuf = (kfft_cpx*)(((char*)st->substate) + subsize);
 #ifndef ENABLE_MEMLESS_MODE
     st->super_twiddles = st->tmpbuf + nfft;
-    for (i = 0; i < nfft / 2; ++i) {
+    for (int i = 0; i < nfft / 2; ++i) {
         double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);
         if (inverse_fft)
             phase *= -1;
@@ -90,7 +89,7 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
 
 #if defined(TRACE)
     kfft_trace("%s: ", "Factors");
-    for (i = 0; st->substate->factors[i] != 0; i++) {
+    for (int i = 0; st->substate->factors[i] != 0; i++) {
         kfft_trace("%d ", st->substate->factors[i]);
     }
     kfft_trace("%s\n", "");

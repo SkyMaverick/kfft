@@ -55,7 +55,6 @@ _kfr_find_root(unsigned num) {
 kfft_rplan
 kfft_rconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem) {
     kfft_trace("%s: %d\n", "[RADER] Create RADER plan level", level);
-    int i;
     kfft_rplan st = NULL;
     size_t subsize = 0, memneeded = 0;
 
@@ -79,7 +78,7 @@ kfft_rconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem) {
 #if defined(TRACE)
     kfft_trace("[RADER] %s: %zu\n", "Memory allocate", memneeded);
     kfft_trace("[RADER] %s: ", "Factors");
-    for (i = 0; st->substate->factors[i] != 0; i++) {
+    for (int i = 0; st->substate->factors[i] != 0; i++) {
         kfft_trace("%d ", st->substate->factors[i]);
     }
     kfft_trace("%s\n", "");

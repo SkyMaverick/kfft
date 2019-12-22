@@ -89,7 +89,6 @@ kf_factor(int n, int* facbuf) {
 
 static inline void
 kfft_kinit(kfft_kplan_t* st, int nfft, int inverse_fft, int level) {
-    int i;
     kf_factor(nfft, st->factors);
 
     st->nfft = nfft;
@@ -97,7 +96,7 @@ kfft_kinit(kfft_kplan_t* st, int nfft, int inverse_fft, int level) {
     st->level = level;
 
 #ifndef ENABLE_MEMLESS_MODE
-    for (i = 0; i < nfft; ++i) {
+    for (int i = 0; i < nfft; ++i) {
         kfft_scalar phase = -2 * KFFT_CONST_PI * i / nfft;
         if (st->inverse)
             phase *= -1;
