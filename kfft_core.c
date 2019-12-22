@@ -96,13 +96,14 @@ kfft_kinit(kfft_kplan_t* st, int nfft, int inverse_fft, int level) {
     st->inverse = inverse_fft;
     st->level = level;
 
+#ifndef ENABLE_MEMLESS_MODE
     for (i = 0; i < nfft; ++i) {
-        const kfft_scalar pi = KFFT_CONST_PI;
-        kfft_scalar phase = -2 * pi * i / nfft;
+        kfft_scalar phase = -2 * KFFT_CONST_PI * i / nfft;
         if (st->inverse)
             phase *= -1;
         kf_cexp(st->twiddles + i, phase);
     }
+#endif /* memless */
 }
 
 /*
@@ -143,10 +144,10 @@ kfft_kstride(kfft_kplan_t* st, const kfft_cpx* fin, kfft_cpx* fout, int in_strid
         // It just performs an out-of-place FFT into a temp buffer
         kfft_cpx* tmpbuf = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * st->nfft);
 
-        printf("ALLOC temp buffer: %p\n", (void*)tmpbuf);
+        kfft_trace("ALLOC temp buffer: %p\n", (void*)tmpbuf);
         kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
         memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
-        printf("FREE temp buffer: %p\n", (void*)tmpbuf);
+        kfft_trace("FREE temp buffer: %p\n", (void*)tmpbuf);
 
         KFFT_TMP_FREE(tmpbuf);
     } else {

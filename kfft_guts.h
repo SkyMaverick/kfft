@@ -56,13 +56,17 @@ typedef struct kfft_kstate {
     int inverse;
     int level;
     int factors[2 * MAX_FACTORS];
+#ifndef ENABLE_MEMLESS_MODE
     kfft_cpx twiddles[1];
+#endif /* memless */
 } kfft_kplan_t;
 
 typedef struct kfft_state {
     kfft_kplan_t* substate;
     kfft_cpx* tmpbuf;
+#ifndef ENABLE_MEMLESS_MODE
     kfft_cpx* super_twiddles;
+#endif /* memless */
 #ifdef USE_SIMD
     void* pad;
 #endif
@@ -140,6 +144,24 @@ typedef struct kfft_rstate {
 
 /* a debugging function */
 #define pcpx(c) fprintf(stderr, "%g + %gi\n", (double)((c)->r), (double)((c)->i))
+
+#ifndef ENABLE_MEMLESS_MODE
+    #define TWIDDLE(i, P) P->twiddles[i]
+#else
+static inline kfft_cpx
+get_kernel_twiddle(size_t i, const kfft_kplan_t* P) {
+    kfft_cpx ret;
+
+    kfft_scalar phase = -2 * KFFT_CONST_PI * i / P->nfft;
+    if (P->inverse)
+        phase *= -1;
+
+    kf_cexp(&ret, phase);
+    return ret;
+}
+
+    #define TWIDDLE(i, P) get_kernel_twiddle(i, P)
+#endif /* memless */
 
 #ifdef KFFT_USE_ALLOCA
     // define this to allow use of alloca instead of malloc for temporary buffers

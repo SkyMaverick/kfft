@@ -9,7 +9,7 @@
 static void
 kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m, int p) {
     int u, k, q1, q;
-    const kfft_cpx* twiddles = st->twiddles;
+    //    const kfft_cpx* twiddles = st->twiddles;
     kfft_cpx t;
     int Norig = st->nfft;
 
@@ -50,7 +50,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, in
                     twidx += fstride * k;
                     if (twidx >= Norig)
                         twidx -= Norig;
-                    C_MUL(t, scratch[q], twiddles[twidx]);
+                    C_MUL(t, scratch[q], TWIDDLE(twidx, st) /*twiddles[twidx]*/);
                     C_ADDTO(Fout[k], t);
                 }
                 k += m;

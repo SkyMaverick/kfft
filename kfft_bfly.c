@@ -1,12 +1,12 @@
 static inline void
 kf_bfly2(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m) {
     kfft_cpx* Fout2;
-    const kfft_cpx* tw1 = st->twiddles;
+    size_t twidx = 0;
     kfft_cpx t;
     Fout2 = Fout + m;
     do {
-        C_MUL(t, *Fout2, *tw1);
-        tw1 += fstride;
+        C_MUL(t, *Fout2, TWIDDLE(twidx, st));
+        twidx += fstride;
         C_SUB(*Fout2, *Fout, t);
         C_ADDTO(*Fout, t);
         ++Fout2;
@@ -16,18 +16,18 @@ kf_bfly2(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m) {
 
 static inline void
 kf_bfly4(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, const size_t m) {
-    const kfft_cpx *tw1, *tw2, *tw3;
+    size_t tw1, tw2, tw3;
     kfft_cpx scratch[6];
     size_t k = m;
     const size_t m2 = 2 * m;
     const size_t m3 = 3 * m;
 
-    tw3 = tw2 = tw1 = st->twiddles;
+    tw1 = tw2 = tw3 = 0;
 
     do {
-        C_MUL(scratch[0], Fout[m], *tw1);
-        C_MUL(scratch[1], Fout[m2], *tw2);
-        C_MUL(scratch[2], Fout[m3], *tw3);
+        C_MUL(scratch[0], Fout[m], TWIDDLE(tw1, st));
+        C_MUL(scratch[1], Fout[m2], TWIDDLE(tw2, st));
+        C_MUL(scratch[2], Fout[m3], TWIDDLE(tw3, st));
 
         C_SUB(scratch[5], *Fout, scratch[1]);
         C_ADDTO(*Fout, scratch[1]);
@@ -58,16 +58,16 @@ static inline void
 kf_bfly3(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, size_t m) {
     size_t k = m;
     const size_t m2 = 2 * m;
-    const kfft_cpx *tw1, *tw2;
+    size_t tw1, tw2;
     kfft_cpx scratch[5];
     kfft_cpx epi3;
-    epi3 = st->twiddles[fstride * m];
+    epi3 = TWIDDLE(fstride * m, st);
 
-    tw1 = tw2 = st->twiddles;
+    tw1 = tw2 = 0;
 
     do {
-        C_MUL(scratch[1], Fout[m], *tw1);
-        C_MUL(scratch[2], Fout[m2], *tw2);
+        C_MUL(scratch[1], Fout[m], TWIDDLE(tw1, st));
+        C_MUL(scratch[2], Fout[m2], TWIDDLE(tw2, st));
 
         C_ADD(scratch[3], scratch[1], scratch[2]);
         C_SUB(scratch[0], scratch[1], scratch[2]);
@@ -96,11 +96,9 @@ kf_bfly5(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m) {
     kfft_cpx *Fout0, *Fout1, *Fout2, *Fout3, *Fout4;
     int u;
     kfft_cpx scratch[13];
-    const kfft_cpx* twiddles = st->twiddles;
-    const kfft_cpx* tw;
     kfft_cpx ya, yb;
-    ya = twiddles[fstride * m];
-    yb = twiddles[fstride * 2 * m];
+    ya = TWIDDLE(fstride * m, st);
+    yb = TWIDDLE(fstride * 2 * m, st);
 
     Fout0 = Fout;
     Fout1 = Fout0 + m;
@@ -108,14 +106,13 @@ kf_bfly5(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m) {
     Fout3 = Fout0 + 3 * m;
     Fout4 = Fout0 + 4 * m;
 
-    tw = st->twiddles;
     for (u = 0; u < m; ++u) {
         scratch[0] = *Fout0;
 
-        C_MUL(scratch[1], *Fout1, tw[u * fstride]);
-        C_MUL(scratch[2], *Fout2, tw[2 * u * fstride]);
-        C_MUL(scratch[3], *Fout3, tw[3 * u * fstride]);
-        C_MUL(scratch[4], *Fout4, tw[4 * u * fstride]);
+        C_MUL(scratch[1], *Fout1, TWIDDLE(u * fstride, st));
+        C_MUL(scratch[2], *Fout2, TWIDDLE(2 * u * fstride, st));
+        C_MUL(scratch[3], *Fout3, TWIDDLE(3 * u * fstride, st));
+        C_MUL(scratch[4], *Fout4, TWIDDLE(4 * u * fstride, st));
 
         C_ADD(scratch[7], scratch[1], scratch[4]);
         C_SUB(scratch[10], scratch[1], scratch[4]);

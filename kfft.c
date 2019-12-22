@@ -76,7 +76,16 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
 
     st->substate = (kfft_kplan_t*)(st + 1); /*just beyond kfftr_state struct */
     st->tmpbuf = (kfft_cpx*)(((char*)st->substate) + subsize);
+#ifndef ENABLE_MEMLESS_MODE
     st->super_twiddles = st->tmpbuf + nfft;
+    for (i = 0; i < nfft / 2; ++i) {
+        double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);
+        if (inverse_fft)
+            phase *= -1;
+        kf_cexp(st->super_twiddles + i, phase);
+    }
+#endif /* memless mode */
+
     kfft_kconfig(nfft, inverse_fft, 0, st->substate, &subsize);
 
 #if defined(TRACE)
@@ -85,14 +94,7 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
         kfft_trace("%d ", st->substate->factors[i]);
     }
     kfft_trace("%s\n", "");
-#endif
-
-    for (i = 0; i < nfft / 2; ++i) {
-        double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);
-        if (inverse_fft)
-            phase *= -1;
-        kf_cexp(st->super_twiddles + i, phase);
-    }
+#endif /* TRACE */
     return (uintptr_t)st;
 }
 
@@ -135,7 +137,7 @@ kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
 
         C_ADD(f1k, fpk, fpnk);
         C_SUB(f2k, fpk, fpnk);
-        C_MUL(tw, f2k, st->super_twiddles[k - 1]);
+        C_MUL(tw, f2k, SUPER_TWIDDLE(k - 1, st) /* st->super_twiddles[k - 1] */);
 
         freqdata[k].r = HALF_OF(f1k.r + tw.r);
         freqdata[k].i = HALF_OF(f1k.i + tw.i);
@@ -169,7 +171,7 @@ kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
 
         C_ADD(fek, fk, fnkc);
         C_SUB(tmp, fk, fnkc);
-        C_MUL(fok, tmp, st->super_twiddles[k - 1]);
+        C_MUL(fok, tmp, SUPER_TWIDDLE(k - 1, st) /* st->super_twiddles[k - 1] */);
         C_ADD(st->tmpbuf[k], fek, fok);
         C_SUB(st->tmpbuf[ncfft - k], fek, fok);
 #ifdef USE_SIMD

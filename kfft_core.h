@@ -2,6 +2,22 @@
 
 #include "kfft_guts.h"
 
+#ifndef ENABLE_MEMLESS_MODE
+    #define SUPER_TWIDDLE(i, P) P->super_twiddles[i]
+#else
+static inline kfft_cpx
+get_super_twiddle(int i, kfft_plan_t* P) {
+    kfft_cpx ret;
+
+    double phase = -KFFT_CONST_PI * ((double)(i + 1) / P->substate->nfft + .5);
+    if (P->substate->inverse)
+        phase *= -1;
+    kf_cexp(&ret, phase);
+    return ret;
+}
+    #define SUPER_TWIDDLE(i, P) get_super_twiddle(i, P)
+#endif
+
 kfft_kplan_t*
 kfft_kconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem);
 
