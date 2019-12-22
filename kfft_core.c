@@ -119,9 +119,12 @@ kfft_kconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem) {
 
     if (lenmem == NULL) {
         st = (kfft_kplan_t*)KFFT_MALLOC(memneeded);
+        kfft_trace("Alloc kernel plan: %p. Memneed: %zu\n", (void*)st, memneeded);
     } else {
-        if (mem != NULL && *lenmem >= memneeded)
+        if (mem != NULL && *lenmem >= memneeded) {
             st = (kfft_kplan_t*)mem;
+            kfft_trace("Redefine kernel plan: %p. Memneed: %zu\n", (void*)st, memneeded);
+        }
         *lenmem = memneeded;
     }
     if (st) {

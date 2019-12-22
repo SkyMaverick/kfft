@@ -63,22 +63,23 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
 
     if (lenmem == NULL) {
         st = (kfft_plan_t*)KFFT_MALLOC(memneeded);
+        kfft_trace("Alloc complex plan: %p. Memneed: %zu\n", (void*)st, memneeded);
     } else {
         if (*lenmem >= memneeded) {
             st = (kfft_plan_t*)mem;
+            kfft_trace("Redefine complex plan: %p. Memneed: %zu\n", (void*)st, memneeded);
         }
         *lenmem = memneeded;
     }
     if (!st)
         return 0;
 
-    st->substate = (kfft_kplan_t*)(st+1); /*just beyond kfftr_state struct */
+    st->substate = (kfft_kplan_t*)(st + 1); /*just beyond kfftr_state struct */
     st->tmpbuf = (kfft_cpx*)(((char*)st->substate) + subsize);
     st->super_twiddles = st->tmpbuf + nfft;
     kfft_kconfig(nfft, inverse_fft, 0, st->substate, &subsize);
 
 #if defined(TRACE)
-    kfft_trace("%s: %zu\n", "Memory allocate", memneeded);
     kfft_trace("%s: ", "Factors");
     for (i = 0; st->substate->factors[i] != 0; i++) {
         kfft_trace("%d ", st->substate->factors[i]);
@@ -187,6 +188,7 @@ kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
 void
 kfft_free(uintptr_t* cfg) {
     if (cfg && *cfg) {
+        kfft_trace("Cleanup plan: %p\n", (void*)(*cfg));
         kfft_plan_t* st = (kfft_plan_t*)(*cfg);
         free(st);
         *cfg = 0;
