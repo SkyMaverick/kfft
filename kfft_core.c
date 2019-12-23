@@ -16,6 +16,29 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const size_t fstride, int in_stride, 
                Fout->r, Fout->i, Fout_end->r, Fout_end->i, f->r, f->i, fstride, in_stride);
     kfft_trace("      p - %d | m - %d\n", p, m);
 
+    // #ifdef _OPENMP
+    //     // use openmp extensions at the
+    //     // top-level (not recursive)
+    //     if (fstride==1 && p<=5)
+    //     {
+    //         int k;
+    //
+    //         // execute the p different work units in different threads
+    // #       pragma omp parallel for
+    //         for (k=0;k<p;++k)
+    //             kf_work( Fout +k*m, f+ fstride*in_stride*k,fstride*p,in_stride,factors,st);
+    //         // all threads have joined by this point
+    //
+    //         switch (p) {
+    //             case 2: kf_bfly2(Fout,fstride,st,m); break;
+    //             case 3: kf_bfly3(Fout,fstride,st,m); break;
+    //             case 4: kf_bfly4(Fout,fstride,st,m); break;
+    //             case 5: kf_bfly5(Fout,fstride,st,m); break;
+    //             default: kf_bfly_generic(Fout,fstride,st,m,p); break;
+    //         }
+    //         return;
+    //     }
+    // #endif
     if (m == 1) {
         do {
             *Fout = *f;
@@ -95,7 +118,7 @@ kfft_kinit(kfft_kplan_t* st, int nfft, int inverse_fft, int level) {
     st->inverse = inverse_fft;
     st->level = level;
 
-#ifndef ENABLE_MEMLESS_MODE
+#ifndef KFFT_MEMLESS_MODE
     for (int i = 0; i < nfft; ++i) {
         kfft_scalar phase = -2 * KFFT_CONST_PI * i / nfft;
         if (st->inverse)
@@ -115,7 +138,11 @@ kfft_kinit(kfft_kplan_t* st, int nfft, int inverse_fft, int level) {
 kfft_kplan_t*
 kfft_kconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem) {
     kfft_kplan_t* st = NULL;
+#ifndef KFFT_MEMLESS_MODE
     size_t memneeded = sizeof(struct kfft_kstate) + sizeof(kfft_cpx) * (nfft); /* twiddle factors*/
+#else
+    size_t memneeded = sizeof(struct kfft_kstate); /* twiddle factors*/
+#endif /* memless */
 
     if (lenmem == NULL) {
         st = (kfft_kplan_t*)KFFT_MALLOC(memneeded);

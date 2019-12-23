@@ -73,7 +73,7 @@ kfft_get_size(const int n) {
     return memneeded;
 }
 
-static inline int
+int
 kfft_isnull(kfft_t in) {
     return (in == 0) ? 1 : 0;
 }

@@ -56,10 +56,14 @@ kfft_rplan
 kfft_rconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem) {
     kfft_trace("%s: %d\n", "[RADER] Create RADER plan level", level);
     kfft_rplan st = NULL;
-    size_t subsize = 0, memneeded = 0;
+    size_t subsize = 0;
 
     kfft_kconfig(nfft, inverse_fft, level, NULL, &subsize);
-    memneeded = sizeof(kfft_rplan_t) * 2 + subsize + sizeof(kfft_cpx) * (nfft * 3 / 2);
+#ifndef KFFT_MEMLESS_MODE
+    size_t memneeded = sizeof(kfft_rplan_t) * 2 + subsize + sizeof(kfft_cpx) * (nfft * 3 / 2);
+#else
+    size_t memneeded = sizeof(kfft_rplan_t) * 2 + subsize + sizeof(kfft_cpx) * nfft;
+#endif /* memless */
 
     if (lenmem == NULL) {
         st = (kfft_rplan)KFFT_MALLOC(memneeded);

@@ -2,7 +2,7 @@
 
 #include "kfft_guts.h"
 
-#ifndef ENABLE_MEMLESS_MODE
+#ifndef KFFT_MEMLESS_MODE
     #define SUPER_TWIDDLE(i, P) P->super_twiddles[i]
 #else
 static inline kfft_cpx

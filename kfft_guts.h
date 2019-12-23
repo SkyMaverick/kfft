@@ -56,7 +56,7 @@ typedef struct kfft_kstate {
     int inverse;
     int level;
     int factors[2 * MAX_FACTORS];
-#ifndef ENABLE_MEMLESS_MODE
+#ifndef KFFT_MEMLESS_MODE
     kfft_cpx twiddles[1];
 #endif /* memless */
 } kfft_kplan_t;
@@ -64,7 +64,7 @@ typedef struct kfft_kstate {
 typedef struct kfft_state {
     kfft_kplan_t* substate;
     kfft_cpx* tmpbuf;
-#ifndef ENABLE_MEMLESS_MODE
+#ifndef KFFT_MEMLESS_MODE
     kfft_cpx* super_twiddles;
 #endif /* memless */
 #ifdef USE_SIMD
@@ -145,7 +145,7 @@ typedef struct kfft_rstate {
 /* a debugging function */
 #define pcpx(c) fprintf(stderr, "%g + %gi\n", (double)((c)->r), (double)((c)->i))
 
-#ifndef ENABLE_MEMLESS_MODE
+#ifndef KFFT_MEMLESS_MODE
     #define TWIDDLE(i, P) P->twiddles[i]
 #else
 static inline kfft_cpx

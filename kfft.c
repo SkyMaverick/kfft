@@ -55,10 +55,14 @@ kfft_next_fast_size(int n) {
 uintptr_t
 kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
     kfft_plan_t* st = NULL;
-    size_t subsize = 0, memneeded = 0;
+    size_t subsize = 0;
 
     kfft_kconfig(nfft, inverse_fft, 0, NULL, &subsize);
-    memneeded = sizeof(kfft_plan_t) + subsize + sizeof(kfft_cpx) * (nfft * 3 / 2);
+#ifndef KFFT_MEMLESS_MODE
+    size_t memneeded = sizeof(kfft_plan_t) + subsize + sizeof(kfft_cpx) * (nfft * 3 / 2);
+#else
+    size_t memneeded = sizeof(kfft_plan_t) + subsize + (sizeof(kfft_cpx) * nfft);
+#endif /* memless */
 
     if (lenmem == NULL) {
         st = (kfft_plan_t*)KFFT_MALLOC(memneeded);
@@ -75,7 +79,7 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
 
     st->substate = (kfft_kplan_t*)(st + 1); /*just beyond kfftr_state struct */
     st->tmpbuf = (kfft_cpx*)(((char*)st->substate) + subsize);
-#ifndef ENABLE_MEMLESS_MODE
+#ifndef KFFT_MEMLESS_MODE
     st->super_twiddles = st->tmpbuf + nfft;
     for (int i = 0; i < nfft / 2; ++i) {
         double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);
