@@ -38,6 +38,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MAX_FACTORS 32
 #define MAX_ROOTS 32
+#define MAX_BFLY_LEVEL 5
 
 #ifndef USE_SYSMATH
     #define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
@@ -57,6 +58,9 @@ typedef struct kfft_kstate {
     int level;
     int factors[2 * MAX_FACTORS];
 #ifndef KFFT_MEMLESS_MODE
+    #ifdef KFFT_RADER_ALGO
+    int roots[3 * MAX_ROOTS];
+    #endif
     kfft_cpx twiddles[1];
 #endif /* memless */
 } kfft_kplan_t;
@@ -71,10 +75,6 @@ typedef struct kfft_state {
     void* pad;
 #endif
 } kfft_plan_t;
-
-typedef struct kfft_rstate {
-    kfft_kplan_t* substate;
-} kfft_rplan_t;
 
 /*
   Explanation of macros dealing with complex math:

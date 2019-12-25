@@ -97,6 +97,13 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
         kfft_trace("%d ", st->substate->factors[i]);
     }
     kfft_trace("%s\n", "");
+    #if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
+    kfft_trace("%s: ", "Prime roots");
+    for (int i = 0; st->substate->roots[i] != 0; i++) {
+        kfft_trace("%d ", st->substate->roots[i]);
+    }
+    #endif
+    kfft_trace("%s\n", "");
 #endif /* TRACE */
     return (uintptr_t)st;
 }

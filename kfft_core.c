@@ -3,6 +3,62 @@
 #include "kfft_generic.c"
 #include "kfft_bfly.c"
 
+#ifdef KFFT_RADER_ALGO
+static inline unsigned
+_kfr_power(unsigned x, unsigned y, unsigned m) {
+    if (y == 0)
+        return 1;
+    unsigned p = _kfr_power(x, y / 2, m) % m;
+    p = (p * p) % m;
+
+    return (y % 2 == 0) ? p : (x * p) % m;
+}
+
+static unsigned
+_kfr_gcd(unsigned a, unsigned b) {
+    if (a == 0)
+        return b;
+    return _kfr_gcd(b % a, a);
+}
+
+// WARNING in kfft num - always prime. Don't check this
+unsigned
+kfft_prime_root(unsigned num) {
+    unsigned phi = num - 1;
+    unsigned n = phi;
+
+    unsigned primes[MAX_ROOTS];
+    unsigned count = 0;
+
+    for (unsigned i = 2; i * i <= n; i++) {
+        if (n % i == 0) {
+            primes[count++] = i;
+            while (n % i == 0)
+                n /= i;
+        }
+    }
+    if (n > 1)
+        primes[count++] = n;
+
+    for (unsigned res = 2; res <= num; ++res) {
+        int ok = 1;
+        for (unsigned i = 0; count > i && ok; ++i) {
+            if (_kfr_power(res, phi / primes[i], num) == 1)
+                ok = 0;
+        }
+        if (ok)
+            return res;
+    }
+    return 0;
+}
+
+unsigned
+kfft_primei_root(unsigned a, unsigned m) {
+    return (_kfr_gcd(a, m) != 1) ? 0 : _kfr_power(a, m - 2, m);
+}
+
+#endif /* KFFT_RADER_ALGO */
+
 static void
 kf_work(kfft_cpx* Fout, const kfft_cpx* f, const size_t fstride, int in_stride, int* factors,
         const kfft_kplan_t* st) {
@@ -16,29 +72,6 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const size_t fstride, int in_stride, 
                Fout->r, Fout->i, Fout_end->r, Fout_end->i, f->r, f->i, fstride, in_stride);
     kfft_trace("      p - %d | m - %d\n", p, m);
 
-    // #ifdef _OPENMP
-    //     // use openmp extensions at the
-    //     // top-level (not recursive)
-    //     if (fstride==1 && p<=5)
-    //     {
-    //         int k;
-    //
-    //         // execute the p different work units in different threads
-    // #       pragma omp parallel for
-    //         for (k=0;k<p;++k)
-    //             kf_work( Fout +k*m, f+ fstride*in_stride*k,fstride*p,in_stride,factors,st);
-    //         // all threads have joined by this point
-    //
-    //         switch (p) {
-    //             case 2: kf_bfly2(Fout,fstride,st,m); break;
-    //             case 3: kf_bfly3(Fout,fstride,st,m); break;
-    //             case 4: kf_bfly4(Fout,fstride,st,m); break;
-    //             case 5: kf_bfly5(Fout,fstride,st,m); break;
-    //             default: kf_bfly_generic(Fout,fstride,st,m,p); break;
-    //         }
-    //         return;
-    //     }
-    // #endif
     if (m == 1) {
         do {
             *Fout = *f;
@@ -82,10 +115,12 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const size_t fstride, int in_stride, 
     p[i] * m[i] = m[i-1]
     m0 = n                  */
 static void
-kf_factor(int n, int* facbuf) {
-    int p = 4;
+kf_factor(int n, int* facbuf, unsigned* root_buf) {
+    unsigned p = 4;
     double floor_sqrt;
     floor_sqrt = floor(sqrt((double)n));
+
+    unsigned* rbufs = root_buf;
 
     /*factor out powers of 4, powers of 2, then any remaining primes */
     do {
@@ -104,6 +139,25 @@ kf_factor(int n, int* facbuf) {
             if (p > floor_sqrt)
                 p = n; /* no more factors, skip to end */
         }
+#if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
+        if (p > MAX_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
+            unsigned* root_buf = rbufs;
+            while (*root_buf != p) {
+                if (*root_buf == 0) {
+                    *root_buf = p;
+
+                    unsigned root = kfft_prime_root(p);
+                    *(root_buf + 1) = root;
+                    *(root_buf + 2) = kfft_primei_root(p, root);
+
+                    break;
+                }
+                root_buf +=3;
+            }
+        }
+#else
+        (void)root_buf; // fake operation for disable warning
+#endif /* RADER and not MEMLESS */
         n /= p;
         *facbuf++ = p;
         *facbuf++ = n;
@@ -112,8 +166,11 @@ kf_factor(int n, int* facbuf) {
 
 static inline void
 kfft_kinit(kfft_kplan_t* st, int nfft, int inverse_fft, int level) {
-    kf_factor(nfft, st->factors);
-
+#if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
+    kf_factor(nfft, st->factors, st->roots);
+#else
+    kf_factor(nfft, st->factors, NULL);
+#endif
     st->nfft = nfft;
     st->inverse = inverse_fft;
     st->level = level;

@@ -18,6 +18,12 @@ get_super_twiddle(int i, kfft_plan_t* P) {
     #define SUPER_TWIDDLE(i, P) get_super_twiddle(i, P)
 #endif
 
+unsigned
+kfft_prime_root(unsigned num);
+
+unsigned
+kfft_primei_root(unsigned a, unsigned m);
+
 kfft_kplan_t*
 kfft_kconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem);
 
