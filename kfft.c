@@ -31,10 +31,10 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  fixed or floating point complex numbers.  It also delares the kf_ internal functions.
  */
 
-int
-kfft_next_fast_size(int n) {
+uint32_t
+kfft_next_fast_size(uint32_t n) {
     while (1) {
-        int m = n;
+        uint32_t m = n;
         while ((m % 2) == 0)
             m /= 2;
         while ((m % 3) == 0)
@@ -53,7 +53,7 @@ kfft_next_fast_size(int n) {
 ******************************************************************************** */
 
 uintptr_t
-kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
+kfft_config(uint32_t nfft, bool inverse_fft, uintptr_t mem, size_t* lenmem) {
     kfft_plan_t* st = NULL;
     size_t subsize = 0;
 
@@ -81,7 +81,7 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
     st->tmpbuf = (kfft_cpx*)(((char*)st->substate) + subsize);
 #ifndef KFFT_MEMLESS_MODE
     st->super_twiddles = st->tmpbuf + nfft;
-    for (int i = 0; i < nfft / 2; ++i) {
+    for (uint32_t i = 0; i < nfft / 2; ++i) {
         double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);
         if (inverse_fft)
             phase *= -1;
@@ -93,7 +93,7 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
 
 #if defined(TRACE)
     kfft_trace("%s: ", "Factors");
-    for (int i = 0; st->substate->factors[i] != 0; i++) {
+    for (uint32_t i = 0; st->substate->factors[i] != 0; i++) {
         kfft_trace("%d ", st->substate->factors[i]);
     }
     kfft_trace("%s\n", "");
@@ -111,7 +111,7 @@ kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem) {
 void
 kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
     /* input buffer timedata is stored row-wise */
-    int k, ncfft;
+    uint32_t k, ncfft;
     kfft_cpx fpnk, fpk, f1k, f2k, tw, tdc;
 
     kfft_plan_t* st = (kfft_plan_t*)stu;
@@ -123,7 +123,7 @@ kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
 
     ncfft = st->substate->nfft;
 
-    for (int i = 0; i < ncfft; i++) {
+    for (uint32_t i = 0; i < ncfft; i++) {
         st->tmpbuf[i].r = timedata[i];
         st->tmpbuf[i].i = 0;
     }
@@ -159,7 +159,7 @@ kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
 void
 kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
     /* input buffer timedata is stored row-wise */
-    int k, ncfft;
+    uint32_t k, ncfft;
 
     kfft_plan_t* st = (kfft_plan_t*)stu;
 
@@ -192,7 +192,7 @@ kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
     }
     __kfft(st->substate, st->tmpbuf, st->tmpbuf);
 
-    for (int i = 0; i < ncfft; i++) {
+    for (uint32_t i = 0; i < ncfft; i++) {
         timedata[i] = S_DIV(st->tmpbuf[i].r, (2 * st->substate->nfft));
     }
 }

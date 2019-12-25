@@ -1,3 +1,5 @@
+#if defined(KFFT_RADER_ALGO)
+
 #include "kfft_guts.h"
 
 #include "kfft_core.h"
@@ -48,7 +50,7 @@
 // }
 //
 void
-kf_rader(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m, int p) {
+kf_rader(kfft_cpx* Fout, const uint32_t fstride, const kfft_kplan_t* st, uint32_t m, uint32_t p) {
     kfft_cpx x0 = {.r = Fout->r, .i = Fout->i}; // save first element value
     kfft_cpx* X0 = Fout;                        // remember first element
     unsigned pr, ipr;
@@ -58,7 +60,7 @@ kf_rader(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m, in
     // select prevalte root / inverse
     const unsigned* roots = st->roots;
     while (*roots) {
-        if (*roots == p) {      //FIXME
+        if (*roots == p) { // FIXME
             pr = *(roots + 1);
             ipr = *(roots + 2);
         }
@@ -68,9 +70,9 @@ kf_rader(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m, in
     pr = kfft_prime_root(p);
     ipr = kfft_primei_root(pr, p);
 #endif
-    size_t nfft = p - 1;
+    uint32_t nfft = p - 1;
 
-    kfft_trace("[RADER] pr - %d | ipr - %d\n", pr, ipr);
+    kfft_trace("[RADER] pr - %u | ipr - %u\n", pr, ipr);
 }
 
 // void
@@ -80,3 +82,5 @@ kf_rader(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m, in
 //         *cfg = NULL;
 //     }
 // }
+
+#endif /* KFFT_READER_ALGO */

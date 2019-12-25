@@ -5,6 +5,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,7 +40,7 @@ typedef struct {
 typedef uintptr_t kfft_t;
 
 kfft_t
-kfft_config(int nfft, int inverse_fft, uintptr_t mem, size_t* lenmem);
+kfft_config(uint32_t nfft, bool inverse_fft, uintptr_t mem, size_t* lenmem);
 /*
  nfft must be even
 
@@ -60,22 +61,22 @@ kffti(kfft_t cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
  output timedata has nfft scalar points
 */
 
-int
-kfft_next_fast_size(int n);
+uint32_t
+kfft_next_fast_size(uint32_t n);
 
 void
 kfft_free(kfft_t* cfg);
 
-static inline size_t
-kfft_get_size(const int n) {
+static inline uint32_t
+kfft_get_size(const uint32_t n) {
     size_t memneeded = 0;
     kfft_config(n, 0, 0, &memneeded);
     return memneeded;
 }
 
-static inline int
+static inline bool
 kfft_isnull(kfft_t in) {
-    return (in == 0) ? 1 : 0;
+    return (in == 0) ? true : false;
 }
 
 #ifdef __cplusplus

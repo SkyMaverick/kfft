@@ -6,7 +6,7 @@
     #define SUPER_TWIDDLE(i, P) P->super_twiddles[i]
 #else
 static inline kfft_cpx
-get_super_twiddle(int i, kfft_plan_t* P) {
+get_super_twiddle(uint32_t i, kfft_plan_t* P) {
     kfft_cpx ret;
 
     kfft_scalar phase = -KFFT_CONST_PI * ((kfft_scalar)(i + 1) / P->substate->nfft + .5);
@@ -18,14 +18,14 @@ get_super_twiddle(int i, kfft_plan_t* P) {
     #define SUPER_TWIDDLE(i, P) get_super_twiddle(i, P)
 #endif
 
-unsigned
-kfft_prime_root(unsigned num);
+uint32_t
+kfft_prime_root(uint32_t num);
 
-unsigned
-kfft_primei_root(unsigned a, unsigned m);
+uint32_t
+kfft_primei_root(uint32_t a, uint32_t m);
 
 kfft_kplan_t*
-kfft_kconfig(int nfft, int inverse_fft, int level, void* mem, size_t* lenmem);
+kfft_kconfig(uint32_t nfft, bool inverse_fft, uint8_t level, void* mem, size_t* lenmem);
 
 void
 __kfft(kfft_kplan_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);

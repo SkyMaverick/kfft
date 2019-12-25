@@ -4,6 +4,7 @@
 *.swp
 *.s
 *.s~
+*.log
 ~*
 
 aukfcmp

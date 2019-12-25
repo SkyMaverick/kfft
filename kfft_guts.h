@@ -53,13 +53,13 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 typedef struct kfft_kstate {
-    int nfft;
-    int inverse;
-    int level;
-    int factors[2 * MAX_FACTORS];
+    uint32_t nfft;
+    bool inverse;
+    uint8_t level;
+    uint32_t factors[2 * MAX_FACTORS];
 #ifndef KFFT_MEMLESS_MODE
     #ifdef KFFT_RADER_ALGO
-    int roots[3 * MAX_ROOTS];
+    uint32_t roots[3 * MAX_ROOTS];
     #endif
     kfft_cpx twiddles[1];
 #endif /* memless */
@@ -149,7 +149,7 @@ typedef struct kfft_state {
     #define TWIDDLE(i, P) P->twiddles[i]
 #else
 static inline kfft_cpx
-get_kernel_twiddle(size_t i, const kfft_kplan_t* P) {
+get_kernel_twiddle(uint32_t i, const kfft_kplan_t* P) {
     kfft_cpx ret;
 
     kfft_scalar phase = -2 * KFFT_CONST_PI * i / P->nfft;
