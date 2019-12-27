@@ -165,7 +165,7 @@ kf_factor(uint32_t n, uint32_t* facbuf, uint32_t* root_buf) {
 }
 
 static inline void
-kfft_kinit(kfft_kplan_t* st, uint32_t nfft, bool inverse_fft, uint8_t level) {
+kfft_kinit(kfft_kplan_t* st, uint32_t nfft, bool inverse_fft) {
 #if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
     kf_factor(nfft, st->factors, st->roots);
 #else
@@ -173,7 +173,6 @@ kfft_kinit(kfft_kplan_t* st, uint32_t nfft, bool inverse_fft, uint8_t level) {
 #endif
     st->nfft = nfft;
     st->inverse = inverse_fft;
-    st->level = level;
 
 #ifndef KFFT_MEMLESS_MODE
     for (uint32_t i = 0; i < nfft; ++i) {
@@ -193,7 +192,7 @@ kfft_kinit(kfft_kplan_t* st, uint32_t nfft, bool inverse_fft, uint8_t level) {
  * It can be freed with free(), rather than a kfft-specific function.
  * */
 kfft_kplan_t*
-kfft_kconfig(uint32_t nfft, bool inverse_fft, uint8_t level, void* mem, size_t* lenmem) {
+kfft_kconfig(uint32_t nfft, bool inverse_fft, void* mem, size_t* lenmem) {
     kfft_kplan_t* st = NULL;
 #ifndef KFFT_MEMLESS_MODE
     size_t memneeded = sizeof(struct kfft_kstate) + sizeof(kfft_cpx) * (nfft); /* twiddle factors*/
@@ -212,7 +211,7 @@ kfft_kconfig(uint32_t nfft, bool inverse_fft, uint8_t level, void* mem, size_t* 
         *lenmem = memneeded;
     }
     if (st) {
-        kfft_kinit(st, nfft, inverse_fft, level);
+        kfft_kinit(st, nfft, inverse_fft);
 
         kfft_trace("Config: nfft - %u | inv - %d | lvl - %d\n", st->nfft, st->inverse, st->level);
     }

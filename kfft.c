@@ -57,7 +57,7 @@ kfft_config(uint32_t nfft, bool inverse_fft, uintptr_t mem, size_t* lenmem) {
     kfft_plan_t* st = NULL;
     size_t subsize = 0;
 
-    kfft_kconfig(nfft, inverse_fft, 0, NULL, &subsize);
+    kfft_kconfig(nfft, inverse_fft, NULL, &subsize);
 #ifndef KFFT_MEMLESS_MODE
     size_t memneeded = sizeof(kfft_plan_t) + subsize + sizeof(kfft_cpx) * (nfft * 3 / 2);
 #else
@@ -89,7 +89,7 @@ kfft_config(uint32_t nfft, bool inverse_fft, uintptr_t mem, size_t* lenmem) {
     }
 #endif /* memless mode */
 
-    kfft_kconfig(nfft, inverse_fft, 0, st->substate, &subsize);
+    kfft_kconfig(nfft, inverse_fft, st->substate, &subsize);
 
 #if defined(TRACE)
     kfft_trace("%s: ", "Factors");
