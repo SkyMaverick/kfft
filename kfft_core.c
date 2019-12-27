@@ -214,8 +214,7 @@ kfft_kconfig(uint32_t nfft, bool inverse_fft, uint8_t level, void* mem, size_t* 
     if (st) {
         kfft_kinit(st, nfft, inverse_fft, level);
 
-        kfft_trace("Config: nfft - %u | inv - %d | lvl - %d", st->nfft, st->inverse, st->level);
-        kfft_trace("        memory - %zu\n", memneeded);
+        kfft_trace("Config: nfft - %u | inv - %d | lvl - %d\n", st->nfft, st->inverse, st->level);
     }
     return st;
 }
