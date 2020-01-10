@@ -38,7 +38,9 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MAX_FACTORS 32
 #define MAX_ROOTS 32
+
 #define MAX_BFLY_LEVEL 5
+#define MAX_PLAN_LEVEL 3
 
 #ifndef USE_SYSMATH
     #define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
@@ -49,21 +51,43 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* e.g. an fft of length 128 has 4 factors
  as far as kissfft is concerned
- 4*4*4*2
- */
+ 4*4*4*2 */
+typedef struct kfft_krdr {
+    uint32_t nfft; // original sequence lenght
+
+    //    uint32_t root;      // prime root
+    //    uint32_t inv_root;
+    //
+    size_t pcount;              // primes count
+    uint32_t primes[MAX_ROOTS]; // prime values
+
+    struct kfft_kstate* r_plans[MAX_ROOTS]; // subplan pointers for all primes
+    uint32_t* idx;                          // shuffle indexes array
+} kfft_rdr_t;
+
+static inline size_t
+kfft_rdr_size(size_t n) {
+    return sizeof(kfft_rdr_t) + sizeof(uint32_t) * n;
+}
 
 typedef struct kfft_kstate {
-    uint32_t nfft;
-    bool inverse;
-    uint8_t level;
-    uint32_t factors[2 * MAX_FACTORS];
-#ifndef KFFT_MEMLESS_MODE
-    #ifdef KFFT_RADER_ALGO
-    uint32_t roots[3 * MAX_ROOTS];
-    #endif
-    kfft_cpx twiddles[1];
-#endif /* memless */
+    size_t msize;   // memory size
+    uint32_t nfft;  // sequence lenght
+    bool inverse;   // inverse flag
+    uint32_t level; // plan level
+
+    size_t fcount;                     // factors count
+    uint32_t factors[2 * MAX_FACTORS]; // factor values
+    kfft_rdr_t rdr;                    // rader solver
+
+    kfft_cpx twiddles[1]; // twiddles
 } kfft_kplan_t;
+
+static inline size_t
+kfft_kplan_size(uint32_t n) {
+    // structure + (twiddles * nfft)
+    return sizeof(kfft_kplan_t) + sizeof(kfft_cpx) * n;
+}
 
 typedef struct kfft_state {
     kfft_kplan_t* substate;
@@ -71,7 +95,7 @@ typedef struct kfft_state {
 #ifndef KFFT_MEMLESS_MODE
     kfft_cpx* super_twiddles;
 #endif /* memless */
-#ifdef USE_SIMD
+#ifdef KFFT_USE_SIMD
     void* pad;
 #endif
 } kfft_plan_t;
@@ -87,6 +111,12 @@ typedef struct kfft_state {
 
 #define S_MUL(a, b) ((a) * (b))
 #define S_DIV(a, b) ((a) / (b))
+
+#define C_CPY(m, a)                                                                                \
+    do {                                                                                           \
+        m.r = a.r;                                                                                 \
+        m.i = a.i;                                                                                 \
+    } while (0)
 
 #define C_MUL(m, a, b)                                                                             \
     do {                                                                                           \
@@ -126,7 +156,7 @@ typedef struct kfft_state {
         (res).i -= (a).i;                                                                          \
     } while (0)
 
-#if defined(USE_SIMD)
+#if defined(KFFT_USE_SIMD)
     #define KFFT_COS(phase) _mm_set1_ps(cos(phase))
     #define KFFT_SIN(phase) _mm_set1_ps(sin(phase))
     #define HALF_OF(x) ((x)*_mm_set1_ps(.5))
@@ -172,13 +202,43 @@ get_kernel_twiddle(uint32_t i, const kfft_kplan_t* P) {
     #include <alloca.h>
     #define KFFT_TMP_ALLOC(nbytes) alloca(nbytes)
     #define KFFT_TMP_FREE(ptr)
+
+static inline void*
+zmemory(void* mem, size_t nmem) {
+    for (size_t i = 0; i < nmem; i++)
+        ((char*)(mem))[i] = 0;
+    return mem;
+}
+    #define KFFT_TMP_ZEROMEM(M, X) zmemory((M), (X))
 #else
     #define KFFT_TMP_ALLOC(nbytes) KFFT_MALLOC(nbytes)
     #define KFFT_TMP_FREE(ptr) KFFT_FREE(ptr)
-#endif
+    #define KFFT_TMP_ZEROMEM(M, X) KFFT_ZEROMEM(M, X)
+#endif /* KFFT_USE_ALLOCA */
 
-#if (defined TRACE)
+#define KFFT_TMP_FREE_NULL(X)                                                                      \
+    do {                                                                                           \
+        KFFT_TMP_FREE(X);                                                                          \
+        X = NULL;                                                                                  \
+    } while (0)
+
+#if (defined KFFT_TRACE)
     #define kfft_trace(fmt, ...) fprintf(stdout, fmt, __VA_ARGS__)
+    #define kfft_sztrace(msg, X)                                                                   \
+        do {                                                                                       \
+            register double nmem = (double)(X);                                                    \
+            if (nmem < 0x0400) {                                                                   \
+                kfft_trace(msg "%4.2f byte\n", nmem);                                              \
+            } else if ((nmem /= 0x0400) < 0x0400) {                                                \
+                kfft_trace(msg "%4.2f Kbyte\n", nmem);                                             \
+            } else if ((nmem /= 0x0400) < 0x0400) {                                                \
+                kfft_trace(msg "%4.2f Mbyte\n", nmem);                                             \
+            } else if ((nmem /= 0x0400) < 0x0400) {                                                \
+                kfft_trace(msg "%4.2f Gbyte\n", nmem);                                             \
+            }                                                                                      \
+        } while (0)
+
 #else
     #define kfft_trace(fmt, ...) // noop
+    #define kfft_sztrace(msg, X) // noop
 #endif

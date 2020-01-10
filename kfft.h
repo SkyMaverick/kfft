@@ -11,15 +11,25 @@
 extern "C" {
 #endif
 
-#ifdef USE_SIMD
+// clang-format off
+#ifdef KFFT_USE_SIMD
     #include <xmmintrin.h>
     #define kfft_scalar __m128
+    
     #define KFFT_MALLOC(nbytes) _mm_malloc(nbytes, 16)
     #define KFFT_FREE _mm_free
 #else
-    #define KFFT_MALLOC(X) malloc(X)
+    #define KFFT_MALLOC(X) calloc(1,(X))
     #define KFFT_FREE(X) free(X)
 #endif
+#define KFFT_ZEROMEM(M,X)  memset((M),0,(X))
+// clang-format on
+
+#define KFFT_FREE_NULL(X)                                                                          \
+    do {                                                                                           \
+        KFFT_FREE(X);                                                                              \
+        X = NULL;                                                                                  \
+    } while (0)
 
 #ifndef kfft_scalar
     #define kfft_scalar double

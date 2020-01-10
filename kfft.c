@@ -57,7 +57,7 @@ kfft_config(uint32_t nfft, bool inverse_fft, uintptr_t mem, size_t* lenmem) {
     kfft_plan_t* st = NULL;
     size_t subsize = 0;
 
-    kfft_kconfig(nfft, inverse_fft, NULL, &subsize);
+    kfft_kconfig(nfft, inverse_fft, 0, NULL, &subsize);
 #ifndef KFFT_MEMLESS_MODE
     size_t memneeded = sizeof(kfft_plan_t) + subsize + sizeof(kfft_cpx) * (nfft * 3 / 2);
 #else
@@ -65,12 +65,14 @@ kfft_config(uint32_t nfft, bool inverse_fft, uintptr_t mem, size_t* lenmem) {
 #endif /* memless */
 
     if (lenmem == NULL) {
+        kfft_sztrace("KFFT real plan size: ", memneeded);
         st = (kfft_plan_t*)KFFT_MALLOC(memneeded);
-        kfft_trace("Alloc complex plan: %p. Memneed: %zu\n", (void*)st, memneeded);
+        kfft_trace("Alloc real plan: %p\n", (void*)st);
     } else {
         if (*lenmem >= memneeded) {
+            kfft_sztrace("KFFT real plan size: ", memneeded);
             st = (kfft_plan_t*)mem;
-            kfft_trace("Redefine complex plan: %p. Memneed: %zu\n", (void*)st, memneeded);
+            kfft_trace("Redefine real plan: %p\n", (void*)st);
         }
         *lenmem = memneeded;
     }
@@ -89,9 +91,9 @@ kfft_config(uint32_t nfft, bool inverse_fft, uintptr_t mem, size_t* lenmem) {
     }
 #endif /* memless mode */
 
-    kfft_kconfig(nfft, inverse_fft, st->substate, &subsize);
+    kfft_kconfig(nfft, inverse_fft, 0, st->substate, &subsize);
 
-#if defined(TRACE)
+#if defined(KFFT_TRACE)
     kfft_trace("%s: ", "Factors");
     for (uint32_t i = 0; st->substate->factors[i] != 0; i++) {
         kfft_trace("%d ", st->substate->factors[i]);
@@ -99,8 +101,8 @@ kfft_config(uint32_t nfft, bool inverse_fft, uintptr_t mem, size_t* lenmem) {
     kfft_trace("%s\n", "");
     #if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
     kfft_trace("%s: ", "Prime roots");
-    for (int i = 0; st->substate->roots[i] != 0; i++) {
-        kfft_trace("%d ", st->substate->roots[i]);
+    for (int i = 0; st->substate->rdr.primes[i] != 0; i++) {
+        kfft_trace("%d ", st->substate->rdr.primes[i]);
     }
     #endif
     kfft_trace("%s\n", "");
@@ -134,7 +136,7 @@ kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
     tdc.i = st->tmpbuf[0].i;
     freqdata[0].r = tdc.r + tdc.i;
     freqdata[ncfft].r = tdc.r - tdc.i;
-#ifdef USE_SIMD
+#ifdef KFFT_USE_SIMD
     freqdata[ncfft].i = freqdata[0].i = _mm_set1_ps(0);
 #else
     freqdata[ncfft].i = freqdata[0].i = 0;
@@ -184,7 +186,7 @@ kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
         C_MUL(fok, tmp, SUPER_TWIDDLE(k - 1, st) /* st->super_twiddles[k - 1] */);
         C_ADD(st->tmpbuf[k], fek, fok);
         C_SUB(st->tmpbuf[ncfft - k], fek, fok);
-#ifdef USE_SIMD
+#ifdef KFFT_USE_SIMD
         st->tmpbuf[ncfft - k].i *= _mm_set1_ps(-1.0);
 #else
         st->tmpbuf[ncfft - k].i *= -1;

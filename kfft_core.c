@@ -4,16 +4,6 @@
 #include "kfft_bfly.c"
 
 #ifdef KFFT_RADER_ALGO
-static inline uint32_t
-_kfr_power(uint32_t x, uint32_t y, uint32_t m) {
-    if (y == 0)
-        return 1;
-    uint64_t p = _kfr_power(x, y / 2, m) % m;
-    p = (p * p) % m;
-
-    return (y % 2 == 0) ? (uint32_t)p : (uint32_t)((x * p) % m);
-}
-
 static uint32_t
 _kfr_gcd(uint32_t a, uint32_t b) {
     if (a == 0)
@@ -114,13 +104,15 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
     where
     p[i] * m[i] = m[i-1]
     m0 = n                  */
-static void
-kf_factor(uint32_t n, uint32_t* facbuf, uint32_t* root_buf) {
+static inline void
+kf_factor(kfft_kplan_t* st) {
     uint32_t p = 4;
-    double floor_sqrt;
-    floor_sqrt = floor(sqrt((double)n));
+    uint32_t n = st->nfft;
+    uint32_t* facbuf = st->factors;
+    uint32_t* pbuf = st->rdr.primes;
 
-    uint32_t* rbufs = root_buf;
+    double floor_sqrt;
+    floor_sqrt = floor(sqrt((double)st->nfft));
 
     /*factor out powers of 4, powers of 2, then any remaining primes */
     do {
@@ -140,24 +132,13 @@ kf_factor(uint32_t n, uint32_t* facbuf, uint32_t* root_buf) {
                 p = n; /* no more factors, skip to end */
         }
 #if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
-        if (p > MAX_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
-            uint32_t* root_buf = rbufs;
-            while (*root_buf != p) {
-                if (*root_buf == 0) {
-                    *root_buf = p;
-
-                    uint32_t root = kfft_prime_root(p);
-                    *(root_buf + 1) = root;
-                    *(root_buf + 2) = kfft_primei_root(p, root);
-
-                    break;
-                }
-                root_buf += 3;
-            }
+        if (st->level < MAX_PLAN_LEVEL && p > MAX_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
+            *(pbuf++) = p;
+            st->rdr.pcount++;
         }
-#else
-        (void)rbufs; // fake operation for disable warning
 #endif /* RADER and not MEMLESS */
+        st->fcount++;
+
         n /= p;
         *facbuf++ = p;
         *facbuf++ = n;
@@ -165,23 +146,15 @@ kf_factor(uint32_t n, uint32_t* facbuf, uint32_t* root_buf) {
 }
 
 static inline void
-kfft_kinit(kfft_kplan_t* st, uint32_t nfft, bool inverse_fft) {
-#if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
-    kf_factor(nfft, st->factors, st->roots);
-#else
-    kf_factor(nfft, st->factors, NULL);
-#endif
-    st->nfft = nfft;
-    st->inverse = inverse_fft;
+kfft_kinit(kfft_kplan_t* st) {
+    // TODO
 
-#ifndef KFFT_MEMLESS_MODE
-    for (uint32_t i = 0; i < nfft; ++i) {
-        kfft_scalar phase = -2 * KFFT_CONST_PI * i / nfft;
+    for (uint32_t i = 0; i < st->nfft; ++i) {
+        kfft_scalar phase = -2 * KFFT_CONST_PI * i / st->nfft;
         if (st->inverse)
             phase *= -1;
         kf_cexp(st->twiddles + i, phase);
     }
-#endif /* memless */
 }
 
 /*
@@ -192,30 +165,99 @@ kfft_kinit(kfft_kplan_t* st, uint32_t nfft, bool inverse_fft) {
  * It can be freed with free(), rather than a kfft-specific function.
  * */
 kfft_kplan_t*
-kfft_kconfig(uint32_t nfft, bool inverse_fft, void* mem, size_t* lenmem) {
-    kfft_kplan_t* st = NULL;
-#ifndef KFFT_MEMLESS_MODE
-    size_t memneeded = sizeof(struct kfft_kstate) + sizeof(kfft_cpx) * (nfft); /* twiddle factors*/
-#else
-    size_t memneeded = sizeof(struct kfft_kstate); /* twiddle factors*/
-#endif /* memless */
+kfft_kconfig(uint32_t nfft, bool inverse_fft, uint8_t level, void* mem, size_t* lenmem) {
+    kfft_kplan_t st;
+    KFFT_ZEROMEM(&st, sizeof(kfft_kplan_t));
+
+    kfft_kplan_t* ret = NULL;
+
+    size_t root = 0, inv_root = 0;
+    
+    st.msize = kfft_kplan_size(nfft);
+    st.nfft = nfft;
+    st.inverse = inverse_fft;
+    st.level = level;
+
+    kf_factor(&st);
+
+    /* Recursive clculate memory for plan and all subplans */
+    for (size_t i = 0; i < st.rdr.pcount; i++) {
+        size_t delta_mem = 0;
+        kfft_kconfig(st.rdr.primes[i] - 1, inverse_fft, level + 1, NULL, &delta_mem);
+        st.msize += delta_mem;
+    }
+
+    kfft_trace ("[LEVEL %d] Change KFFT kernel plan", level);
+    kfft_sztrace(" size: ", st.msize);
 
     if (lenmem == NULL) {
-        st = (kfft_kplan_t*)KFFT_MALLOC(memneeded);
-        kfft_trace("Alloc kernel plan: %p. Memneed: %zu\n", (void*)st, memneeded);
-    } else {
-        if (mem != NULL && *lenmem >= memneeded) {
-            st = (kfft_kplan_t*)mem;
-            kfft_trace("Redefine kernel plan: %p. Memneed: %zu\n", (void*)st, memneeded);
+        if ((ret = KFFT_MALLOC(st.msize)) != NULL) {
+            kfft_trace("[LEVEL %d] Alloc kernel plan: %p ->", level, (void*)ret);
+            memcpy(ret, &st, sizeof(kfft_kplan_t));
+        } else {
+            kfft_trace("[LEVEL %d\n] Alloc kernel plan FAILED", level);
         }
-        *lenmem = memneeded;
+    } else {
+        if (mem != NULL && *lenmem >= st.msize) {
+            kfft_sztrace("KFFT kernel plan size: ", st.msize);
+            ret = (kfft_kplan_t*)mem;
+            memcpy((void*)ret, (void*)(&st), sizeof(kfft_kplan_t));
+            kfft_trace("[LEVEL %d] Redefine kernel plan: %p ->", level, (void*)ret);
+        }
+        *lenmem = st.msize;
     }
-    if (st) {
-        kfft_kinit(st, nfft, inverse_fft);
+    if (ret) {
+        // TODO Fix use memory if nfft is prime
+        if (level) {
+            root = kfft_prime_root(nfft);
+            inv_root = kfft_primei_root(root, nfft);
+        }
 
-        kfft_trace("Config: nfft - %u | inv - %d | lvl - %d\n", st->nfft, st->inverse, st->level);
+        kfft_kinit(ret);
+        kfft_trace(" nfft - %u | inv - %d | factors - %zu | primes - %zu\n", ret->nfft,
+                   ret->inverse, ret->fcount, ret->rdr.pcount);
     }
-    return st;
+    //         if (lenmem == NULL) {
+    // #ifdef KFFT_USE_ALLOCA
+    //             kfft_kplan_t* tmp = NULL;
+    //             if ((tmp = KFFT_MALLOC(memneeded)) != NULL) {
+    //                 kfft_trace("Alloc kernel plan: %p. Memneed: %zu\n", (void*)st,
+    //                 memneeded); memcpy(tmp, st, sizeof(kfft_kplan_t));
+    //                 KFFT_TMP_FREE_NULL(st);
+    //                 st = tmp;
+    //             } else {
+    //                 kfft_trace("Alloc kernel plan FAILED: %p. Memneed: %zu\n", (void*)st,
+    //                 memneeded); KFFT_TMP_FREE_NULL(st);
+    //             }
+    // #else
+    //             if (KFFT_REALLOC(st, memneeded) == 0) {
+    //                 kfft_trace("Relloc kernel plan: %p. Memneed: %zu\n", (void*)st,
+    //                 memneeded);
+    //             } else {
+    //                 KFFT_TMP_FREE_NULL(st);
+    //                 kfft_trace("Realloc kernel plan FAILED: %p. Memneed: %zu\n", (void*)st,
+    //                 memneeded);
+    //             }
+    // #endif /* KFFT_USE_ALLOCA */
+    //         } else {
+    //             if (mem != NULL && *lenmem >= memneeded) {
+    //                 memcpy(mem, st, sizeof(kfft_kplan_t));
+    //                 KFFT_TMP_FREE_NULL(st);
+    //                 st = (kfft_kplan_t*)mem;
+    //                 kfft_trace("Redefine kernel plan: %p. Memneed: %zu\n", (void*)st,
+    //                 memneeded);
+    //             } else {
+    //                 KFFT_TMP_FREE_NULL(st);
+    //             }
+    //             *lenmem = memneeded;
+    //         }
+    //         if (st) {
+    //             kfft_kinit(st);
+    //             kfft_trace("Config: nfft - %u | inv - %d | factors - %zu | primes - %zu\n",
+    //             st->nfft,
+    //                        st->inverse, st->fcount, st->pcount);
+    //         }
+    return ret;
 }
 
 static inline void

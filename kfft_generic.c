@@ -7,11 +7,12 @@
 
 /* perform the butterfly for one stage of a mixed radix FFT */
 static void
-kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, int m, int p) {
-    int u, k, q1, q;
+kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, uint32_t m,
+                uint32_t p) {
+    uint32_t u, k, q1, q;
     //    const kfft_cpx* twiddles = st->twiddles;
     kfft_cpx t;
-    int Norig = st->nfft;
+    uint32_t Norig = st->nfft;
 
     kfft_trace("%s: m - %d | p - %d\n", "Generic FFT", m, p);
 
@@ -20,16 +21,16 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, in
     // TODO Maybe use Rader for FFT buffer
 
 #if defined(KFFT_RADER_ALGO)
-    if (!((p < KFFT_RADER_LIMIT) || (st->level > KFFT_RADER_LEVEL))) {
+    if (!(p < KFFT_RADER_LIMIT)) {
         for (u = 0; u < m; ++u) {
             k = u;
+
             for (q1 = 0; q1 < p; ++q1) {
-                scratch[q1] = Fout[k];
+                // TODO Create buffer
                 k += m;
             }
 
             k = u;
-            kf_rader(Fout, fstride, st, m, q1);
             // TODO Rader here
         }
     } else {
@@ -43,7 +44,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, in
 
             k = u;
             for (q1 = 0; q1 < p; ++q1) {
-                int twidx = 0;
+                uint32_t twidx = 0;
                 Fout[k] = scratch[0];
                 for (q = 1; q < p; ++q) {
                     twidx += fstride * k;
