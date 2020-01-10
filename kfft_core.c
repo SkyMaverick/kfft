@@ -172,7 +172,7 @@ kfft_kconfig(uint32_t nfft, bool inverse_fft, uint8_t level, void* mem, size_t* 
     kfft_kplan_t* ret = NULL;
 
     size_t root = 0, inv_root = 0;
-    
+
     st.msize = kfft_kplan_size(nfft);
     st.nfft = nfft;
     st.inverse = inverse_fft;
@@ -187,7 +187,7 @@ kfft_kconfig(uint32_t nfft, bool inverse_fft, uint8_t level, void* mem, size_t* 
         st.msize += delta_mem;
     }
 
-    kfft_trace ("[LEVEL %d] Change KFFT kernel plan", level);
+    kfft_trace("[LEVEL %d] Change KFFT kernel plan", level);
     kfft_sztrace(" size: ", st.msize);
 
     if (lenmem == NULL) {

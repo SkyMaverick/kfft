@@ -1,2 +1,11 @@
 #!/bin/sh
-CFLAGS="${CFLAGS} -Wall -Wextra -Wpedantic -O3 -mtune=native -ffast-math -fomit-frame-pointer -unroll-loops -USE_SIMD" make $1
+BUILD_DIR='./build'
+BUILD_DIR='./build'
+if [ -d ${BUILD_DIR} ]; then
+    if [ "$1" = "new" ]; then
+	    rm -rf ${BUILD_DIR}
+    else
+        ninja -C ${BUILD_DIR} && exit 
+    fi
+fi
+meson . ${BUILD_DIR} -Dbuildtype=release -Denable_simd=true && ninja -C ${BUILD_DIR}

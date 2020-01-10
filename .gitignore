@@ -16,4 +16,6 @@ ukfcmpwp
 ustest
 
 exp/
+build/
 find.sh
+Makefile
