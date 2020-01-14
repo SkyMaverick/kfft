@@ -50,27 +50,11 @@ typedef struct {
 typedef uintptr_t kfft_t;
 
 kfft_t
-kfft_config(uint32_t nfft, bool inverse_fft, uintptr_t mem, size_t* lenmem);
-/*
- nfft must be even
-
- If you don't care to allocate space, use mem = lenmem = NULL
-*/
-
+kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size_t* lenmem);
 void
 kfft(kfft_t cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
-/*
- input timedata has nfft scalar points
- output freqdata has nfft/2+1 complex points
-*/
-
 void
 kffti(kfft_t cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
-/*
- input freqdata has  nfft/2+1 complex points
- output timedata has nfft scalar points
-*/
-
 uint32_t
 kfft_next_fast_size(uint32_t n);
 

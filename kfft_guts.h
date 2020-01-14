@@ -49,47 +49,44 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define KFFT_CONST_PI M_PI
 #endif
 
+typedef struct {
+    size_t allocated; // area size
+    uint8_t* head;    // current head address
+    uint8_t* tail;    // current tail address
+
+    uint8_t* cur; // cursor pointer
+
+    uint8_t area[1];
+} kfft_pool_t;
+
 /* e.g. an fft of length 128 has 4 factors
  as far as kissfft is concerned
  4*4*4*2 */
-typedef struct kfft_krdr {
-    uint32_t nfft; // original sequence lenght
-
-    //    uint32_t root;      // prime root
-    //    uint32_t inv_root;
-    //
-    size_t pcount;              // primes count
-    uint32_t primes[MAX_ROOTS]; // prime values
-
-    struct kfft_kstate* r_plans[MAX_ROOTS]; // subplan pointers for all primes
-    uint32_t* idx;                          // shuffle indexes array
-} kfft_rdr_t;
-
-static inline size_t
-kfft_rdr_size(size_t n) {
-    return sizeof(kfft_rdr_t) + sizeof(uint32_t) * n;
-}
+typedef struct {
+    uint32_t prime;
+    struct kfft_kstate* splan;
+} kfft_splan_t;
 
 typedef struct kfft_kstate {
-    size_t msize;   // memory size
-    uint32_t nfft;  // sequence lenght
-    bool inverse;   // inverse flag
-    uint32_t level; // plan level
+    uint32_t nfft;
+    bool inverse;
+    uint32_t level;
 
-    size_t fcount;                     // factors count
+    kfft_pool_t* mmgr;
+
+    uint8_t fac_count;                 // factors count
     uint32_t factors[2 * MAX_FACTORS]; // factor values
-    kfft_rdr_t rdr;                    // rader solver
+
+    uint8_t prm_count;
+    kfft_splan_t primes[MAX_ROOTS]; //
+    uint32_t* rdr_idx[1];           // rader shuffle index (for level > 0)
 
     kfft_cpx twiddles[1]; // twiddles
 } kfft_kplan_t;
 
-static inline size_t
-kfft_kplan_size(uint32_t n) {
-    // structure + (twiddles * nfft)
-    return sizeof(kfft_kplan_t) + sizeof(kfft_cpx) * n;
-}
-
 typedef struct kfft_state {
+    kfft_pool_t* mmgr;
+
     kfft_kplan_t* substate;
     kfft_cpx* tmpbuf;
 #ifndef KFFT_MEMLESS_MODE
