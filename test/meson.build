@@ -6,49 +6,42 @@ endif
 
 test_link = [libkfft]
 
-app_demo =      executable ('demo', 'demo.c',
-                            link_with: test_link,
-                            include_directories: kfft_inc,
-                            install: false)
+app_demo = executable ('demo', 'demo.c',
+                       link_with: test_link,
+                       include_directories: kfft_inc,
+                       install: false)
 
 test_src = '''
-    test.c
+    app.c
 '''.split()
 
-app_usdemo =    executable ('usdemo', test_src,
-                            c_args: '-DSIMPLE_APP',
-                            link_with: test_link,
-                            include_directories: kfft_inc,
-                            install: false)
+kfft_apps = {
+    'usdemo': ['-DSIMPLE_APP'],
+    'ustest': []
+}
 
-app_ustest =    executable ('ustest', test_src,
-                            link_with: test_link,
-                            include_directories: kfft_inc,
-                            install: false)
+foreach test_app, app_args : kfft_apps
+    A = executable (test_app, test_src,
+                    c_args: app_args,
+                    link_with: test_link,
+                    include_directories: kfft_inc,
+                    install: false)
+endforeach
 
 if fftw_dep.found()
-    app_ukfcmp =    executable ('ukfcmp', test_src,
-                            c_args: ['-DFFTW_COMPARE'],
-                            link_with: test_link,
-                            dependencies: fftw_dep,
-                            include_directories: kfft_inc,
-                            install: false)
-    app_ukfcmpwp =  executable ('ukfcmpwp', test_src,
-                            c_args: ['-DFFTW_COMPARE', '-DCHECK_WITHOUT_PLAN'],
-                            link_with: test_link,
-                            dependencies: fftw_dep,
-                            include_directories: kfft_inc,
-                            install: false)
-    app_aukfcmp =   executable ('aukfcmp', test_src,
-                            c_args: ['-DFFTW_COMPARE', '-DLOG_AUTO'],
-                            link_with: test_link,
-                            dependencies: fftw_dep,
-                            include_directories: kfft_inc,
-                            install: false)
-    app_aukfcmpwp = executable ('aukfcmpwp', test_src,
-                            c_args: ['-DFFTW_COMPARE', '-DCHEC_WITHOUT_PLAN', '-DLOG_AUTO'],
-                            link_with: test_link,
-                            dependencies: fftw_dep,
-                            include_directories: kfft_inc,
-                            install: false)
+    fftw_apps = {
+        'ukfcmp' : ['-DFFTW_COMPARE'],
+        'ukfcmpwp' : ['-DFFTW_COMPARE', '-DCHECK_WITHOUT_PLAN'],
+        'aukfcmp' : ['-DFFTW_COMPARE', '-DLOG_AUTO'],
+        'aukfcmpwp' : ['-DFFTW_COMPARE', '-DCHECK_WITHOUT_PLAN', '-DLOG_AUTO']
+    }
+
+    foreach test_app, app_args : fftw_apps
+        A = executable (test_app, test_src,
+                        c_args: app_args,
+                        link_with: test_link,
+                        dependencies: fftw_dep,
+                        include_directories: kfft_inc,
+                        install: false)
+    endforeach
 endif
