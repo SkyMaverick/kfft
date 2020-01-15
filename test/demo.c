@@ -2,52 +2,72 @@
 #include <string.h>
 #include "kfft.h"
 
+static void
+display_info(void) {
+    uint8_t info = kfft_info();
+
+    fprintf(stdout, "%s - %s\n", "Enable trace messages",
+            (info & KFFT_FLAG_INFO_TRACE) ? "YES" : "NO");
+    fprintf(stdout, "%s - %s\n", "Enable use SIMD instructions",
+            (info & KFFT_FLAG_INFO_USE_SIMD) ? "YES" : "NO");
+    fprintf(stdout, "%s - %s\n", "Enable use alloca() function",
+            (info & KFFT_FLAG_INFO_USE_ALLOCA) ? "YES" : "NO");
+    fprintf(stdout, "%s - %s\n", "Enable use system math functions",
+            (info & KFFT_FLAG_INFO_USE_SYSMATH) ? "YES" : "NO");
+    fprintf(stdout, "%s - %s\n", "Enable use Rader algoritm",
+            (info & KFFT_FLAG_INFO_RADER_ALGO) ? "YES" : "NO");
+    fprintf(stdout, "%s - %s\n", "Enable lesser memory mode",
+            (info & KFFT_FLAG_INFO_MEMLESS_MODE) ? "YES" : "NO");
+}
+
 int
-main (int argc, char* argv[])
-{
+main(int argc, char* argv[]) {
     if (argc > 1) {
-        double * amp_scalar = calloc (argc, sizeof(double));
-        for (int i=1; i < argc; i++) {
-            amp_scalar [i-1] = atof(argv[i]);
-            printf ("%5.3f ", amp_scalar[i-1]);
+        display_info();
+        printf("\n\n\n");
+
+        double* amp_scalar = calloc(argc, sizeof(double));
+        for (int i = 1; i < argc; i++) {
+            amp_scalar[i - 1] = atof(argv[i]);
+            printf("%5.3f ", amp_scalar[i - 1]);
         }
-        printf ("\n");
+        printf("\n");
 
-        kfft_cpx* FOut = calloc (argc, sizeof(kfft_cpx));
+        kfft_cpx* FOut = calloc(argc, sizeof(kfft_cpx));
 
-        size_t memneed = kfft_get_size(argc-1);
+        size_t memneed = kfft_get_size(argc - 1);
 
-        printf ("Create forward config for %d len\n", argc-1);
-        kfft_t FCfg = kfft_config (argc-1, 0, 0, NULL);
-        
-        printf ("Forward FFT transform\n");
-        kfft (FCfg, amp_scalar, FOut);
+        printf("Create forward config for %d len\n", argc - 1);
+        kfft_t FCfg = kfft_config(argc - 1, 0, 0, NULL);
 
-        for (int i = 0; i < argc-1; i++) {
+        printf("Forward FFT transform\n");
+        kfft(FCfg, amp_scalar, FOut);
+
+        for (int i = 0; i < argc - 1; i++) {
             printf("r%5.3fi%5.3f | ", FOut[i].r, FOut[i].i);
         }
-        printf ("\n\n\n");
-        
-        printf ("Create inverse config for %d len\n", argc-1);
-        kfft_config (argc-1, 1, KFFT_PLAN_ALLOCATOR(FCfg), &memneed);
-        memset (amp_scalar, 0, argc * sizeof(double));
+        printf("\n\n\n");
 
-        printf ("Inverse FFT transform\n");
-        kffti (FCfg, FOut, amp_scalar);
+        printf("Create inverse config for %d len\n", argc - 1);
+        kfft_config(argc - 1, 1, KFFT_PLAN_ALLOCATOR(FCfg), &memneed);
+        memset(amp_scalar, 0, argc * sizeof(double));
 
-        for (int i = 0; i < argc-1; i++) {
+        printf("Inverse FFT transform\n");
+        kffti(FCfg, FOut, amp_scalar);
+
+        for (int i = 0; i < argc - 1; i++) {
             printf("%5.3f | ", amp_scalar[i]);
         }
 
-        printf ("\n");
+        printf("\n");
 
-        free (FOut);
-        free (amp_scalar);
-        kfft_free (&FCfg);
+        free(FOut);
+        free(amp_scalar);
+        kfft_free(&FCfg);
 
         return 0;
     } else {
-        fprintf (stderr, "%s\n","Need scalar array as arguments");
+        fprintf(stderr, "%s\n", "Need scalar array as arguments");
         return 1;
     }
 }

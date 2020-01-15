@@ -50,6 +50,15 @@ typedef struct {
     kfft_scalar i;
 } kfft_cpx;
 
+enum {
+    KFFT_FLAG_INFO_TRACE = 1 << 0,
+    KFFT_FLAG_INFO_USE_SIMD = 1 << 1,
+    KFFT_FLAG_INFO_USE_ALLOCA = 1 << 2,
+    KFFT_FLAG_INFO_USE_SYSMATH = 1 << 3,
+    KFFT_FLAG_INFO_RADER_ALGO = 1 << 4,
+    KFFT_FLAG_INFO_MEMLESS_MODE = 1 << 5,
+};
+
 typedef uintptr_t kfft_t;
 
 kfft_t
@@ -60,9 +69,10 @@ void
 kffti(kfft_t cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
 uint32_t
 kfft_next_fast_size(uint32_t n);
-
 void
 kfft_free(kfft_t* cfg);
+uint8_t
+kfft_info(void);
 
 static inline uint32_t
 kfft_get_size(const uint32_t n) {
