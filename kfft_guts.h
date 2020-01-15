@@ -64,22 +64,23 @@ typedef struct {
  4*4*4*2 */
 typedef struct {
     uint32_t prime;
+    uint32_t inv_prime;
     struct kfft_kstate* splan;
 } kfft_splan_t;
 
 typedef struct kfft_kstate {
+    kfft_pool_t* mmgr;
+
     uint32_t nfft;
     bool inverse;
     uint32_t level;
-
-    kfft_pool_t* mmgr;
 
     uint8_t fac_count;                 // factors count
     uint32_t factors[2 * MAX_FACTORS]; // factor values
 
     uint8_t prm_count;
     kfft_splan_t primes[MAX_ROOTS]; //
-    uint32_t* rdr_idx[1];           // rader shuffle index (for level > 0)
+    uint32_t rdr_idx[1];            // rader shuffle index (for level > 0)
 
     kfft_cpx twiddles[1]; // twiddles
 } kfft_kplan_t;
@@ -89,9 +90,8 @@ typedef struct kfft_state {
 
     kfft_kplan_t* substate;
     kfft_cpx* tmpbuf;
-#ifndef KFFT_MEMLESS_MODE
+    // TODO memless
     kfft_cpx* super_twiddles;
-#endif /* memless */
 #ifdef KFFT_USE_SIMD
     void* pad;
 #endif

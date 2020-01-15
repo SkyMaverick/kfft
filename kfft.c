@@ -69,26 +69,42 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
     if (lenmem == NULL) {
         mmgr = (A) ? (kfft_pool_t*)A : kfft_allocator_create(memneeded);
         if (mmgr)
-            st = kfft_internal_alloc(mmgr, plan_size);
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_plan_t));
     } else {
         if (A && *lenmem >= memneeded) {
             mmgr = (kfft_pool_t*)A;
-            st = kfft_internal_alloc(mmgr, plan_size);
+
+            kfft_allocator_clear(mmgr);
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_plan_t));
         }
         *lenmem = memneeded;
     }
     if (!st) {
-        if (mmgr)
-            kfft_allocator_free(&mmgr);
+    bailout:
+        if (mmgr != NULL) {
+            if (A) {
+                kfft_allocator_clear(mmgr);
+            } else {
+                kfft_allocator_free(&mmgr);
+            }
+        }
         return 0;
     }
 
     st->mmgr = mmgr;
     st->substate = kfft_kconfig(nfft, inverse_fft, 0, mmgr, NULL);
-    st->tmpbuf = (kfft_cpx*)(&(st->substate) + sizeof(kfft_kplan_t*));
+    if (st->substate == NULL)
+        goto bailout;
+
+    st->tmpbuf = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * nfft);
+    if (st->tmpbuf == NULL)
+        goto bailout;
 
     // TODO Maybe memless
-    st->super_twiddles = st->tmpbuf + nfft;
+    st->super_twiddles = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * (nfft / 2));
+    if (st->super_twiddles == NULL)
+        goto bailout;
+
     for (uint32_t i = 0; i < nfft / 2; ++i) {
         double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);
         if (inverse_fft)

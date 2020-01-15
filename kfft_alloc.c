@@ -42,9 +42,15 @@ kfft_internal_zmem(kfft_pool_t* A, void* ptr, size_t size) {
 }
 
 void
+kfft_allocator_clear(kfft_pool_t* A) {
+    kfft_internal_zmem(A, (void*)(A->area), A->tail - A->head);
+    A->cur = A->head;
+}
+
+void
 kfft_allocator_free(kfft_pool_t** A) {
     if (*A) {
-        KFFT_FREE_NULL(*A);
+        KFFT_FREE(*A);
     }
 }
 

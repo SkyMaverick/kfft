@@ -1,4 +1,5 @@
 #include "kfft_guts.h"
+#include "kfft_alloc.h"
 
 #include "kfft_generic.c"
 #include "kfft_bfly.c"
@@ -14,31 +15,31 @@ _kfr_gcd(uint32_t a, uint32_t b) {
 // WARNING in kfft num - always prime. Don't check this
 uint32_t
 kfft_prime_root(uint32_t num) {
-    //    uint32_t phi = num - 1;
-    //    uint32_t n = phi;
-    //
-    //    uint32_t primes[MAX_ROOTS];
-    //    uint32_t count = 0;
-    //
-    //    for (uint32_t i = 2; i * i <= n; i++) {
-    //        if (n % i == 0) {
-    //            primes[count++] = i;
-    //            while (n % i == 0)
-    //                n /= i;
-    //        }
-    //    }
-    //    if (n > 1)
-    //        primes[count++] = n;
-    //
-    //    for (uint32_t res = 2; res <= num; ++res) {
-    //        bool ok = true;
-    //        for (uint32_t i = 0; count > i && ok; ++i) {
-    //            if (_kfr_power(res, phi / primes[i], num) == 1)
-    //                ok = false;
-    //        }
-    //        if (ok)
-    //            return res;
-    //    }
+    uint32_t phi = num - 1;
+    uint32_t n = phi;
+
+    uint32_t primes[MAX_ROOTS];
+    uint32_t count = 0;
+
+    for (uint32_t i = 2; i * i <= n; i++) {
+        if (n % i == 0) {
+            primes[count++] = i;
+            while (n % i == 0)
+                n /= i;
+        }
+    }
+    if (n > 1)
+        primes[count++] = n;
+
+    for (uint32_t res = 2; res <= num; ++res) {
+        bool ok = true;
+        for (uint32_t i = 0; count > i && ok; ++i) {
+            if (_kfr_power(res, phi / primes[i], num) == 1)
+                ok = false;
+        }
+        if (ok)
+            return res;
+    }
     return 0;
 }
 
@@ -106,43 +107,46 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
     m0 = n                  */
 static inline void
 kf_factor(kfft_kplan_t* st) {
-    //    uint32_t p = 4;
-    //    uint32_t n = st->nfft;
-    //    uint32_t* facbuf = st->factors;
-    //    uint32_t* pbuf = st->rdr.primes;
-    //
-    //    double floor_sqrt;
-    //    floor_sqrt = floor(sqrt((double)st->nfft));
-    //
-    //    /*factor out powers of 4, powers of 2, then any remaining primes */
-    //    do {
-    //        while (n % p) {
-    //            switch (p) {
-    //            case 4:
-    //                p = 2;
-    //                break;
-    //            case 2:
-    //                p = 3;
-    //                break;
-    //            default:
-    //                p += 2;
-    //                break;
-    //            }
-    //            if (p > floor_sqrt)
-    //                p = n; /* no more factors, skip to end */
-    //        }
-    //#if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
-    //        if (st->level < MAX_PLAN_LEVEL && p > MAX_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
-    //            *(pbuf++) = p;
-    //            st->rdr.pcount++;
-    //        }
-    //#endif /* RADER and not MEMLESS */
-    //        st->fcount++;
-    //
-    //        n /= p;
-    //        *facbuf++ = p;
-    //        *facbuf++ = n;
-    //    } while (n > 1);
+    uint32_t p = 4;
+    uint32_t n = st->nfft;
+    uint32_t* facbuf = st->factors;
+    kfft_splan_t* pbuf = st->primes;
+
+    double floor_sqrt;
+    floor_sqrt = floor(sqrt((double)st->nfft));
+
+    /*factor out powers of 4, powers of 2, then any remaining primes */
+    do {
+        while (n % p) {
+            switch (p) {
+            case 4:
+                p = 2;
+                break;
+            case 2:
+                p = 3;
+                break;
+            default:
+                p += 2;
+                break;
+            }
+            if (p > floor_sqrt)
+                p = n; /* no more factors, skip to end */
+        }
+#if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
+        if (st->level < MAX_PLAN_LEVEL && p > MAX_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
+            pbuf->prime = p;
+            pbuf->inv_prime = kfft_primei_root(p, n);
+
+            st->prm_count++;
+            pbuf++;
+        }
+#endif /* RADER and not MEMLESS */
+        st->fac_count++;
+
+        n /= p;
+        *facbuf++ = p;
+        *facbuf++ = n;
+    } while (n > 1);
 }
 
 static inline void
@@ -165,97 +169,66 @@ kfft_kinit(kfft_kplan_t* st) {
  * It can be freed with free(), rather than a kfft-specific function.
  * */
 kfft_kplan_t*
-kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level,
-             const kfft_pool_t* mem, size_t* lenmem) {
+kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, const kfft_pool_t* A,
+             size_t* lenmem) {
     kfft_kplan_t* st = NULL;
+    size_t plan_size = sizeof(kfft_kplan_t) + sizeof(kfft_cpx) * nfft;
+    size_t memneeded = plan_size;
 
-    kfft_kplan_t tmp = {0};
+    kfft_kplan_t tmp;
+    KFFT_ZEROMEM(&tmp, sizeof(kfft_kplan_t));
+
     size_t root = 0, inv_root = 0;
 
-    // tmp.msize = kfft_kplan_size(nfft);
     tmp.nfft = nfft;
     tmp.inverse = inverse_fft;
     tmp.level = level;
-    //
-    //    kf_factor(&st);
-    //
-    //    /* Recursive clculate memory for plan and all subplans */
-    //    for (size_t i = 0; i < st.rdr.pcount; i++) {
-    //        size_t delta_mem = 0;
-    //        kfft_kconfig(st.rdr.primes[i] - 1, inverse_fft, level + 1, NULL, &delta_mem);
-    //        st.msize += delta_mem;
-    //    }
-    //
-    //    kfft_trace("[LEVEL %d] Change KFFT kernel plan", level);
-    //    kfft_sztrace(" size: ", st.msize);
-    //
-    //    if (lenmem == NULL) {
-    //        if ((ret = KFFT_MALLOC(st.msize)) != NULL) {
-    //            kfft_trace("[LEVEL %d] Alloc kernel plan: %p ->", level, (void*)ret);
-    //            memcpy(ret, &st, sizeof(kfft_kplan_t));
-    //        } else {
-    //            kfft_trace("[LEVEL %d\n] Alloc kernel plan FAILED", level);
-    //        }
-    //    } else {
-    //        if (mem != NULL && *lenmem >= st.msize) {
-    //            kfft_sztrace("KFFT kernel plan size: ", st.msize);
-    //            ret = (kfft_kplan_t*)mem;
-    //            memcpy((void*)ret, (void*)(&st), sizeof(kfft_kplan_t));
-    //            kfft_trace("[LEVEL %d] Redefine kernel plan: %p ->", level, (void*)ret);
-    //        }
-    //        *lenmem = st.msize;
-    //    }
-    //    if (ret) {
-    //        // TODO Fix use memory if nfft is prime
-    //        if (level) {
-    //            root = kfft_prime_root(nfft);
-    //            inv_root = kfft_primei_root(root, nfft);
-    //        }
-    //
-    //        kfft_kinit(ret);
-    //        kfft_trace(" nfft - %u | inv - %d | factors - %zu | primes - %zu\n", ret->nfft,
-    //                   ret->inverse, ret->fcount, ret->rdr.pcount);
-    //    }
-    //         if (lenmem == NULL) {
-    // #ifdef KFFT_USE_ALLOCA
-    //             kfft_kplan_t* tmp = NULL;
-    //             if ((tmp = KFFT_MALLOC(memneeded)) != NULL) {
-    //                 kfft_trace("Alloc kernel plan: %p. Memneed: %zu\n", (void*)st,
-    //                 memneeded); memcpy(tmp, st, sizeof(kfft_kplan_t));
-    //                 KFFT_TMP_FREE_NULL(st);
-    //                 st = tmp;
-    //             } else {
-    //                 kfft_trace("Alloc kernel plan FAILED: %p. Memneed: %zu\n", (void*)st,
-    //                 memneeded); KFFT_TMP_FREE_NULL(st);
-    //             }
-    // #else
-    //             if (KFFT_REALLOC(st, memneeded) == 0) {
-    //                 kfft_trace("Relloc kernel plan: %p. Memneed: %zu\n", (void*)st,
-    //                 memneeded);
-    //             } else {
-    //                 KFFT_TMP_FREE_NULL(st);
-    //                 kfft_trace("Realloc kernel plan FAILED: %p. Memneed: %zu\n", (void*)st,
-    //                 memneeded);
-    //             }
-    // #endif /* KFFT_USE_ALLOCA */
-    //         } else {
-    //             if (mem != NULL && *lenmem >= memneeded) {
-    //                 memcpy(mem, st, sizeof(kfft_kplan_t));
-    //                 KFFT_TMP_FREE_NULL(st);
-    //                 st = (kfft_kplan_t*)mem;
-    //                 kfft_trace("Redefine kernel plan: %p. Memneed: %zu\n", (void*)st,
-    //                 memneeded);
-    //             } else {
-    //                 KFFT_TMP_FREE_NULL(st);
-    //             }
-    //             *lenmem = memneeded;
-    //         }
-    //         if (st) {
-    //             kfft_kinit(st);
-    //             kfft_trace("Config: nfft - %u | inv - %d | factors - %zu | primes - %zu\n",
-    //             st->nfft,
-    //                        st->inverse, st->fcount, st->pcount);
-    //         }
+
+    kf_factor(&tmp);
+
+    /* Recursive clculate memory for plan and all subplans */
+    for (size_t i = 0; i < tmp.prm_count; i++) {
+        size_t delta_mem = 0;
+        size_t snfft = tmp.primes[i].prime - 1;
+
+        kfft_kconfig(snfft, inverse_fft, level + 1, NULL, &delta_mem);
+        memneeded += delta_mem;
+        if (level > 0)
+            memneeded += sizeof(uint32_t) * snfft; // index table
+    }
+
+    kfft_trace("[LEVEL %d] Change KFFT kernel plan", level);
+    kfft_sztrace(" size: ", memneeded);
+
+    kfft_pool_t* mmgr = NULL;
+    if (lenmem == NULL) {
+        mmgr = (A) ? (kfft_pool_t*)A : kfft_allocator_create(memneeded);
+        if (mmgr)
+            st = kfft_internal_alloc(mmgr, plan_size);
+    } else {
+        if (A && *lenmem >= memneeded) {
+            mmgr = (kfft_pool_t*)A;
+            st = kfft_internal_alloc(mmgr, plan_size);
+        }
+        *lenmem = memneeded;
+    }
+    if (!st) {
+        if (mmgr)
+            kfft_allocator_free(&mmgr);
+        return 0;
+    }
+
+    memcpy(st, &tmp, sizeof(kfft_kplan_t));
+
+    st->mmgr = mmgr;
+
+    kfft_kinit(st);
+
+    for (size_t i = 0; i < tmp.prm_count; i++) {
+        size_t snfft = tmp.primes[i].prime - 1;
+        kfft_kconfig(snfft, inverse_fft, level + 1, st->mmgr, NULL);
+    }
+
     return st;
 }
 

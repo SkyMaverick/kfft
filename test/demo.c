@@ -29,7 +29,7 @@ main (int argc, char* argv[])
         printf ("\n\n\n");
         
         printf ("Create inverse config for %d len\n", argc-1);
-        kfft_config (argc-1, 1, FCfg, &memneed);
+        kfft_config (argc-1, 1, KFFT_PLAN_ALLOCATOR(FCfg), &memneed);
         memset (amp_scalar, 0, argc * sizeof(double));
 
         printf ("Inverse FFT transform\n");

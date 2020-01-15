@@ -19,4 +19,7 @@ void
 kfft_internal_zmem(kfft_pool_t* A, void* ptr, size_t size);
 
 void
+kfft_allocator_clear(kfft_pool_t* A);
+
+void
 kfft_allocator_free(kfft_pool_t** A);

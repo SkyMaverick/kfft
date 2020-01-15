@@ -5,6 +5,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -41,6 +42,8 @@ extern "C" {
 #ifndef KFFR_RADER_LIMIT
     #define KFFT_RADER_LIMIT 50
 #endif
+
+#define KFFT_PLAN_ALLOCATOR(X) (*((uintptr_t*)(X)))
 
 typedef struct {
     kfft_scalar r;
