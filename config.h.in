@@ -1,0 +1,12 @@
+#pragma once
+
+#mesondefine KFFT_MAJOR_VERSION
+#mesondefine KFFT_MINOR_VERSION
+#mesondefine KFFT_PATCH_VERSION
+
+#mesondefine KFFT_TRACE
+#mesondefine KFFT_USE_SIMD
+#mesondefine KFFT_USE_ALLOCA
+#mesondefine KFFT_USE_SYSMATH
+#mesondefine KFFT_RADER_ALGO
+#mesondefine KFFT_MEMLESS_MODE

@@ -1,3 +1,4 @@
+#include "kfft_guts.h"
 #include "kfft_core.h"
 
 #ifdef KFFT_RADER_ALGO

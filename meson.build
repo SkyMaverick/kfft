@@ -1,5 +1,5 @@
 project ('kfft', 'c',
-         version: '0.1.3',
+         version: '0.1.5',
          license: 'Zlib',
          default_options:[
             'c_std=gnu11',
@@ -9,13 +9,15 @@ project ('kfft', 'c',
 
 message ('Build configuration - @0@'.format(get_option('buildtype')))
 
+kfft_ver = meson.project_version().split('.')
+
 kfft_src = '''
-    kfft.c
+    kfft_guts.h
     kfft.h
+    kfft.c
     kfft_alloc.c
     kfft_alloc.h
     kfft_core.c
-    kfft_guts.h
     kfft_rader.c
 '''.split()
 
@@ -32,26 +34,21 @@ kfft_ldflags = '''
 kfft_defs    = '''
 '''.split()
 
-if get_option('enable_traces')
-    kfft_defs += 'KFFT_TRACE'
-endif
-if get_option('enable_simd')
-    if (cc.has_header('xmmintrin.h'))
-        kfft_defs += 'KFFT_USE_SIMD'
-    else
-        warning ('SIMD header not found. SIMD disabled')
-    endif
-endif
-if get_option('enable_alloca')
-    if (cc.has_header('alloca.h'))
-        kfft_defs += 'KFFT_USE_ALLOCA'
-    else
-        warning ('Alloca not found on this system. Disabled.')
-    endif
-endif
-if get_option('enable_extended')
-    kfft_defs += 'KFFT_RADER_ALGO'
-endif
+kfft_cfg = configuration_data()
+kfft_cfg.set('KFFT_MAJOR_VERSION', kfft_ver[0])
+kfft_cfg.set('KFFT_MINOR_VERSION', kfft_ver[1])
+kfft_cfg.set('KFFT_PATCH_VERSION', kfft_ver[2])
+
+kfft_cfg.set('KFFT_TRACE', get_option('enable_traces'))
+kfft_cfg.set('KFFT_USE_SIMD', get_option('enable_simd'))
+kfft_cfg.set('KFFT_USE_ALLOCA', get_option('enable_alloca'))
+kfft_cfg.set('KFFT_USE_SYSMATH', get_option('enable_sysmath'))
+kfft_cfg.set('KFFT_RADER_ALGO', get_option('enable_extended'))
+kfft_cfg.set('KFFT_MEMLESS_MODE', get_option('enable_memless'))
+
+configure_file (input: 'config.h.in',
+                output: 'config.h',
+                configuration: kfft_cfg)
 
 foreach item : kfft_cflags
     if cc.has_argument (item)

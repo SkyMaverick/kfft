@@ -6,5 +6,9 @@ option ('enable_simd', type: 'boolean', value: 'false',
         description: 'use SIMD optimized code')
 option ('enable_alloca', type: 'boolean', value: 'true',
         description: 'use alloca for temporary buffers (dangerouse)')
+option ('enable_sysmath', type: 'boolean', value: 'true',
+        description: 'use system (or custom) defines and math functions')
 option ('enable_extended', type: 'boolean', value: 'true',
         description: 'enable extended algoritms')
+option ('enable_memless', type: 'boolean', value: 'false',
+        description: 'use memory less mode (very slow)')

@@ -35,6 +35,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits.h>
 
 #include "kfft.h"
+#include "config.h"
 
 #define MAX_FACTORS 32
 #define MAX_ROOTS 32
