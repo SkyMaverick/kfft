@@ -1,5 +1,5 @@
 project ('kfft', 'c',
-         version: '0.1.5',
+         version: '0.1',
          license: 'Zlib',
          default_options:[
             'c_std=gnu11',
@@ -34,21 +34,54 @@ kfft_ldflags = '''
 kfft_defs    = '''
 '''.split()
 
-kfft_cfg = configuration_data()
-kfft_cfg.set('KFFT_MAJOR_VERSION', kfft_ver[0])
-kfft_cfg.set('KFFT_MINOR_VERSION', kfft_ver[1])
-kfft_cfg.set('KFFT_PATCH_VERSION', kfft_ver[2])
+kfft_deps = []
 
-kfft_cfg.set('KFFT_TRACE', get_option('enable_traces'))
-kfft_cfg.set('KFFT_USE_SIMD', get_option('enable_simd'))
-kfft_cfg.set('KFFT_USE_ALLOCA', get_option('enable_alloca'))
-kfft_cfg.set('KFFT_USE_SYSMATH', get_option('enable_sysmath'))
-kfft_cfg.set('KFFT_RADER_ALGO', get_option('enable_extended'))
-kfft_cfg.set('KFFT_MEMLESS_MODE', get_option('enable_memless'))
+# Validate system depends
+
+if get_option ('enable_sysmath')
+    if not (osid == 'windows')
+        kfft_deps += cc.find_library('m', required: true)
+    endif
+endif
+if get_option ('enable_simd')
+    if not cc.has_header('xmmintrin.h')
+        error ('Header <xmmintrin.h> not found. Disable enable_simd option. Maybe use fast-math optimization.')
+    endif
+endif
+if get_option ('enable_fastmath')
+    if not (ccid == 'msvc')
+        message ('Use CC fast-math optimization. This maybe dangerouse optimization. Disable this if application crash.')
+        kfft_cflags += '''
+            -ffast-math
+            -funroll-loops
+        '''.split()
+    endif
+endif
+if get_option ('enable_alloca')
+    if not cc.has_header('alloca.h')
+        error ('Header <alloca.h> not found. Disable enable_alloca option')
+    endif
+endif
+
+# Define configuration file
+
+kfft_cfg = configuration_data({
+    'KFFT_MAJOR_VERSION': kfft_ver[0],
+    'KFFT_MINOR_VERSION': kfft_ver[1],
+    
+    'KFFT_TRACE'        : get_option('enable_traces')   ,
+    'KFFT_USE_SIMD'     : get_option('enable_simd')     ,
+    'KFFT_USE_ALLOCA'   : get_option('enable_alloca')   ,
+    'KFFT_USE_SYSMATH'  : get_option('enable_sysmath')  ,
+    'KFFT_RADER_ALGO'   : get_option('enable_extended') ,
+    'KFFT_MEMLESS_MODE' : get_option('enable_memless')  ,
+})
 
 configure_file (input: 'config.h.in',
                 output: 'config.h',
                 configuration: kfft_cfg)
+
+# Apply all argments
 
 foreach item : kfft_cflags
     if cc.has_argument (item)
@@ -65,13 +98,9 @@ foreach item : kfft_defs
     add_project_arguments (item, language: 'c')
 endforeach
 
-kfft_deps = []
-if not (osid == 'windows')
-    kfft_deps += cc.find_library('m', required: true)
-endif
-
 kfft_inc= include_directories('.')
 
+# build library
 libkfft = shared_library (meson.project_name(), kfft_src,
                           dependencies: kfft_deps,
                           install: true)
