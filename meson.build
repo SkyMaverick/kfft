@@ -63,6 +63,15 @@ if get_option ('enable_alloca')
     endif
 endif
 
+build_type = get_option('build_library_api')
+if build_type == 'export'
+    kfft_defs += ['KFFT_EXPORTS']
+elif build_type == 'import'
+    kfft_defs += ['KFFT_IMPORTS']
+else
+    message ('No defines API')
+endif
+
 # Define configuration file
 
 kfft_cfg = configuration_data({
@@ -103,8 +112,8 @@ kfft_inc= include_directories('.')
 # build library
 libkfft = shared_library (meson.project_name(), kfft_src,
                           dependencies: kfft_deps,
+                          gnu_symbol_visibility: 'hidden',
                           install: true)
-
 if get_option('enable_tests')
     subdir('test')
 endif

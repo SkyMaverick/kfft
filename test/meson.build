@@ -1,7 +1,7 @@
 fftw_dep = dependency ('fftw3', required: false)
 if not fftw_dep.found()
     message ('FFTW3 not found. Try with compilator.')
-    fftw_dep = cc.found_library('fftw3', required: false)
+    fftw_dep = cc.find_library('fftw3', required: false)
 endif
 
 test_link = [libkfft]

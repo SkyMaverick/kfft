@@ -82,7 +82,7 @@ kfft_next_fast_size(uint32_t n) {
       TODO  Functionality
 ******************************************************************************** */
 
-uintptr_t
+KFFT_API uintptr_t
 kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size_t* lenmem) {
     kfft_plan_t* st = NULL;
 
@@ -160,7 +160,7 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
     return (uintptr_t)st;
 }
 
-void
+KFFT_API void
 kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
     /* input buffer timedata is stored row-wise */
     uint32_t k, ncfft;
@@ -208,7 +208,7 @@ kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
     }
 }
 
-void
+KFFT_API void
 kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
     /* input buffer timedata is stored row-wise */
     uint32_t k, ncfft;
@@ -249,7 +249,7 @@ kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
     }
 }
 
-void
+KFFT_API void
 kfft_free(uintptr_t* cfg) {
     if (cfg && *cfg) {
         kfft_trace("Cleanup plan: %p\n", (void*)(*cfg));

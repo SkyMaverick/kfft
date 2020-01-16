@@ -30,17 +30,11 @@ _kfr_power(uint32_t x, uint32_t y, uint32_t m) {
 }
 #endif
 
-uint32_t
-kfft_prime_root(uint32_t num);
-
-uint32_t
-kfft_primei_root(uint32_t a, uint32_t m);
-
-kfft_kplan_t*
+KFFT_API kfft_kplan_t*
 kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, const kfft_pool_t* A,
              size_t* lenmem);
 
-void
+KFFT_API void
 __kfft(kfft_kplan_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
 
 #define kfft_kfree(X)                                                                              \
