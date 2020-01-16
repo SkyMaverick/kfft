@@ -4,6 +4,7 @@
 
 static void
 display_info(void) {
+
     uint8_t info = kfft_info();
 
     fprintf(stdout, "%s - %s\n", "Enable trace messages",
@@ -23,8 +24,9 @@ display_info(void) {
 int
 main(int argc, char* argv[]) {
     if (argc > 1) {
+        fprintf(stdout, "LibKFFT ver.: %d.%d\n\n", kfft_vmajor(), kfft_vminor());
         display_info();
-        printf("\n\n\n");
+        printf("\n");
 
         double* amp_scalar = calloc(argc, sizeof(double));
         for (int i = 1; i < argc; i++) {
@@ -46,7 +48,7 @@ main(int argc, char* argv[]) {
         for (int i = 0; i < argc - 1; i++) {
             printf("r%5.3fi%5.3f | ", FOut[i].r, FOut[i].i);
         }
-        printf("\n\n\n");
+        printf("\n");
 
         printf("Create inverse config for %d len\n", argc - 1);
         kfft_config(argc - 1, 1, KFFT_PLAN_ALLOCATOR(FCfg), &memneed);

@@ -57,6 +57,11 @@ kfft_info(void) {
 }
 
 uint32_t
+kfft_version(void) {
+    return (((uint32_t)(KFFT_MAJOR_VERSION)) << 16) | (KFFT_MINOR_VERSION);
+}
+
+uint32_t
 kfft_next_fast_size(uint32_t n) {
     while (1) {
         uint32_t m = n;
@@ -125,9 +130,11 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
         goto bailout;
 
     // TODO Maybe memless
-    st->super_twiddles = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * (nfft / 2));
-    if (st->super_twiddles == NULL)
-        goto bailout;
+    if (nfft > 1) {
+        st->super_twiddles = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * (nfft / 2));
+        if (st->super_twiddles == NULL)
+            goto bailout;
+    }
 
     for (uint32_t i = 0; i < nfft / 2; ++i) {
         double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);

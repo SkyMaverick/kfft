@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 // clang-format off
-#ifdef KFFT_USE_SIMD
+#if defined (KFFT_USE_SIMD) && defined (NOT_XMMINTRIN_H)
     #include <xmmintrin.h>
     #define kfft_scalar __m128
     
@@ -73,6 +73,18 @@ void
 kfft_free(kfft_t* cfg);
 uint8_t
 kfft_info(void);
+uint32_t
+kfft_version(void);
+
+static inline uint16_t
+kfft_vmajor(void) {
+    return (uint16_t)((kfft_version() & 0xFFFF0000) >> 16);
+}
+
+static inline uint16_t
+kfft_vminor(void) {
+    return (uint16_t)((kfft_version() & 0x0000FFFF));
+}
 
 static inline uint32_t
 kfft_get_size(const uint32_t n) {
