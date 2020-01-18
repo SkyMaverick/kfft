@@ -31,7 +31,7 @@ main(int argc, char* argv[]) {
         printf("\n");
 
         double* amp_scalar = calloc(argc, sizeof(double));
-        for (int i = 1; i < argc; i++) {
+        for (int32_t i = 1; i < argc; i++) {
             amp_scalar[i - 1] = atof(argv[i]);
             printf("%5.3f ", amp_scalar[i - 1]);
         }
@@ -47,7 +47,7 @@ main(int argc, char* argv[]) {
         printf("Forward FFT transform\n");
         kfft(FCfg, amp_scalar, FOut);
 
-        for (int i = 0; i < argc - 1; i++) {
+        for (int32_t i = 0; i < argc - 1; i++) {
             printf("r%5.3fi%5.3f | ", FOut[i].r, FOut[i].i);
         }
         printf("\n");
@@ -59,7 +59,7 @@ main(int argc, char* argv[]) {
         printf("Inverse FFT transform\n");
         kffti(FCfg, FOut, amp_scalar);
 
-        for (int i = 0; i < argc - 1; i++) {
+        for (int32_t i = 0; i < argc - 1; i++) {
             printf("%5.3f | ", amp_scalar[i]);
         }
 

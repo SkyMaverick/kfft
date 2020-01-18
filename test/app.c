@@ -74,7 +74,7 @@ __report_func(double vals[][2]) {
     double t_kavg = 0;
     double t_favg = 0;
 
-    for (int i = 0; i < TEST_COUNT; i++) {
+    for (int32_t i = 0; i < TEST_COUNT; i++) {
         t_kavg += vals[i][VALS_KFFT];
         t_favg += vals[i][VALS_FFTW];
     }
@@ -87,7 +87,7 @@ __report_func(double vals[][2]) {
 
     #if defined FFTW_COMPARE
     fprintf(stdout, "%s\n", " --STEP-----KFFT-------FFTW----");
-    for (int i = 0; i < TEST_COUNT; i++) {
+    for (int32_t i = 0; i < TEST_COUNT; i++) {
         fprintf(stdout, "| %5d | %8.2f | %8.2f  |\n", i, vals[i][VALS_KFFT], vals[i][VALS_FFTW]);
     }
     fprintf(stdout, "%s\n", " ------------------------------");
@@ -95,7 +95,7 @@ __report_func(double vals[][2]) {
     fprintf(stdout, "%s:\t%8.2f\n", "Average work time for FFTW", t_favg / TEST_COUNT);
     #else
     fprintf(stdout, "%s\n", " --STEP------KFFT--");
-    for (int i = 0; i < TEST_COUNT; i++) {
+    for (int32_t i = 0; i < TEST_COUNT; i++) {
         fprintf(stdout, "| %5d | %8.2f |\n", i, vals[i][VALS_KFFT]);
     }
     fprintf(stdout, "%s\n", " ------------------ ");
@@ -109,18 +109,18 @@ __report_func(double vals[][2]) {
     double t_kavg = 0;
     double t_favg = 0;
 
-    for (int i = 0; i < TEST_COUNT; i++) {
+    for (int32_t i = 0; i < TEST_COUNT; i++) {
         t_kavg += vals[i][VALS_KFFT];
     #if defined FFTW_COMPARE
         t_favg += vals[i][VALS_FFTW];
     #endif
     }
-    for (int i = 0; i < TEST_COUNT; i++) {
+    for (int32_t i = 0; i < TEST_COUNT; i++) {
         fprintf(stdout, "%8.2f", vals[i][VALS_KFFT]);
     }
     #if defined FFTW_COMPARE
     fprintf(stdout, "\n");
-    for (int i = 0; i < TEST_COUNT; i++) {
+    for (int32_t i = 0; i < TEST_COUNT; i++) {
         fprintf(stdout, "%8.2f", vals[i][VALS_FFTW]);
     }
     #endif
@@ -144,7 +144,7 @@ main(int argc, char* argv[]) {
         fftw_complex* fftw_spectr = malloc((size + 1) * sizeof(fftw_complex));
 #endif
 
-        for (int i = 0; i < TEST_COUNT; i++) {
+        for (int32_t i = 0; i < TEST_COUNT; i++) {
             // Zero memory
             memset(amp_scalar, 0, size * sizeof(kfft_scalar));
             memset(kfft_spectr, 0, size * sizeof(kfft_cpx));
