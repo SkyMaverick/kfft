@@ -32,28 +32,31 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  fixed or floating point complex numbers.  It also delares the kf_ internal functions.
  */
 
-uint8_t
-kfft_info(void) {
-    uint8_t ret = 0;
+void
+kfft_info(kfft_info_t* info) {
+
+    info->vmajor = KFFT_MAJOR_VERSION;
+    info->vminor = KFFT_MINOR_VERSION;
+    info->vpatch = KFFT_PATCH_VERSION;
+
 #if defined(KFFT_TRACE)
-    ret |= KFFT_FLAG_INFO_TRACE;
+    info->flags |= KFFT_FLAG_INFO_TRACE;
 #endif
 #if defined(KFFT_USE_SIMD)
-    ret |= KFFT_FLAG_INFO_USE_SIMD;
+    info->flags |= KFFT_FLAG_INFO_USE_SIMD;
 #endif
 #if defined(KFFT_USE_ALLOCA)
-    ret |= KFFT_FLAG_INFO_USE_ALLOCA;
+    info->flags |= KFFT_FLAG_INFO_USE_ALLOCA;
 #endif
 #if defined(KFFT_USE_SYSMATH)
-    ret |= KFFT_FLAG_INFO_USE_SYSMATH;
+    info->flags |= KFFT_FLAG_INFO_USE_SYSMATH;
 #endif
 #if defined(KFFT_RADER_ALGO)
-    ret |= KFFT_FLAG_INFO_RADER_ALGO;
+    info->flags |= KFFT_FLAG_INFO_RADER_ALGO;
 #endif
 #if defined(KFFT_MEMLESS_MODE)
-    ret |= KFFT_FLAG_INFO_MEMLESS_MODE;
+    info->flags |= KFFT_FLAG_INFO_MEMLESS_MODE;
 #endif
-    return ret;
 }
 
 uint32_t

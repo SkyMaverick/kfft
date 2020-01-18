@@ -1,5 +1,5 @@
 project ('kfft', 'c',
-         version: '0.1',
+         version: '0.1.5',
          license: 'Zlib',
          default_options:[
             'c_std=gnu11',
@@ -62,7 +62,13 @@ if get_option ('enable_alloca')
         error ('Header <alloca.h> not found. Disable enable_alloca option')
     endif
 endif
-
+if get_option ('build_with_native')
+    if (ccid == 'gcc') or (ccid == 'clang')
+        kfft_cflags += '''
+            -march=native
+        '''.split()
+    endif
+endif
 build_type = get_option('build_library_api')
 if build_type == 'export'
     kfft_defs += ['KFFT_EXPORTS']
@@ -77,6 +83,7 @@ endif
 kfft_cfg = configuration_data({
     'KFFT_MAJOR_VERSION': kfft_ver[0],
     'KFFT_MINOR_VERSION': kfft_ver[1],
+    'KFFT_PATCH_VERSION': kfft_ver[2],
     
     'KFFT_TRACE'        : get_option('enable_traces')   ,
     'KFFT_USE_SIMD'     : get_option('enable_simd')     ,
@@ -109,11 +116,21 @@ endforeach
 
 kfft_inc= include_directories('.')
 
+optimize_opts = []
+if not (get_option('buildtype') == 'debug')
+    optimize_opts += [
+            get_option('build_with_lto') ? 'b_lto=true' : 'b_lto=false',
+            get_option('build_with_pgo') ? 'b_pgo=use'  : 'b_pg=none',
+        ]
+endif
+
 # build library
 libkfft = shared_library (meson.project_name(), kfft_src,
                           dependencies: kfft_deps,
                           gnu_symbol_visibility: 'hidden',
+                          override_options : optimize_opts,
                           install: true)
+
 if get_option('enable_tests')
     subdir('test')
 endif

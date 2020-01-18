@@ -198,6 +198,14 @@ enum {
 
 typedef uintptr_t kfft_t;
 
+typedef struct {
+    uint16_t vmajor;
+    uint16_t vminor;
+    uint16_t vpatch;
+
+    uint16_t flags;
+} kfft_info_t;
+
 KFFT_API kfft_t
 kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size_t* lenmem);
 KFFT_API void
@@ -208,20 +216,8 @@ KFFT_API uint32_t
 kfft_next_fast_size(uint32_t n);
 KFFT_API void
 kfft_free(kfft_t* cfg);
-KFFT_API uint8_t
-kfft_info(void);
-KFFT_API uint32_t
-kfft_version(void);
-
-static inline uint16_t
-kfft_vmajor(void) {
-    return (uint16_t)((kfft_version() & 0xFFFF0000) >> 16);
-}
-
-static inline uint16_t
-kfft_vminor(void) {
-    return (uint16_t)((kfft_version() & 0x0000FFFF));
-}
+KFFT_API void
+kfft_info(kfft_info_t* info);
 
 static inline uint32_t
 kfft_get_size(const uint32_t n) {
