@@ -35,6 +35,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits.h>
 
 #include "kfft.h"
+#include "kfft_trace.h"
 #include "config.h"
 
 #define MAX_FACTORS 32
@@ -81,9 +82,9 @@ typedef struct kfft_kstate {
 
     uint8_t prm_count;
     kfft_splan_t primes[MAX_ROOTS]; //
-    uint32_t rdr_idx[1];            // rader shuffle index (for level > 0)
+    uint32_t* ridx;                 // rader shuffle index (for level > 0)
 
-    kfft_cpx twiddles[1]; // twiddles
+    kfft_cpx* twiddles; // twiddles
 } kfft_kplan_t;
 
 typedef struct kfft_state {
@@ -219,24 +220,3 @@ zmemory(void* mem, size_t nmem) {
         KFFT_TMP_FREE(X);                                                                          \
         X = NULL;                                                                                  \
     } while (0)
-
-#if (defined KFFT_TRACE)
-    #define kfft_trace(fmt, ...) fprintf(stdout, fmt, __VA_ARGS__)
-    #define kfft_sztrace(msg, X)                                                                   \
-        do {                                                                                       \
-            register double nmem = (double)(X);                                                    \
-            if (nmem < 0x0400) {                                                                   \
-                kfft_trace(msg "%4.2f byte\n", nmem);                                              \
-            } else if ((nmem /= 0x0400) < 0x0400) {                                                \
-                kfft_trace(msg "%4.2f Kbyte\n", nmem);                                             \
-            } else if ((nmem /= 0x0400) < 0x0400) {                                                \
-                kfft_trace(msg "%4.2f Mbyte\n", nmem);                                             \
-            } else if ((nmem /= 0x0400) < 0x0400) {                                                \
-                kfft_trace(msg "%4.2f Gbyte\n", nmem);                                             \
-            }                                                                                      \
-        } while (0)
-
-#else
-    #define kfft_trace(fmt, ...) // noop
-    #define kfft_sztrace(msg, X) // noop
-#endif

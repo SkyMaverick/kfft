@@ -81,6 +81,18 @@ kfft_next_fast_size(uint32_t n) {
     return n;
 }
 
+static inline size_t
+kfft_calculate(const uint32_t nfft, const bool inverse_fft) {
+    size_t ret = sizeof(kfft_plan_t) + sizeof(kfft_cpx) * (nfft * 3/2);
+    size_t subsize = 0;
+    kfft_kconfig(nfft, inverse_fft, 0, NULL, &subsize);
+    
+    ret += subsize;
+    kfft_sztrace("KFFT real plan size: ", ret);
+
+    return ret;
+}
+
 /* ********************************************************************************
       TODO  Functionality
 ******************************************************************************** */
@@ -88,14 +100,8 @@ kfft_next_fast_size(uint32_t n) {
 KFFT_API uintptr_t
 kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size_t* lenmem) {
     kfft_plan_t* st = NULL;
-
-    size_t plan_size = sizeof(kfft_plan_t) + sizeof(kfft_cpx) * (nfft * 3 / 2);
-
-    size_t subsize = 0;
-    kfft_kconfig(nfft, inverse_fft, 0, NULL, &subsize);
-    size_t memneeded = plan_size + subsize;
-
-    kfft_sztrace("KFFT real plan size: ", memneeded);
+    
+    size_t memneeded = kfft_calculate (nfft, inverse_fft);
 
     kfft_pool_t* mmgr = NULL;
     if (lenmem == NULL) {
@@ -114,11 +120,7 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
     if (!st) {
     bailout:
         if (mmgr != NULL) {
-            if (A) {
-                kfft_allocator_clear(mmgr);
-            } else {
-                kfft_allocator_free(&mmgr);
-            }
+            kfft_allocator_free(&mmgr);
         }
         return 0;
     }

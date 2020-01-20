@@ -159,6 +159,40 @@ kfft_kinit(kfft_kplan_t* st) {
             phase *= -1;
         kf_cexp(st->twiddles + i, phase);
     }
+    
+    for (size_t i = 0; i < st->prm_count; i++) {
+        st->primes[i].splan = kfft_kconfig(st->primes[i].prime - 1, st->inverse, st->level + 1, st->mmgr, NULL);
+    }
+
+}
+
+static inline size_t
+kfft_calculate(const uint32_t nfft, const bool inverse_fft, const uint8_t level, kfft_kplan_t* st) {
+
+    size_t ret = sizeof(kfft_kplan_t) + sizeof(kfft_cpx) * nfft;
+
+    st->nfft = nfft;
+    st->inverse = inverse_fft;
+    st->level = level;
+
+    kf_factor(st);
+
+    /* Recursive clculate memory for plan and all subplans */
+    for (size_t i = 0; i < st->prm_count; i++) {
+        size_t snfft = st->primes[i].prime - 1;
+
+        size_t delta_mem = 0;
+        kfft_kconfig(snfft, inverse_fft, level + 1, NULL, &delta_mem);
+
+        ret += delta_mem;
+        if (level > 0)
+            ret += sizeof(uint32_t) * snfft; // index table
+    }
+
+    kfft_trace("[LEVEL %d] Change KFFT kernel plan", level);
+    kfft_sztrace(" size: ", ret);
+
+    return ret;
 }
 
 /*
@@ -169,50 +203,34 @@ kfft_kinit(kfft_kplan_t* st) {
  * It can be freed with free(), rather than a kfft-specific function.
  * */
 kfft_kplan_t*
-kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, const kfft_pool_t* A,
+kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, kfft_pool_t* A,
              size_t* lenmem) {
     kfft_kplan_t* st = NULL;
-    size_t plan_size = sizeof(kfft_kplan_t) + sizeof(kfft_cpx) * nfft;
-    size_t memneeded = plan_size;
 
     kfft_kplan_t tmp;
     KFFT_ZEROMEM(&tmp, sizeof(kfft_kplan_t));
 
-    size_t root = 0, inv_root = 0;
-
-    tmp.nfft = nfft;
-    tmp.inverse = inverse_fft;
-    tmp.level = level;
-
-    kf_factor(&tmp);
-
-    /* Recursive clculate memory for plan and all subplans */
-    for (size_t i = 0; i < tmp.prm_count; i++) {
-        size_t delta_mem = 0;
-        size_t snfft = tmp.primes[i].prime - 1;
-
-        kfft_kconfig(snfft, inverse_fft, level + 1, NULL, &delta_mem);
-        memneeded += delta_mem;
-        if (level > 0)
-            memneeded += sizeof(uint32_t) * snfft; // index table
-    }
-
-    kfft_trace("[LEVEL %d] Change KFFT kernel plan", level);
-    kfft_sztrace(" size: ", memneeded);
+    size_t memneeded = kfft_calculate(nfft, inverse_fft, level, &tmp);
 
     kfft_pool_t* mmgr = NULL;
     if (lenmem == NULL) {
-        mmgr = (A) ? (kfft_pool_t*)A : kfft_allocator_create(memneeded);
+        if (A == NULL) {
+            mmgr = kfft_allocator_create(memneeded);
+        } else
+            mmgr = A;
+
         if (mmgr)
-            st = kfft_internal_alloc(mmgr, plan_size);
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_kplan_t));
     } else {
         if (A && *lenmem >= memneeded) {
             mmgr = (kfft_pool_t*)A;
-            st = kfft_internal_alloc(mmgr, plan_size);
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_kplan_t));
         }
         *lenmem = memneeded;
     }
+
     if (!st) {
+    bailout:
         if (mmgr)
             kfft_allocator_free(&mmgr);
         return 0;
@@ -221,13 +239,16 @@ kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, c
     memcpy(st, &tmp, sizeof(kfft_kplan_t));
 
     st->mmgr = mmgr;
+    if (level > 0) {
+        st->ridx = kfft_internal_alloc(st->mmgr, sizeof(uint32_t) * st->nfft);
+        if (st->ridx == NULL)
+            goto bailout;
+    }
+    st->twiddles = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * st->nfft);
+    if (st->twiddles == NULL)
+        goto bailout;
 
     kfft_kinit(st);
-
-    for (size_t i = 0; i < tmp.prm_count; i++) {
-        size_t snfft = tmp.primes[i].prime - 1;
-        kfft_kconfig(snfft, inverse_fft, level + 1, st->mmgr, NULL);
-    }
 
     return st;
 }

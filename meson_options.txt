@@ -11,7 +11,7 @@ option ('enable_traces', type: 'boolean', value: 'true',
         description: 'use stdio messages in kfft lib')
 option ('enable_simd', type: 'boolean', value: 'false',
         description: 'use SIMD optimized code')
-option ('enable_alloca', type: 'boolean', value: 'true',
+option ('enable_alloca', type: 'boolean', value: 'false',
         description: 'use alloca for temporary buffers (dangerouse)')
 option ('enable_sysmath', type: 'boolean', value: 'true',
         description: 'use system (or custom) defines and math functions')
