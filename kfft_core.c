@@ -159,11 +159,11 @@ kfft_kinit(kfft_kplan_t* st) {
             phase *= -1;
         kf_cexp(st->twiddles + i, phase);
     }
-    
-    for (size_t i = 0; i < st->prm_count; i++) {
-        st->primes[i].splan = kfft_kconfig(st->primes[i].prime - 1, st->inverse, st->level + 1, st->mmgr, NULL);
-    }
 
+    for (size_t i = 0; i < st->prm_count; i++) {
+        st->primes[i].splan =
+            kfft_kconfig(st->primes[i].prime - 1, st->inverse, st->level + 1, st->mmgr, NULL);
+    }
 }
 
 static inline size_t
@@ -184,9 +184,8 @@ kfft_calculate(const uint32_t nfft, const bool inverse_fft, const uint8_t level,
         size_t delta_mem = 0;
         kfft_kconfig(snfft, inverse_fft, level + 1, NULL, &delta_mem);
 
+        delta_mem += sizeof(uint32_t) * snfft; // index table
         ret += delta_mem;
-        if (level > 0)
-            ret += sizeof(uint32_t) * snfft; // index table
     }
 
     kfft_trace("[LEVEL %d] Change KFFT kernel plan", level);

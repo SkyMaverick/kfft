@@ -83,10 +83,10 @@ kfft_next_fast_size(uint32_t n) {
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const bool inverse_fft) {
-    size_t ret = sizeof(kfft_plan_t) + sizeof(kfft_cpx) * (nfft * 3/2);
+    size_t ret = sizeof(kfft_plan_t) + sizeof(kfft_cpx) * (nfft * 3 / 2);
     size_t subsize = 0;
     kfft_kconfig(nfft, inverse_fft, 0, NULL, &subsize);
-    
+
     ret += subsize;
     kfft_sztrace("KFFT real plan size: ", ret);
 
@@ -100,8 +100,8 @@ kfft_calculate(const uint32_t nfft, const bool inverse_fft) {
 KFFT_API uintptr_t
 kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size_t* lenmem) {
     kfft_plan_t* st = NULL;
-    
-    size_t memneeded = kfft_calculate (nfft, inverse_fft);
+
+    size_t memneeded = kfft_calculate(nfft, inverse_fft);
 
     kfft_pool_t* mmgr = NULL;
     if (lenmem == NULL) {
