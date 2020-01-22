@@ -195,7 +195,7 @@ enum {
     KFFT_INFO_MEMLESS_MODE = 1 << 5,
 };
 
-enum { KFFT_FLAG_INVERSE = 1 << 0, KFFT_FLAG_REBUILD = 1 << 1 };
+enum { KFFT_FLAG_NORMAL = 0, KFFT_FLAG_INVERSE = 1 << 0, KFFT_FLAG_RENEW = 1 << 1 };
 
 typedef uintptr_t kfft_t;
 

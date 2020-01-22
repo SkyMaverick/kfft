@@ -227,6 +227,10 @@ kfft_kconfig(const uint32_t nfft, const uint32_t flags, const uint8_t level, kff
     } else {
         if (A && *lenmem >= memneeded) {
             mmgr = (kfft_pool_t*)A;
+
+            if (flags & KFFT_FLAG_RENEW)
+                kfft_allocator_clear(mmgr);
+
             st = kfft_internal_alloc(mmgr, sizeof(kfft_kplan_t));
 
             kfft_trace("[CORE] %s: %p\n", "Reuse allocator and create plan", (void*)mmgr);

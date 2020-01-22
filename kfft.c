@@ -124,7 +124,9 @@ kfft_config(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t
         if (A && *lenmem >= memneeded) {
             mmgr = (kfft_pool_t*)A;
 
-            kfft_allocator_clear(mmgr);
+            if (flags & KFFT_FLAG_RENEW)
+                kfft_allocator_clear(mmgr);
+
             st = kfft_internal_alloc(mmgr, sizeof(kfft_plan_t));
 
             kfft_trace("[REAL] %s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
@@ -141,9 +143,6 @@ kfft_config(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t
     }
 
     st->mmgr = mmgr;
-    st->substate = kfft_kconfig(nfft, flags, 0, mmgr, NULL);
-    if (st->substate == NULL)
-        goto bailout;
 
     st->tmpbuf = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * nfft);
     if (st->tmpbuf == NULL)
@@ -155,6 +154,10 @@ kfft_config(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t
         if (st->super_twiddles == NULL)
             goto bailout;
     }
+
+    st->substate = kfft_kconfig(nfft, flags | (!(KFFT_FLAG_RENEW)), 0, mmgr, NULL);
+    if (st->substate == NULL)
+        goto bailout;
 
     for (uint32_t i = 0; i < nfft / 2; ++i) {
         double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);
