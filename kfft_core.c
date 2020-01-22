@@ -215,8 +215,12 @@ kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, k
         if (A == NULL) {
             mmgr = kfft_allocator_create(memneeded);
             flag_create = true;
-        } else
+
+            kfft_trace("[CORE] %s: %p\n", "Create new allocator and plan", (void*)mmgr);
+        } else {
             mmgr = A;
+            kfft_trace("[CORE] %s: %p\n", "Use allocator and create plan", (void*)mmgr);
+        }
 
         if (mmgr)
             st = kfft_internal_alloc(mmgr, sizeof(kfft_kplan_t));
@@ -224,13 +228,15 @@ kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, k
         if (A && *lenmem >= memneeded) {
             mmgr = (kfft_pool_t*)A;
             st = kfft_internal_alloc(mmgr, sizeof(kfft_kplan_t));
+
+            kfft_trace("[CORE] %s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
         }
         *lenmem = memneeded;
     }
 
     if (!st) {
     bailout:
-        if (mmgr && flag_create)
+        if (mmgr && (flag_create == true))
             kfft_allocator_free(&mmgr);
         return 0;
     }

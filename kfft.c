@@ -107,10 +107,15 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
     if (lenmem == NULL) {
         if (A == 0) {
             size_t memneeded = kfft_calculate(nfft, inverse_fft);
+
             mmgr = kfft_allocator_create(memneeded);
             flag_create = true;
-        } else
+
+            kfft_trace("[REAL] %s: %p\n", "Create new allocator and plan", (void*)mmgr);
+        } else {
             mmgr = (kfft_pool_t*)A;
+            kfft_trace("[REAL] %s: %p\n", "Use allocator and create plan", (void*)mmgr);
+        }
 
         if (mmgr)
             st = kfft_internal_alloc(mmgr, sizeof(kfft_plan_t));
@@ -121,9 +126,12 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
 
             kfft_allocator_clear(mmgr);
             st = kfft_internal_alloc(mmgr, sizeof(kfft_plan_t));
+
+            kfft_trace("[REAL] %s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
         }
         *lenmem = memneeded;
     }
+
     if (!st) {
     bailout:
         if (mmgr && (flag_create == true)) {

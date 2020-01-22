@@ -2,7 +2,7 @@
 #include "kfft_trace.h"
 
 kfft_pool_t*
-kfft_allocator_init(void* mem, size_t nmem) {
+kfft_allocator_init(void* mem, const size_t nmem) {
     kfft_pool_t* ret = (kfft_pool_t*)mem;
     if (mem && (nmem > sizeof(kfft_pool_t))) {
         ret->allocated = nmem;
@@ -18,7 +18,7 @@ kfft_allocator_init(void* mem, size_t nmem) {
 }
 
 kfft_pool_t*
-kfft_allocator_create(size_t size) {
+kfft_allocator_create(const size_t size) {
     kfft_trace("[KIA] %s: %zu byte\n", "Allocator capacity", size);
 
     size_t memneed = sizeof(kfft_pool_t) + size;
@@ -28,7 +28,7 @@ kfft_allocator_create(size_t size) {
 }
 
 void*
-kfft_internal_alloc(kfft_pool_t* A, size_t nmem) {
+kfft_internal_alloc(kfft_pool_t* A, const size_t nmem) {
     uint8_t* ret = NULL;
 
     if (A && (nmem > 0)) {
@@ -45,7 +45,7 @@ kfft_internal_alloc(kfft_pool_t* A, size_t nmem) {
 }
 
 void
-kfft_internal_zmem(kfft_pool_t* A, void* ptr, size_t size) {
+kfft_internal_zmem(const kfft_pool_t* A, void* ptr, const size_t size) {
     if (A && ptr && (size > 0))
         if ((uint8_t*)ptr + size <= A->tail)
             KFFT_ZEROMEM(ptr, size);
@@ -65,6 +65,6 @@ kfft_allocator_free(kfft_pool_t** A) {
 }
 
 size_t
-kfft_allocator_empty(kfft_pool_t* A) {
+kfft_allocator_empty(const kfft_pool_t* A) {
     return (A) ? A->tail - A->cur : 0;
 }

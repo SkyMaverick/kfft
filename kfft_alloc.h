@@ -4,19 +4,19 @@
 #include "kfft_guts.h"
 
 kfft_pool_t*
-kfft_allocator_create(size_t size);
+kfft_allocator_create(const size_t size);
 
 kfft_pool_t*
-kfft_allocator_init(void* mem, size_t nmem);
+kfft_allocator_init(void* mem, const size_t nmem);
 
 void*
-kfft_internal_alloc(kfft_pool_t* A, size_t nmem);
+kfft_internal_alloc(kfft_pool_t* A, const size_t nmem);
 
 size_t
-kfft_allocator_empty(kfft_pool_t* A);
+kfft_allocator_empty(const kfft_pool_t* A);
 
 void
-kfft_internal_zmem(kfft_pool_t* A, void* ptr, size_t size);
+kfft_internal_zmem(const kfft_pool_t* A, void* ptr, const size_t size);
 
 void
 kfft_allocator_clear(kfft_pool_t* A);
