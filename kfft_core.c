@@ -188,9 +188,6 @@ kfft_calculate(const uint32_t nfft, const bool inverse_fft, const uint8_t level,
         ret += delta_mem;
     }
 
-    kfft_trace("[LEVEL %d] Change KFFT kernel plan", level);
-    kfft_sztrace(" size: ", ret);
-
     return ret;
 }
 
@@ -212,9 +209,12 @@ kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, k
     size_t memneeded = kfft_calculate(nfft, inverse_fft, level, &tmp);
 
     kfft_pool_t* mmgr = NULL;
+    bool flag_create = false;
+
     if (lenmem == NULL) {
         if (A == NULL) {
             mmgr = kfft_allocator_create(memneeded);
+            flag_create = true;
         } else
             mmgr = A;
 
@@ -230,7 +230,7 @@ kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, k
 
     if (!st) {
     bailout:
-        if (mmgr)
+        if (mmgr && flag_create)
             kfft_allocator_free(&mmgr);
         return 0;
     }

@@ -28,6 +28,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kfft_guts.h"
 #include "kfft_core.h"
 #include "kfft_alloc.h"
+#include "kfft_trace.h"
 /* The guts header contains all the multiplication and addition macros that are defined for
  fixed or floating point complex numbers.  It also delares the kf_ internal functions.
  */
@@ -88,7 +89,6 @@ kfft_calculate(const uint32_t nfft, const bool inverse_fft) {
     kfft_kconfig(nfft, inverse_fft, 0, NULL, &subsize);
 
     ret += subsize;
-    kfft_sztrace("KFFT real plan size: ", ret);
 
     return ret;
 }
@@ -101,14 +101,21 @@ KFFT_API uintptr_t
 kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size_t* lenmem) {
     kfft_plan_t* st = NULL;
 
-    size_t memneeded = kfft_calculate(nfft, inverse_fft);
-
     kfft_pool_t* mmgr = NULL;
+    bool flag_create = false;
+
     if (lenmem == NULL) {
-        mmgr = (A) ? (kfft_pool_t*)A : kfft_allocator_create(memneeded);
+        if (A == 0) {
+            size_t memneeded = kfft_calculate(nfft, inverse_fft);
+            mmgr = kfft_allocator_create(memneeded);
+            flag_create = true;
+        } else
+            mmgr = (kfft_pool_t*)A;
+
         if (mmgr)
             st = kfft_internal_alloc(mmgr, sizeof(kfft_plan_t));
     } else {
+        size_t memneeded = kfft_calculate(nfft, inverse_fft);
         if (A && *lenmem >= memneeded) {
             mmgr = (kfft_pool_t*)A;
 
@@ -119,7 +126,7 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
     }
     if (!st) {
     bailout:
-        if (mmgr != NULL) {
+        if (mmgr && (flag_create == true)) {
             kfft_allocator_free(&mmgr);
         }
         return 0;
@@ -174,7 +181,7 @@ kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
     kfft_plan_t* st = (kfft_plan_t*)stu;
 
     if (st->substate->inverse) {
-        fprintf(stderr, "kiss fft usage error: improper alloc\n");
+        kfft_trace("%s\n", "kiss fft usage error: improper alloc");
         exit(1);
     }
 
@@ -221,7 +228,7 @@ kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
     kfft_plan_t* st = (kfft_plan_t*)stu;
 
     if (st->substate->inverse == 0) {
-        fprintf(stderr, "kiss fft usage error: improper alloc\n");
+        kfft_trace("%s\n", "kiss fft usage error: improper alloc");
         exit(1);
     }
 

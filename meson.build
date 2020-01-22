@@ -131,6 +131,8 @@ libkfft = shared_library (meson.project_name(), kfft_src,
                           override_options : optimize_opts,
                           install: true)
 
+install_headers('kfft.h', subdir: 'kfft')
+
 if get_option('enable_tests')
     subdir('test')
 endif

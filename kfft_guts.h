@@ -36,6 +36,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "kfft.h"
 #include "kfft_trace.h"
+
 #include "config.h"
 
 #define MAX_FACTORS 32

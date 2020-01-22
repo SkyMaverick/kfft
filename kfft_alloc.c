@@ -1,5 +1,4 @@
 #include "kfft_alloc.h"
-
 #include "kfft_trace.h"
 
 kfft_pool_t*
