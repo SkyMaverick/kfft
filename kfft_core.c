@@ -155,24 +155,24 @@ kfft_kinit(kfft_kplan_t* st) {
 
     for (uint32_t i = 0; i < st->nfft; ++i) {
         kfft_scalar phase = -2 * KFFT_CONST_PI * i / st->nfft;
-        if (st->inverse)
+        if (st->flags & KFFT_FLAG_INVERSE)
             phase *= -1;
         kf_cexp(st->twiddles + i, phase);
     }
 
     for (size_t i = 0; i < st->prm_count; i++) {
         st->primes[i].splan =
-            kfft_kconfig(st->primes[i].prime - 1, st->inverse, st->level + 1, st->mmgr, NULL);
+            kfft_kconfig(st->primes[i].prime - 1, st->flags, st->level + 1, st->mmgr, NULL);
     }
 }
 
 static inline size_t
-kfft_calculate(const uint32_t nfft, const bool inverse_fft, const uint8_t level, kfft_kplan_t* st) {
+kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_kplan_t* st) {
 
     size_t ret = sizeof(kfft_kplan_t) + sizeof(kfft_cpx) * nfft;
 
     st->nfft = nfft;
-    st->inverse = inverse_fft;
+    st->flags = flags;
     st->level = level;
 
     kf_factor(st);
@@ -182,7 +182,7 @@ kfft_calculate(const uint32_t nfft, const bool inverse_fft, const uint8_t level,
         size_t snfft = st->primes[i].prime - 1;
 
         size_t delta_mem = 0;
-        kfft_kconfig(snfft, inverse_fft, level + 1, NULL, &delta_mem);
+        kfft_kconfig(snfft, flags, level + 1, NULL, &delta_mem);
 
         delta_mem += sizeof(uint32_t) * snfft; // index table
         ret += delta_mem;
@@ -199,14 +199,14 @@ kfft_calculate(const uint32_t nfft, const bool inverse_fft, const uint8_t level,
  * It can be freed with free(), rather than a kfft-specific function.
  * */
 kfft_kplan_t*
-kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, kfft_pool_t* A,
+kfft_kconfig(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
              size_t* lenmem) {
     kfft_kplan_t* st = NULL;
 
     kfft_kplan_t tmp;
     KFFT_ZEROMEM(&tmp, sizeof(kfft_kplan_t));
 
-    size_t memneeded = kfft_calculate(nfft, inverse_fft, level, &tmp);
+    size_t memneeded = kfft_calculate(nfft, flags, level, &tmp);
 
     kfft_pool_t* mmgr = NULL;
     bool flag_create = false;

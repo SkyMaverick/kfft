@@ -41,22 +41,22 @@ kfft_info(kfft_info_t* info) {
     info->vpatch = KFFT_PATCH_VERSION;
 
 #if defined(KFFT_TRACE)
-    info->flags |= KFFT_FLAG_INFO_TRACE;
+    info->flags |= KFFT_INFO_TRACE;
 #endif
 #if defined(KFFT_USE_SIMD)
-    info->flags |= KFFT_FLAG_INFO_USE_SIMD;
+    info->flags |= KFFT_INFO_USE_SIMD;
 #endif
 #if defined(KFFT_USE_ALLOCA)
-    info->flags |= KFFT_FLAG_INFO_USE_ALLOCA;
+    info->flags |= KFFT_INFO_USE_ALLOCA;
 #endif
 #if defined(KFFT_USE_SYSMATH)
-    info->flags |= KFFT_FLAG_INFO_USE_SYSMATH;
+    info->flags |= KFFT_INFO_USE_SYSMATH;
 #endif
 #if defined(KFFT_RADER_ALGO)
-    info->flags |= KFFT_FLAG_INFO_RADER_ALGO;
+    info->flags |= KFFT_INFO_RADER_ALGO;
 #endif
 #if defined(KFFT_MEMLESS_MODE)
-    info->flags |= KFFT_FLAG_INFO_MEMLESS_MODE;
+    info->flags |= KFFT_INFO_MEMLESS_MODE;
 #endif
 }
 
@@ -83,10 +83,10 @@ kfft_next_fast_size(uint32_t n) {
 }
 
 static inline size_t
-kfft_calculate(const uint32_t nfft, const bool inverse_fft) {
+kfft_calculate(const uint32_t nfft, const uint32_t flags) {
     size_t ret = sizeof(kfft_plan_t) + sizeof(kfft_cpx) * (nfft * 3 / 2);
     size_t subsize = 0;
-    kfft_kconfig(nfft, inverse_fft, 0, NULL, &subsize);
+    kfft_kconfig(nfft, flags, 0, NULL, &subsize);
 
     ret += subsize;
 
@@ -98,7 +98,7 @@ kfft_calculate(const uint32_t nfft, const bool inverse_fft) {
 ******************************************************************************** */
 
 KFFT_API uintptr_t
-kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size_t* lenmem) {
+kfft_config(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t* lenmem) {
     kfft_plan_t* st = NULL;
 
     kfft_pool_t* mmgr = NULL;
@@ -106,7 +106,7 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
 
     if (lenmem == NULL) {
         if (A == 0) {
-            size_t memneeded = kfft_calculate(nfft, inverse_fft);
+            size_t memneeded = kfft_calculate(nfft, flags);
 
             mmgr = kfft_allocator_create(memneeded);
             flag_create = true;
@@ -120,7 +120,7 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
         if (mmgr)
             st = kfft_internal_alloc(mmgr, sizeof(kfft_plan_t));
     } else {
-        size_t memneeded = kfft_calculate(nfft, inverse_fft);
+        size_t memneeded = kfft_calculate(nfft, flags);
         if (A && *lenmem >= memneeded) {
             mmgr = (kfft_pool_t*)A;
 
@@ -141,7 +141,7 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
     }
 
     st->mmgr = mmgr;
-    st->substate = kfft_kconfig(nfft, inverse_fft, 0, mmgr, NULL);
+    st->substate = kfft_kconfig(nfft, flags, 0, mmgr, NULL);
     if (st->substate == NULL)
         goto bailout;
 
@@ -158,7 +158,7 @@ kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size
 
     for (uint32_t i = 0; i < nfft / 2; ++i) {
         double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);
-        if (inverse_fft)
+        if (flags & KFFT_FLAG_INVERSE)
             phase *= -1;
         kf_cexp(st->super_twiddles + i, phase);
     }
@@ -188,7 +188,7 @@ kfft(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
 
     kfft_plan_t* st = (kfft_plan_t*)stu;
 
-    if (st->substate->inverse) {
+    if (st->substate->flags & KFFT_FLAG_INVERSE) {
         kfft_trace("%s\n", "kiss fft usage error: improper alloc");
         exit(1);
     }
@@ -235,7 +235,7 @@ kffti(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
 
     kfft_plan_t* st = (kfft_plan_t*)stu;
 
-    if (st->substate->inverse == 0) {
+    if (!(st->substate->flags & KFFT_FLAG_INVERSE)) {
         kfft_trace("%s\n", "kiss fft usage error: improper alloc");
         exit(1);
     }

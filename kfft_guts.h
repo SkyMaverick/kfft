@@ -75,8 +75,9 @@ typedef struct kfft_kstate {
     kfft_pool_t* mmgr;
 
     uint32_t nfft;
-    bool inverse;
     uint32_t level;
+
+    uint32_t flags;
 
     uint8_t fac_count;                 // factors count
     uint32_t factors[2 * MAX_FACTORS]; // factor values
@@ -183,7 +184,7 @@ get_kernel_twiddle(uint32_t i, const kfft_kplan_t* P) {
     kfft_cpx ret;
 
     kfft_scalar phase = -2 * KFFT_CONST_PI * i / P->nfft;
-    if (P->inverse)
+    if (P->flags & KFFT_CONFIG_INVERSE)
         phase *= -1;
 
     kf_cexp(&ret, phase);

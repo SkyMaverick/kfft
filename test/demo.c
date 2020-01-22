@@ -12,17 +12,17 @@ display_info(void) {
     fprintf(stdout, "LibKFFT version : %d.%d.%d\n\n", info.vmajor, info.vminor, info.vpatch);
 
     fprintf(stdout, "%s - %s\n", "Enable trace messages",
-            (info.flags & KFFT_FLAG_INFO_TRACE) ? "YES" : "NO");
+            (info.flags & KFFT_INFO_TRACE) ? "YES" : "NO");
     fprintf(stdout, "%s - %s\n", "Enable use SIMD instructions",
-            (info.flags & KFFT_FLAG_INFO_USE_SIMD) ? "YES" : "NO");
+            (info.flags & KFFT_INFO_USE_SIMD) ? "YES" : "NO");
     fprintf(stdout, "%s - %s\n", "Enable use alloca() function",
-            (info.flags & KFFT_FLAG_INFO_USE_ALLOCA) ? "YES" : "NO");
+            (info.flags & KFFT_INFO_USE_ALLOCA) ? "YES" : "NO");
     fprintf(stdout, "%s - %s\n", "Enable use system math functions",
-            (info.flags & KFFT_FLAG_INFO_USE_SYSMATH) ? "YES" : "NO");
+            (info.flags & KFFT_INFO_USE_SYSMATH) ? "YES" : "NO");
     fprintf(stdout, "%s - %s\n", "Enable use Rader algoritm",
-            (info.flags & KFFT_FLAG_INFO_RADER_ALGO) ? "YES" : "NO");
+            (info.flags & KFFT_INFO_RADER_ALGO) ? "YES" : "NO");
     fprintf(stdout, "%s - %s\n", "Enable lesser memory mode",
-            (info.flags & KFFT_FLAG_INFO_MEMLESS_MODE) ? "YES" : "NO");
+            (info.flags & KFFT_INFO_MEMLESS_MODE) ? "YES" : "NO");
 }
 
 int

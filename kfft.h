@@ -187,13 +187,15 @@ typedef struct {
 } kfft_cpx;
 
 enum {
-    KFFT_FLAG_INFO_TRACE = 1 << 0,
-    KFFT_FLAG_INFO_USE_SIMD = 1 << 1,
-    KFFT_FLAG_INFO_USE_ALLOCA = 1 << 2,
-    KFFT_FLAG_INFO_USE_SYSMATH = 1 << 3,
-    KFFT_FLAG_INFO_RADER_ALGO = 1 << 4,
-    KFFT_FLAG_INFO_MEMLESS_MODE = 1 << 5,
+    KFFT_INFO_TRACE = 1 << 0,
+    KFFT_INFO_USE_SIMD = 1 << 1,
+    KFFT_INFO_USE_ALLOCA = 1 << 2,
+    KFFT_INFO_USE_SYSMATH = 1 << 3,
+    KFFT_INFO_RADER_ALGO = 1 << 4,
+    KFFT_INFO_MEMLESS_MODE = 1 << 5,
 };
+
+enum { KFFT_FLAG_INVERSE = 1 << 0, KFFT_FLAG_REBUILD = 1 << 1 };
 
 typedef uintptr_t kfft_t;
 
@@ -206,7 +208,7 @@ typedef struct {
 } kfft_info_t;
 
 KFFT_API kfft_t
-kfft_config(const uint32_t nfft, const bool inverse_fft, const uintptr_t A, size_t* lenmem);
+kfft_config(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t* lenmem);
 KFFT_API void
 kfft(kfft_t cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
 KFFT_API void

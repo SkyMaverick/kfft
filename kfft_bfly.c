@@ -43,7 +43,7 @@ kf_bfly4(kfft_cpx* Fout, const uint32_t fstride, const kfft_kplan_t* st, const u
         tw3 += fstride * 3;
         C_ADDTO(*Fout, scratch[3]);
 
-        if (st->inverse) {
+        if (st->flags & KFFT_FLAG_INVERSE) {
             Fout[m].r = scratch[5].r - scratch[4].i;
             Fout[m].i = scratch[5].i + scratch[4].r;
             Fout[m3].r = scratch[5].r + scratch[4].i;

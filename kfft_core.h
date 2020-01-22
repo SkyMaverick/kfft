@@ -31,7 +31,7 @@ _kfr_power(uint32_t x, uint32_t y, uint32_t m) {
 #endif
 
 KFFT_API kfft_kplan_t*
-kfft_kconfig(const uint32_t nfft, const bool inverse_fft, const uint8_t level, kfft_pool_t* A,
+kfft_kconfig(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
              size_t* lenmem);
 
 KFFT_API void
