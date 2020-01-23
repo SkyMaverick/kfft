@@ -17,7 +17,7 @@ kfft_src = '''
     kfft.c
     kfft_alloc.c
     kfft_alloc.h
-    kfft_core.c
+    kfft_cpx.c
     kfft_ext.c
     kfft_rader.c
 '''.split()

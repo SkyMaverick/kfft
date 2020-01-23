@@ -162,7 +162,7 @@ kfft_kinit(kfft_kplan_t* st) {
 
     for (size_t i = 0; i < st->prm_count; i++) {
         st->primes[i].splan =
-            kfft_kconfig(st->primes[i].prime - 1, st->flags, st->level + 1, st->mmgr, NULL);
+            kfft_config_cpx(st->primes[i].prime - 1, st->flags, st->level + 1, st->mmgr, NULL);
     }
 }
 
@@ -182,7 +182,7 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
         size_t snfft = st->primes[i].prime - 1;
 
         size_t delta_mem = 0;
-        kfft_kconfig(snfft, flags, level + 1, NULL, &delta_mem);
+        kfft_config_cpx(snfft, flags, level + 1, NULL, &delta_mem);
 
         delta_mem += sizeof(uint32_t) * snfft; // index table
         ret += delta_mem;
@@ -199,8 +199,8 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
  * It can be freed with free(), rather than a kfft-specific function.
  * */
 kfft_kplan_t*
-kfft_kconfig(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
-             size_t* lenmem) {
+kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
+                size_t* lenmem) {
     kfft_kplan_t* st = NULL;
 
     kfft_kplan_t tmp;
@@ -281,6 +281,6 @@ kfft_kstride(kfft_kplan_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_
 }
 
 void
-__kfft(kfft_kplan_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
+kfft_eval_cpx(kfft_kplan_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_kstride(cfg, fin, fout, 1);
 }

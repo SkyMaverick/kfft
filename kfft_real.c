@@ -25,8 +25,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "kfft_guts.h"
-#include "kfft_cpx.h"
+#include "kfft.h"
 #include "kfft_alloc.h"
 #include "kfft_trace.h"
 /* The guts header contains all the multiplication and addition macros that are defined for
@@ -35,7 +34,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
-    size_t ret = sizeof(kfft_plan_t) + sizeof(kfft_cpx) * (nfft * 3 / 2);
+    size_t ret = sizeof(kfft_real_t) + sizeof(kfft_cpx) * (nfft * 3 / 2);
     size_t subsize = 0;
     kfft_config_cpx(nfft, flags, 0, NULL, &subsize);
 
@@ -48,9 +47,9 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
       TODO  Functionality
 ******************************************************************************** */
 
-KFFT_API uintptr_t
+KFFT_API kfft_real_t*
 kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t* lenmem) {
-    kfft_plan_t* st = NULL;
+    kfft_real_t* st = NULL;
 
     kfft_pool_t* mmgr = NULL;
     bool flag_create = false;
@@ -69,7 +68,7 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, s
         }
 
         if (mmgr)
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_plan_t));
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_real_t));
     } else {
         size_t memneeded = kfft_calculate(nfft, flags);
         if (A && *lenmem >= memneeded) {
@@ -78,7 +77,7 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, s
             if (flags & KFFT_FLAG_RENEW)
                 kfft_allocator_clear(mmgr);
 
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_plan_t));
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_real_t));
 
             kfft_trace("[REAL] %s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
         }
@@ -131,16 +130,16 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, s
     #endif
     kfft_trace("%s\n", "");
 #endif /* TRACE */
-    return (uintptr_t)st;
+    return st;
 }
 
 KFFT_API void
-kfft_eval_real(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
+kfft_eval_real(kfft_real_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
     /* input buffer timedata is stored row-wise */
     uint32_t k, ncfft;
     kfft_cpx fpnk, fpk, f1k, f2k, tw, tdc;
 
-    kfft_plan_t* st = (kfft_plan_t*)stu;
+    kfft_real_t* st = (kfft_real_t*)stu;
 
     if (st->substate->flags & KFFT_FLAG_INVERSE) {
         kfft_trace("%s\n", "kiss fft usage error: improper alloc");
@@ -183,11 +182,11 @@ kfft_eval_real(uintptr_t stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
 }
 
 KFFT_API void
-kfft_evali_real(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
+kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
     /* input buffer timedata is stored row-wise */
     uint32_t k, ncfft;
 
-    kfft_plan_t* st = (kfft_plan_t*)stu;
+    kfft_real_t* st = (kfft_real_t*)stu;
 
     if (!(st->substate->flags & KFFT_FLAG_INVERSE)) {
         kfft_trace("%s\n", "kiss fft usage error: improper alloc");
@@ -224,10 +223,10 @@ kfft_evali_real(uintptr_t stu, const kfft_cpx* freqdata, kfft_scalar* timedata) 
 }
 
 KFFT_API void
-kfft_free(uintptr_t* cfg) {
+kfft_free(kfft_real_t** cfg) {
     if (cfg && *cfg) {
         kfft_trace("Cleanup plan: %p\n", (void*)(*cfg));
-        kfft_plan_t* st = (kfft_plan_t*)(*cfg);
+        kfft_real_t* st = (kfft_real_t*)(*cfg);
         if (st->mmgr != NULL) {
             kfft_allocator_free(&(st->mmgr));
         }

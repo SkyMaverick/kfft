@@ -213,11 +213,11 @@ typedef struct {
 } kfft_info_t;
 
 KFFT_API kfft_t
-kfft_config(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t* lenmem);
+kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t* lenmem);
 KFFT_API void
-kfft(kfft_t cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
+kfft_eval_real(kfft_t cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
 KFFT_API void
-kffti(kfft_t cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
+kfft_evali_real(kfft_t cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
 KFFT_API uint32_t
 kfft_next_fast_size(uint32_t n);
 KFFT_API void
@@ -228,7 +228,7 @@ kfft_info(kfft_info_t* info);
 static inline uint32_t
 kfft_get_size(const uint32_t n) {
     size_t memneeded = 0;
-    kfft_config(n, 0, 0, &memneeded);
+    kfft_config_real(n, 0, 0, &memneeded);
     return memneeded;
 }
 

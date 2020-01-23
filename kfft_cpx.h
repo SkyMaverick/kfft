@@ -31,11 +31,11 @@ _kfr_power(uint32_t x, uint32_t y, uint32_t m) {
 #endif
 
 KFFT_API kfft_kplan_t*
-kfft_kconfig(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
-             size_t* lenmem);
+kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
+                size_t* lenmem);
 
 KFFT_API void
-__kfft(kfft_kplan_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
+kfft_eval_cpx(kfft_kplan_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
 
 #define kfft_kfree(X)                                                                              \
     do {                                                                                           \
