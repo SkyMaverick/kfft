@@ -10,7 +10,7 @@ get_super_twiddle(uint32_t i, kfft_plan_t* P) {
     kfft_cpx ret;
 
     kfft_scalar phase = -KFFT_CONST_PI * ((kfft_scalar)(i + 1) / P->substate->nfft + .5);
-    if (P->substate->inverse)
+    if (P->substate->flags & KFFT_FLAG_INVERSE)
         phase *= -1;
     kf_cexp(&ret, phase);
     return ret;
