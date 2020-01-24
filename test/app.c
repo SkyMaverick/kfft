@@ -26,7 +26,7 @@ kfft_ktest(kfft_scalar* amp_scalar, kfft_cpx* tmp_buffer, size_t size) {
     clock_t t_start = clock();
 
     kfft_real_t* FCfg = kfft_config_real(size, 0, 0, NULL);
-    if (kfft_isnull(FCfg)) {
+    if (FCfg == NULL) {
         assert("Allocation FAIL");
     }
     kfft_eval_real(FCfg, amp_scalar, tmp_buffer);
@@ -36,7 +36,7 @@ kfft_ktest(kfft_scalar* amp_scalar, kfft_cpx* tmp_buffer, size_t size) {
 #else
 
     kfft_real_t* FCfg = kfft_config_real(size, 0, 0, NULL);
-    if (kfft_isnull(FCfg)) {
+    if (FCfg == NULL) {
         assert("Allocation FAIL");
     }
     clock_t t_start = clock();

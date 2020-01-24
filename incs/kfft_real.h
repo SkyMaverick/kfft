@@ -40,8 +40,3 @@ KFFT_API uint32_t
 kfft_next_fast_size(uint32_t n);
 KFFT_API void
 kfft_free(kfft_real_t** cfg);
-
-static inline bool
-kfft_isnull(kfft_real_t* in) {
-    return (in == 0) ? true : false;
-}
