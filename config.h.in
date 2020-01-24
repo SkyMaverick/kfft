@@ -10,3 +10,7 @@
 #mesondefine KFFT_USE_SYSMATH
 #mesondefine KFFT_RADER_ALGO
 #mesondefine KFFT_MEMLESS_MODE
+
+#mesondefine KFFT_RADER_LIMIT
+#mesondefine KFFT_PLAN_LEVEL
+#mesondefine KFFT_BFLY_LEVEL

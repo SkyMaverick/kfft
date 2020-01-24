@@ -9,26 +9,7 @@ typedef struct kfft_state {
     kfft_cpx* tmpbuf;
     // TODO memless
     kfft_cpx* super_twiddles;
-#ifdef KFFT_USE_SIMD
-    void* pad;
-#endif
 } kfft_real_t;
-
-#ifndef KFFT_MEMLESS_MODE
-    #define SUPER_TWIDDLE(i, P) P->super_twiddles[i]
-#else
-static inline kfft_cpx
-get_super_twiddle(uint32_t i, kfft_plan_t* P) {
-    kfft_cpx ret;
-
-    kfft_scalar phase = -KFFT_CONST_PI * ((kfft_scalar)(i + 1) / P->substate->nfft + .5);
-    if (P->substate->flags & KFFT_FLAG_INVERSE)
-        phase *= -1;
-    kf_cexp(&ret, phase);
-    return ret;
-}
-    #define SUPER_TWIDDLE(i, P) get_super_twiddle(i, P)
-#endif
 
 KFFT_API kfft_real_t*
 kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t* lenmem);

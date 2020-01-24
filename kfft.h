@@ -13,18 +13,7 @@
 extern "C" {
 #endif
 
-#ifndef kfft_scalar
-    #define kfft_scalar double
-#endif
-
-#ifndef KFFT_RADER_LEVEL
-    #define KFFT_RADER_LEVEL 3
-#endif
-#ifndef KFFR_RADER_LIMIT
-    #define KFFT_RADER_LIMIT 50
-#endif
-
-#define KFFT_PLAN_ALLOCATOR(X) (*((uintptr_t*)(X)))
+typedef double kfft_scalar;
 
 typedef struct {
     kfft_scalar r;
@@ -57,14 +46,14 @@ typedef struct {
 
 #include "incs/kfft_macro.h"
 #include "incs/kfft_system.h"
-#include "incs/kfft_trace.h"
 #include "incs/kfft_alloc.h"
 
-#include "incs/kfft_math.h"
 #include "incs/kfft_cpx.h"
 #include "incs/kfft_rader.h"
 
 #include "incs/kfft_real.h"
+
+#define KFFT_PLAN_ALLOCATOR(X) (*((uintptr_t*)(X)))
 
 KFFT_API void
 kfft_info(kfft_info_t* info);

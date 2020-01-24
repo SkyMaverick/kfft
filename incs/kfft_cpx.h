@@ -27,28 +27,6 @@ typedef struct kfft_kstate {
     kfft_cpx* twiddles; // twiddles
 } kfft_comp_t;
 
-#define MAX_BFLY_LEVEL 5
-#define MAX_PLAN_LEVEL 3
-
-#ifndef KFFT_MEMLESS_MODE
-    #define TWIDDLE(i, P) P->twiddles[i]
-#else
-static inline kfft_cpx
-get_kernel_twiddle(uint32_t i, const kfft_kplan_t* P) {
-    kfft_cpx ret;
-
-    kfft_scalar phase = -2 * KFFT_CONST_PI * i / P->nfft;
-    if (P->flags & KFFT_CONFIG_INVERSE)
-        phase *= -1;
-
-    kf_cexp(&ret, phase);
-    return ret;
-}
-
-    #define TWIDDLE(i, P) get_kernel_twiddle(i, P)
-#endif /* memless */
-
-#ifdef KFFT_RADER_ALGO
 static inline uint32_t
 _kfr_power(uint32_t x, uint32_t y, uint32_t m) {
     if (y == 0)
@@ -58,7 +36,6 @@ _kfr_power(uint32_t x, uint32_t y, uint32_t m) {
 
     return (y % 2 == 0) ? (uint32_t)p : (uint32_t)((x * p) % m);
 }
-#endif
 
 KFFT_API kfft_comp_t*
 kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,

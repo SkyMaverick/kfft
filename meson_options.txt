@@ -24,3 +24,10 @@ option ('enable_memless', type: 'boolean', value: 'false',
 
 option ('build_library_api', type : 'combo', choices: ['export', 'import', 'none'], value: 'export',
         description: 'library API type')
+
+option ('limit_rader', type: 'integer', value: '50',
+        description: 'barier use rader or generic algorithm')
+option ('level_plan_max', type: 'integer', value: '3',
+        description: 'max requrcive subplan level')
+option ('level_bfly_max', type: 'integer', value: '5',
+        description: 'max butterfly level')

@@ -1,34 +1,26 @@
-/*
-Copyright (c) 2003-2010, Mark Borgerding
-              2018-2019, Alexander Smirnov
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted
-provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright notice, this list of conditions
-and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, this list of
-conditions and the following disclaimer in the documentation and/or other materials provided with
-the distribution.
-    * Neither the author nor the names of any contributors may be used to endorse or promote
-products derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
-THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-#include "kfft.h"
 /* The guts header contains all the multiplication and addition macros that are defined for
  fixed or floating point complex numbers.  It also delares the kf_ internal functions.
  */
+#include "kfft.h"
+
+#include "kfft_math.h"
+#include "kfft_trace.h"
+
+#ifndef KFFT_MEMLESS_MODE
+    #define SUPER_TWIDDLE(i, P) P->super_twiddles[i]
+#else
+static inline kfft_cpx
+get_super_twiddle(uint32_t i, kfft_plan_t* P) {
+    kfft_cpx ret;
+
+    kfft_scalar phase = -KFFT_CONST_PI * ((kfft_scalar)(i + 1) / P->substate->nfft + .5);
+    if (P->substate->flags & KFFT_FLAG_INVERSE)
+        phase *= -1;
+    kf_cexp(&ret, phase);
+    return ret;
+}
+    #define SUPER_TWIDDLE(i, P) get_super_twiddle(i, P)
+#endif
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {

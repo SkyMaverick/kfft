@@ -79,7 +79,7 @@ endif
 
 # Define configuration file
 
-kfft_cfg = configuration_data({
+kfft_cfg_data = configuration_data({
     'KFFT_MAJOR_VERSION': kfft_ver[0],
     'KFFT_MINOR_VERSION': kfft_ver[1],
     'KFFT_PATCH_VERSION': kfft_ver[2],
@@ -90,11 +90,14 @@ kfft_cfg = configuration_data({
     'KFFT_USE_SYSMATH'  : get_option('enable_sysmath')  ,
     'KFFT_RADER_ALGO'   : get_option('enable_extended') ,
     'KFFT_MEMLESS_MODE' : get_option('enable_memless')  ,
+    'KFFT_RADER_LIMIT'  : get_option('limit_rader')     ,
+    'KFFT_PLAN_LEVEL'   : get_option('level_plan_max')  ,
+    'KFFT_BFLY_LEVEL'   : get_option('level_bfly_max')  ,
 })
 
-configure_file (input: 'config.h.in',
-                output: 'kfft_config.h',
-                configuration: kfft_cfg)
+kfft_cfg = configure_file (input: 'config.h.in',
+                           output: 'kfft_config.h',
+                           configuration: kfft_cfg_data)
 
 # Apply all argments
 
@@ -135,6 +138,15 @@ libkfft = shared_library (meson.project_name(), kfft_src,
                           install: true)
 
 install_headers('kfft.h', subdir: 'kfft')
+install_headers('''
+        incs/kfft_alloc.h
+        incs/kfft_cpx.h
+        incs/kfft_macro.h
+        incs/kfft_rader.h
+        incs/kfft_real.h
+        incs/kfft_system.h
+    '''.split(), subdir: 'kfft/incs')
+install_headers(kfft_cfg, subdir: 'kfft/incs')
 
 if get_option('enable_tests')
     subdir('test')

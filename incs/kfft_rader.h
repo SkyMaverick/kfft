@@ -1,7 +1,5 @@
 #pragma once
 
-#include "kfft_guts.h"
-
 #if defined(KFFT_RADER_ALGO)
 
 void

@@ -1,5 +1,29 @@
 #include "kfft.h"
 
+#include "kfft_trace.h"
+#include "kfft_math.h"
+
+/* clang-format off */
+
+#ifndef KFFT_MEMLESS_MODE
+    #define TWIDDLE(i, P) P->twiddles[i]
+#else
+    static inline kfft_cpx
+    get_kernel_twiddle(uint32_t i, const kfft_kplan_t* P) {
+        kfft_cpx ret;
+
+        kfft_scalar phase = -2 * KFFT_CONST_PI * i / P->nfft;
+        if (P->flags & KFFT_CONFIG_INVERSE)
+            phase *= -1;
+
+        kf_cexp(&ret, phase);
+        return ret;
+    }
+    #define TWIDDLE(i, P) get_kernel_twiddle(i, P)
+#endif /* memless */
+
+/* clang-format on */
+
 #include "kfft_generic.c"
 #include "kfft_bfly.c"
 
@@ -132,7 +156,7 @@ kf_factor(kfft_comp_t* st) {
                 p = n; /* no more factors, skip to end */
         }
 #if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
-        if (st->level < MAX_PLAN_LEVEL && p > MAX_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
+        if (st->level < KFFT_PLAN_LEVEL && p > KFFT_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
             pbuf->prime = p;
             pbuf->inv_prime = kfft_primei_root(p, n);
 

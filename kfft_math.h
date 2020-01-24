@@ -1,5 +1,7 @@
 #pragma once
 
+#include "kfft_config.h"
+
 #ifndef USE_SYSMATH
     #define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
 #else
@@ -9,7 +11,6 @@
 
 /*
   Explanation of macros dealing with complex math:
-
    C_MUL(m,a,b)         : m = a*b
    C_SUB( res, a,b)     : res = a - b
    C_SUBFROM( res , a)  : res -= a

@@ -1,5 +1,3 @@
-#include "kfft.h"
-
 /* perform the butterfly for one stage of a mixed radix FFT */
 static void
 kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
