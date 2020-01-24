@@ -1,5 +1,4 @@
-#include "kfft_alloc.h"
-#include "kfft_trace.h"
+#include "kfft.h"
 
 kfft_pool_t*
 kfft_allocator_init(void* mem, const size_t nmem) {

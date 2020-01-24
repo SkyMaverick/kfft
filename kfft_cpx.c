@@ -1,5 +1,4 @@
-#include "kfft_guts.h"
-#include "kfft_alloc.h"
+#include "kfft.h"
 
 #include "kfft_generic.c"
 #include "kfft_bfly.c"
@@ -52,7 +51,7 @@ kfft_primei_root(uint32_t a, uint32_t m) {
 
 static void
 kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_stride,
-        uint32_t* factors, const kfft_kplan_t* st) {
+        uint32_t* factors, const kfft_comp_t* st) {
     kfft_cpx* Fout_beg = Fout;
     const uint32_t p = *factors++; /* the radix  */
     const uint32_t m = *factors++; /* stage's fft length/p */
@@ -106,7 +105,7 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
     p[i] * m[i] = m[i-1]
     m0 = n                  */
 static inline void
-kf_factor(kfft_kplan_t* st) {
+kf_factor(kfft_comp_t* st) {
     uint32_t p = 4;
     uint32_t n = st->nfft;
     uint32_t* facbuf = st->factors;
@@ -150,7 +149,7 @@ kf_factor(kfft_kplan_t* st) {
 }
 
 static inline void
-kfft_kinit(kfft_kplan_t* st) {
+kfft_kinit(kfft_comp_t* st) {
     // TODO
 
     for (uint32_t i = 0; i < st->nfft; ++i) {
@@ -167,9 +166,9 @@ kfft_kinit(kfft_kplan_t* st) {
 }
 
 static inline size_t
-kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_kplan_t* st) {
+kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_comp_t* st) {
 
-    size_t ret = sizeof(kfft_kplan_t) + sizeof(kfft_cpx) * nfft;
+    size_t ret = sizeof(kfft_comp_t) + sizeof(kfft_cpx) * nfft;
 
     st->nfft = nfft;
     st->flags = flags;
@@ -198,13 +197,13 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
  * The return value is a contiguous block of memory, allocated with malloc.  As such,
  * It can be freed with free(), rather than a kfft-specific function.
  * */
-kfft_kplan_t*
+kfft_comp_t*
 kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
                 size_t* lenmem) {
-    kfft_kplan_t* st = NULL;
+    kfft_comp_t* st = NULL;
 
-    kfft_kplan_t tmp;
-    KFFT_ZEROMEM(&tmp, sizeof(kfft_kplan_t));
+    kfft_comp_t tmp;
+    KFFT_ZEROMEM(&tmp, sizeof(kfft_comp_t));
 
     size_t memneeded = kfft_calculate(nfft, flags, level, &tmp);
 
@@ -223,7 +222,7 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
         }
 
         if (mmgr)
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_kplan_t));
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_comp_t));
     } else {
         if (A && *lenmem >= memneeded) {
             mmgr = (kfft_pool_t*)A;
@@ -231,7 +230,7 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
             if (flags & KFFT_FLAG_RENEW)
                 kfft_allocator_clear(mmgr);
 
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_kplan_t));
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_comp_t));
 
             kfft_trace("[CORE] %s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
         }
@@ -245,7 +244,7 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
         return 0;
     }
 
-    memcpy(st, &tmp, sizeof(kfft_kplan_t));
+    memcpy(st, &tmp, sizeof(kfft_comp_t));
 
     st->mmgr = mmgr;
     if (level > 0) {
@@ -263,7 +262,7 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
 }
 
 static inline void
-kfft_kstride(kfft_kplan_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_stride) {
+kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_stride) {
     if (fin == fout) {
         // NOTE: this is not really an in-place FFT algorithm.
         // It just performs an out-of-place FFT into a temp buffer
@@ -281,6 +280,6 @@ kfft_kstride(kfft_kplan_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_
 }
 
 void
-kfft_eval_cpx(kfft_kplan_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
+kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_kstride(cfg, fin, fout, 1);
 }

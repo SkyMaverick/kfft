@@ -1,4 +1,4 @@
-#include "kfft_guts.h"
+#include "kfft.h"
 
 KFFT_API void
 kfft_info(kfft_info_t* info) {

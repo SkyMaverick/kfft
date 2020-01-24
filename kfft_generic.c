@@ -1,14 +1,8 @@
-#include "kfft_guts.h"
-#include "kfft_cpx.h"
-
-#ifdef KFFT_RADER_ALGO
-    #include "kfft_rader.h"
-// TODO Rader specific functions here
-#endif /* KFFT_RADER_ALGO */
+#include "kfft.h"
 
 /* perform the butterfly for one stage of a mixed radix FFT */
 static void
-kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_kplan_t* st, uint32_t m,
+kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
                 uint32_t p) {
     uint32_t u, k, q1, q;
     //    const kfft_cpx* twiddles = st->twiddles;

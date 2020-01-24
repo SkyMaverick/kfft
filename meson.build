@@ -12,14 +12,12 @@ message ('Build configuration - @0@'.format(get_option('buildtype')))
 kfft_ver = meson.project_version().split('.')
 
 kfft_src = '''
-    kfft_guts.h
     kfft.h
-    kfft.c
     kfft_alloc.c
-    kfft_alloc.h
     kfft_cpx.c
     kfft_ext.c
     kfft_rader.c
+    kfft_real.c
 '''.split()
 
 cc = meson.get_compiler('c')
@@ -95,7 +93,7 @@ kfft_cfg = configuration_data({
 })
 
 configure_file (input: 'config.h.in',
-                output: 'config.h',
+                output: 'kfft_config.h',
                 configuration: kfft_cfg)
 
 # Apply all argments
@@ -115,7 +113,10 @@ foreach item : kfft_defs
     add_project_arguments (item, language: 'c')
 endforeach
 
-kfft_inc= include_directories('.')
+kfft_inc= include_directories('''
+        .
+        ./incs
+    '''.split())
 
 optimize_opts = []
 if not (get_option('buildtype') == 'debug')
@@ -130,6 +131,7 @@ libkfft = shared_library (meson.project_name(), kfft_src,
                           dependencies: kfft_deps,
                           gnu_symbol_visibility: 'hidden',
                           override_options : optimize_opts,
+                          include_directories: kfft_inc,
                           install: true)
 
 install_headers('kfft.h', subdir: 'kfft')

@@ -1,11 +1,9 @@
-#include "kfft_guts.h"
+#include "kfft.h"
 
 #if defined(KFFT_RADER_ALGO)
-    #include "kfft_cpx.h"
-    #include "kfft_rader.h"
 
 void
-kf_rader(kfft_cpx* Fout, const uint32_t fstride, const kfft_kplan_t* st, uint32_t p) {
+kf_rader(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t p) {
     //    kfft_cpx x0 = {.r = Fout->r, .i = Fout->i}; // save first element value
     //    kfft_cpx* X0 = Fout;                        // remember first element
     //    *Fout = X0 * p;

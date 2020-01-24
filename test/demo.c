@@ -50,7 +50,7 @@ main(int argc, char* argv[]) {
         size_t memneed = get_size(argc - 1);
 
         printf("Create forward config for %d len\n", argc - 1);
-        kfft_t FCfg = kfft_config_real(argc - 1, KFFT_FLAG_NORMAL, 0, NULL);
+        kfft_real_t* FCfg = kfft_config_real(argc - 1, KFFT_FLAG_NORMAL, 0, NULL);
 
         printf("Forward FFT transform\n");
         kfft_eval_real(FCfg, amp_scalar, FOut);

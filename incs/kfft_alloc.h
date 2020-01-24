@@ -1,7 +1,17 @@
 #pragma once
 
+#include <stdint.h>
 #include <stdlib.h>
-#include "kfft_guts.h"
+
+typedef struct {
+    size_t allocated; // area size
+    uint8_t* head;    // current head address
+    uint8_t* tail;    // current tail address
+
+    uint8_t* cur; // cursor pointer
+
+    uint8_t area[1];
+} kfft_pool_t;
 
 kfft_pool_t*
 kfft_allocator_create(const size_t size);

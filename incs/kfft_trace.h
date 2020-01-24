@@ -1,6 +1,6 @@
 #pragma once
 
-#include "config.h"
+#include "kfft_config.h"
 
 #if (defined KFFT_TRACE)
     #include <stdio.h>
