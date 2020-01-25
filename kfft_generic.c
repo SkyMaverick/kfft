@@ -11,46 +11,48 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
 
     kfft_cpx* scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * p);
 
-    // TODO Maybe use Rader for FFT buffer
-
+    if (scratch) {
 #if defined(KFFT_RADER_ALGO)
-    if (!(p < KFFT_RADER_LIMIT)) {
-        for (u = 0; u < m; ++u) {
-            k = u;
+        if ((!(p < KFFT_RADER_LIMIT) && (!(st->flags & KFFT_FLAG_GENERIC)))) {
+            for (u = 0; u < m; ++u) {
+                k = u;
 
-            for (q1 = 0; q1 < p; ++q1) {
-                // TODO Create buffer
-                k += m;
-            }
-
-            k = u;
-            // TODO Rader here
-        }
-    } else {
-#endif /* KFFT_RADER_ALGO */
-        for (u = 0; u < m; ++u) {
-            k = u;
-            for (q1 = 0; q1 < p; ++q1) {
-                scratch[q1] = Fout[k];
-                k += m;
-            }
-
-            k = u;
-            for (q1 = 0; q1 < p; ++q1) {
-                uint32_t twidx = 0;
-                Fout[k] = scratch[0];
-                for (q = 1; q < p; ++q) {
-                    twidx += fstride * k;
-                    if (twidx >= Norig)
-                        twidx -= Norig;
-                    C_MUL(t, scratch[q], TWIDDLE(twidx, st) /*twiddles[twidx]*/);
-                    C_ADDTO(Fout[k], t);
+                for (q1 = 0; q1 < p; ++q1) {
+                    // TODO Create buffer
+                    k += m;
                 }
-                k += m;
+
+                k = u;
+                // TODO Rader here
             }
-        }
-#if defined(KFFT_RADER_ALGO)
-    }
+        } else {
 #endif /* KFFT_RADER_ALGO */
-    KFFT_TMP_FREE(scratch);
+            for (u = 0; u < m; ++u) {
+                k = u;
+                for (q1 = 0; q1 < p; ++q1) {
+                    scratch[q1] = Fout[k];
+                    k += m;
+                }
+
+                k = u;
+                for (q1 = 0; q1 < p; ++q1) {
+                    uint32_t twidx = 0;
+                    Fout[k] = scratch[0];
+                    for (q = 1; q < p; ++q) {
+                        twidx += fstride * k;
+                        if (twidx >= Norig)
+                            twidx -= Norig;
+                        C_MUL(t, scratch[q], TWIDDLE(twidx, st) /*twiddles[twidx]*/);
+                        C_ADDTO(Fout[k], t);
+                    }
+                    k += m;
+                }
+            }
+#if defined(KFFT_RADER_ALGO)
+        }
+#endif /* KFFT_RADER_ALGO */
+        KFFT_TMP_FREE(scratch);
+    } else {
+        kfft_trace("[LEVEL %d] %s\n", st->level, "Temporary buffer create fail.");
+    }
 }
