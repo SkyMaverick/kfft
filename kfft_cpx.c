@@ -3,29 +3,22 @@
 #include "kfft_trace.h"
 #include "kfft_math.h"
 
-/* clang-format off */
+#define TWIDDLE(i, P) P->twiddles[i]
 
-#ifndef KFFT_MEMLESS_MODE
-    #define TWIDDLE(i, P) P->twiddles[i]
-#else
-    static inline kfft_cpx
-    get_kernel_twiddle(uint32_t i, const kfft_kplan_t* P) {
-        kfft_cpx ret;
+static inline kfft_cpx
+get_kernel_twiddle(uint32_t i, const kfft_comp_t* P) {
+    kfft_cpx ret;
 
-        kfft_scalar phase = -2 * KFFT_CONST_PI * i / P->nfft;
-        if (P->flags & KFFT_CONFIG_INVERSE)
-            phase *= -1;
+    kfft_scalar phase = -2 * KFFT_CONST_PI * i / P->nfft;
+    if (P->flags & KFFT_FLAG_INVERSE)
+        phase *= -1;
 
-        kf_cexp(&ret, phase);
-        return ret;
-    }
-    #define TWIDDLE(i, P) get_kernel_twiddle(i, P)
-#endif /* memless */
+    kf_cexp(&ret, phase);
+    return ret;
+}
 
-/* clang-format on */
-
-#include "kfft_generic.c"
 #include "kfft_bfly.c"
+#include "kfft_generic.c"
 
 #ifdef KFFT_RADER_ALGO
 static uint32_t
@@ -158,8 +151,6 @@ kf_factor(kfft_comp_t* st) {
 #if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
         if (st->level < KFFT_PLAN_LEVEL && p > KFFT_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
             pbuf->prime = p;
-            pbuf->inv_prime = kfft_primei_root(p, n);
-
             st->prm_count++;
             pbuf++;
         }
@@ -173,20 +164,49 @@ kf_factor(kfft_comp_t* st) {
 }
 
 static inline void
-kfft_kinit(kfft_comp_t* st) {
-    // TODO
+kfft_gen_ridxs(uint32_t* idx, const uint32_t size, const uint32_t root) {
+    for (uint32_t i = 0; i < size - 1; i++) {
+        idx[i] = _kfr_power(root, i, size);
+    }
+}
 
-    for (uint32_t i = 0; i < st->nfft; ++i) {
-        kfft_scalar phase = -2 * KFFT_CONST_PI * i / st->nfft;
-        if (st->flags & KFFT_FLAG_INVERSE)
+static inline void
+kfft_gen_rtws(kfft_comp_t* P, const uint32_t size, const uint32_t iroot) {
+    for (uint32_t i = 0; i < size - 1; i++) {
+        kfft_cpx* ret = &(P->twiddles[_kfr_power(iroot, i, size - 1)]);
+
+        kfft_scalar phase = -2 * KFFT_CONST_PI * i / size;
+        if (P->flags & KFFT_FLAG_INVERSE)
             phase *= -1;
-        kf_cexp(st->twiddles + i, phase);
+
+        kf_cexp(ret, phase);
+    }
+}
+
+static inline int
+kfft_kinit(kfft_comp_t* st) {
+    for (uint32_t i = 0; i < st->nfft; ++i) {
+        if (st->level == 0) {
+            st->twiddles[i] = get_kernel_twiddle(i, st);
+        };
     }
 
     for (size_t i = 0; i < st->prm_count; i++) {
-        st->primes[i].splan =
-            kfft_config_cpx(st->primes[i].prime - 1, st->flags, st->level + 1, st->mmgr, NULL);
+        uint32_t p = st->primes[i].prime;
+
+        st->primes[i].splan = kfft_config_cpx(p - 1, st->flags, st->level + 1, st->mmgr, NULL);
+
+        if (st->prm_count) {
+            st->primes[i].ridx = kfft_internal_alloc(st->mmgr, sizeof(uint32_t) * p);
+            if (st->primes[i].ridx == NULL)
+                return 1;
+
+            uint32_t root = kfft_prime_root(p);
+            kfft_gen_ridxs(st->primes[i].ridx, p, root);
+            kfft_gen_rtws(st->primes[i].splan, p, kfft_primei_root(root, p));
+        }
     }
+    return 0;
 }
 
 static inline size_t
@@ -213,6 +233,34 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
 
     return ret;
 }
+
+#ifdef KFFT_TRACE
+
+static void
+kfft_trace_plan(kfft_comp_t* P) {
+    kfft_trace("[CORE] %s: %p\n", "Create KFFT complex plan", (void*)P);
+    kfft_trace("\t %s - %u", "nfft", P->nfft);
+    kfft_trace("\n\t %s - %u", "level", P->level);
+    kfft_trace("\n\t %s - %u", "flags", P->flags);
+
+    kfft_trace("\n\t %s - %d", "factors count", P->fac_count);
+    if (P->fac_count)
+        kfft_trace("\n\t %u %s", P->nfft, "fac -");
+
+    for (uint32_t i = 0; i < P->fac_count; i++)
+        kfft_trace(" %u", P->factors[i]);
+
+    kfft_trace("\n\t %s - %u", "primes count", P->prm_count);
+    for (uint32_t i = 0; i < P->prm_count; i++) {
+        kfft_trace("\n\t %d %s", P->primes[i].prime, "idx -");
+        for (uint32_t j = 0; j < P->primes[i].prime - 1; j++)
+            kfft_trace(" %u", P->primes[i].ridx[j]);
+    }
+
+    kfft_trace("\n\t %s - %p\n", "twiddles", (void*)(P->twiddles));
+}
+
+#endif
 
 /*
  *
@@ -271,16 +319,16 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
     memcpy(st, &tmp, sizeof(kfft_comp_t));
 
     st->mmgr = mmgr;
-    if (level > 0) {
-        st->ridx = kfft_internal_alloc(st->mmgr, sizeof(uint32_t) * st->nfft);
-        if (st->ridx == NULL)
-            goto bailout;
-    }
     st->twiddles = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * st->nfft);
     if (st->twiddles == NULL)
         goto bailout;
 
-    kfft_kinit(st);
+    if (kfft_kinit(st))
+        goto bailout;
+
+#ifdef KFFT_TRACE
+    kfft_trace_plan(st);
+#endif
 
     return st;
 }
@@ -292,10 +340,10 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
         // It just performs an out-of-place FFT into a temp buffer
         kfft_cpx* tmpbuf = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * st->nfft);
 
-        kfft_trace("ALLOC temp buffer: %p\n", (void*)tmpbuf);
+        kfft_trace("[CORE] %s: %p\n", "ALLOC temp buffer", (void*)tmpbuf);
         kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
         memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
-        kfft_trace("FREE temp buffer: %p\n", (void*)tmpbuf);
+        kfft_trace("[CORE] %s: %p\n", "FREE temp buffer", (void*)tmpbuf);
 
         KFFT_TMP_FREE(tmpbuf);
     } else {

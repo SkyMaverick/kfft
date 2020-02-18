@@ -106,20 +106,6 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, s
         kf_cexp(st->super_twiddles + i, phase);
     }
 
-#if defined(KFFT_TRACE)
-    kfft_trace("%s: ", "Factors");
-    for (uint32_t i = 0; i < st->substate->fac_count; i++) {
-        kfft_trace("%d ", st->substate->factors[i]);
-    }
-    kfft_trace("%s\n", "");
-    #if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
-    kfft_trace("%s: ", "Prime roots");
-    for (int i = 0; i < st->substate->prm_count; i++) {
-        kfft_trace("%d ", st->substate->primes[i].prime);
-    }
-    #endif
-    kfft_trace("%s\n", "");
-#endif /* TRACE */
     return st;
 }
 
@@ -132,7 +118,7 @@ kfft_eval_real(kfft_real_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata
     kfft_real_t* st = (kfft_real_t*)stu;
 
     if (st->substate->flags & KFFT_FLAG_INVERSE) {
-        kfft_trace("%s\n", "kiss fft usage error: improper alloc");
+        kfft_trace("[REAL] %s\n", "kiss fft usage error: improper alloc");
         exit(1);
     }
 
@@ -179,7 +165,7 @@ kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedat
     kfft_real_t* st = (kfft_real_t*)stu;
 
     if (!(st->substate->flags & KFFT_FLAG_INVERSE)) {
-        kfft_trace("%s\n", "kiss fft usage error: improper alloc");
+        kfft_trace("[REAL] %s\n", "kiss fft usage error: improper alloc");
         exit(1);
     }
 
@@ -215,7 +201,7 @@ kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedat
 KFFT_API void
 kfft_free(kfft_real_t** cfg) {
     if (cfg && *cfg) {
-        kfft_trace("Cleanup plan: %p\n", (void*)(*cfg));
+        kfft_trace("[REAL] %s: %p\n", "Cleanup plan", (void*)(*cfg));
         kfft_real_t* st = (kfft_real_t*)(*cfg);
         if (st->mmgr != NULL) {
             kfft_allocator_free(&(st->mmgr));

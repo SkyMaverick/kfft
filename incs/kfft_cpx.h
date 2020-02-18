@@ -5,7 +5,8 @@
 
 typedef struct {
     uint32_t prime;
-    uint32_t inv_prime;
+
+    uint32_t* ridx;
     struct kfft_kstate* splan;
 } kfft_splan_t;
 
@@ -13,8 +14,8 @@ typedef struct kfft_kstate {
     kfft_pool_t* mmgr;
 
     uint32_t nfft;
-    uint32_t level;
 
+    uint32_t level;
     uint32_t flags;
 
     uint8_t fac_count;                 // factors count
@@ -22,7 +23,6 @@ typedef struct kfft_kstate {
 
     uint8_t prm_count;
     kfft_splan_t primes[MAX_ROOTS]; //
-    uint32_t* ridx;                 // rader shuffle index (for level > 0)
 
     kfft_cpx* twiddles; // twiddles
 } kfft_comp_t;
