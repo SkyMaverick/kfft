@@ -33,6 +33,17 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
     return ret;
 }
 
+#ifdef KFFT_TRACE
+
+static void
+kfft_trace_plan(kfft_real_t* P) {
+    kfft_trace("[REAL] %s: %p", "Create KFFT real plan", (void*)P);
+    kfft_trace("\n\t %s - %p", "Uses complex plan", (void*)(P->substate));
+    kfft_trace("\n\t %s - %p", "Temporary buffer", (void*)(P->tmpbuf));
+    kfft_trace("\n\t %s - %p\n", "Real twiddles", (void*)(P->super_twiddles));
+}
+
+#endif
 /* ********************************************************************************
       TODO  Functionality
 ******************************************************************************** */
@@ -105,6 +116,10 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, s
             phase *= -1;
         kf_cexp(st->super_twiddles + i, phase);
     }
+
+#ifdef KFFT_TRACE
+    kfft_trace_plan(st);
+#endif
 
     return st;
 }

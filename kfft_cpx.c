@@ -74,10 +74,11 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
     const uint32_t m = *factors++; /* stage's fft length/p */
     const kfft_cpx* Fout_end = Fout + p * m;
 
-    kfft_trace("Work: in - %4.1fi%4.1f | end -  %4.1fi%4.1f | f - %4.1fi%4.1f | fstride - %u | "
-               "in_stride - %d \n",
-               Fout->r, Fout->i, Fout_end->r, Fout_end->i, f->r, f->i, fstride, in_stride);
-    kfft_trace("      p - %u | m - %u\n", p, m);
+    kfft_trace(
+        "[CORE] Work: in - %4.1fi%4.1f | end -  %4.1fi%4.1f | f - %4.1fi%4.1f | fstride - %u | "
+        "in_stride - %d \n",
+        Fout->r, Fout->i, Fout_end->r, Fout_end->i, f->r, f->i, fstride, in_stride);
+    kfft_trace("\tp - %u | m - %u\n", p, m);
 
     if (m == 1) {
         do {
@@ -241,7 +242,27 @@ kfft_trace_plan(kfft_comp_t* P) {
     kfft_trace("[CORE] %s: %p\n", "Create KFFT complex plan", (void*)P);
     kfft_trace("\t %s - %u", "nfft", P->nfft);
     kfft_trace("\n\t %s - %u", "level", P->level);
-    kfft_trace("\n\t %s - %u", "flags", P->flags);
+    kfft_trace("\n\t %s - %u : ", "flags", P->flags);
+
+    if (P->flags) {
+        for (uint8_t i = 1; i < sizeof(uint32_t); i++) {
+            if (P->flags & i) {
+                switch (i) {
+                case 1:
+                    kfft_trace("| %s ", "KFFT_FLAG_INVERSE");
+                    break;
+                case 2:
+                    kfft_trace("| %s ", "KFFT_FLAG_RENEW");
+                    break;
+                case 3:
+                    kfft_trace("| %s ", "KFFT_FLAG_GENERIC");
+                    break;
+                }
+            }
+        }
+    } else {
+        kfft_trace("| %s ", "KFFT_FLAG_NORMAL");
+    }
 
     kfft_trace("\n\t %s - %d", "factors count", P->fac_count);
     if (P->fac_count)
