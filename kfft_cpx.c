@@ -3,6 +3,54 @@
 #include "kfft_trace.h"
 #include "kfft_math.h"
 
+#ifdef KFFT_TRACE
+
+static void
+kfft_trace_plan(kfft_comp_t* P) {
+    kfft_trace("[CORE] %s: %p\n", "Create KFFT complex plan", (void*)P);
+    kfft_trace("\t %s - %u", "nfft", P->nfft);
+    kfft_trace("\n\t %s - %u", "level", P->level);
+    kfft_trace("\n\t %s - %u : ", "flags", P->flags);
+
+    if (P->flags) {
+        for (uint8_t i = 0; i < sizeof(uint32_t); i++) {
+            if (P->flags & (1 << i)) {
+                switch (i) {
+                case 0:
+                    kfft_trace("| %s ", "KFFT_FLAG_INVERSE");
+                    break;
+                case 1:
+                    kfft_trace("| %s ", "KFFT_FLAG_RENEW");
+                    break;
+                case 2:
+                    kfft_trace("| %s ", "KFFT_FLAG_GENERIC");
+                    break;
+                }
+            }
+        }
+    } else {
+        kfft_trace("| %s ", "KFFT_FLAG_NORMAL");
+    }
+
+    kfft_trace("\n\t %s - %d", "factors count", P->fac_count);
+    if (P->fac_count)
+        kfft_trace("\n\t %u %s", P->nfft, "fac -");
+
+    for (uint32_t i = 0; i < P->fac_count; i++)
+        kfft_trace(" %u", P->factors[i]);
+
+    kfft_trace("\n\t %s - %u", "primes count", P->prm_count);
+    for (uint32_t i = 0; i < P->prm_count; i++) {
+        kfft_trace("\n\t %d %s", P->primes[i].prime, "idx -");
+        for (uint32_t j = 0; j < P->primes[i].prime - 1; j++)
+            kfft_trace(" %u", P->primes[i].ridx[j]);
+    }
+
+    kfft_trace("\n\t %s - %p\n", "twiddles", (void*)(P->twiddles));
+}
+
+#endif
+
 #define TWIDDLE(i, P) P->twiddles[i]
 
 static inline kfft_cpx
@@ -74,11 +122,7 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
     const uint32_t m = *factors++; /* stage's fft length/p */
     const kfft_cpx* Fout_end = Fout + p * m;
 
-    kfft_trace(
-        "[CORE] Work: in - %4.1fi%4.1f | end -  %4.1fi%4.1f | f - %4.1fi%4.1f | fstride - %u | "
-        "in_stride - %d \n",
-        Fout->r, Fout->i, Fout_end->r, Fout_end->i, f->r, f->i, fstride, in_stride);
-    kfft_trace("\tp - %u | m - %u\n", p, m);
+    kfft_trace("[CORE] Work: p - %u | m - %u\n", p, m);
 
     if (m == 1) {
         do {
@@ -191,7 +235,7 @@ kfft_kinit(kfft_comp_t* st) {
             st->twiddles[i] = get_kernel_twiddle(i, st);
         };
     }
-
+#if defined(KFFT_RADER_ALGO)
     for (size_t i = 0; i < st->prm_count; i++) {
         uint32_t p = st->primes[i].prime;
 
@@ -207,6 +251,7 @@ kfft_kinit(kfft_comp_t* st) {
             kfft_gen_rtws(st->primes[i].splan, p, kfft_primei_root(root, p));
         }
     }
+#endif
     return 0;
 }
 
@@ -234,54 +279,6 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
 
     return ret;
 }
-
-#ifdef KFFT_TRACE
-
-static void
-kfft_trace_plan(kfft_comp_t* P) {
-    kfft_trace("[CORE] %s: %p\n", "Create KFFT complex plan", (void*)P);
-    kfft_trace("\t %s - %u", "nfft", P->nfft);
-    kfft_trace("\n\t %s - %u", "level", P->level);
-    kfft_trace("\n\t %s - %u : ", "flags", P->flags);
-
-    if (P->flags) {
-        for (uint8_t i = 1; i < sizeof(uint32_t); i++) {
-            if (P->flags & i) {
-                switch (i) {
-                case 1:
-                    kfft_trace("| %s ", "KFFT_FLAG_INVERSE");
-                    break;
-                case 2:
-                    kfft_trace("| %s ", "KFFT_FLAG_RENEW");
-                    break;
-                case 3:
-                    kfft_trace("| %s ", "KFFT_FLAG_GENERIC");
-                    break;
-                }
-            }
-        }
-    } else {
-        kfft_trace("| %s ", "KFFT_FLAG_NORMAL");
-    }
-
-    kfft_trace("\n\t %s - %d", "factors count", P->fac_count);
-    if (P->fac_count)
-        kfft_trace("\n\t %u %s", P->nfft, "fac -");
-
-    for (uint32_t i = 0; i < P->fac_count; i++)
-        kfft_trace(" %u", P->factors[i]);
-
-    kfft_trace("\n\t %s - %u", "primes count", P->prm_count);
-    for (uint32_t i = 0; i < P->prm_count; i++) {
-        kfft_trace("\n\t %d %s", P->primes[i].prime, "idx -");
-        for (uint32_t j = 0; j < P->primes[i].prime - 1; j++)
-            kfft_trace(" %u", P->primes[i].ridx[j]);
-    }
-
-    kfft_trace("\n\t %s - %p\n", "twiddles", (void*)(P->twiddles));
-}
-
-#endif
 
 /*
  *
@@ -361,10 +358,10 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
         // It just performs an out-of-place FFT into a temp buffer
         kfft_cpx* tmpbuf = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * st->nfft);
 
-        kfft_trace("[CORE] %s: %p\n", "ALLOC temp buffer", (void*)tmpbuf);
+        kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "ALLOC temp buffer", (void*)tmpbuf);
         kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
         memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
-        kfft_trace("[CORE] %s: %p\n", "FREE temp buffer", (void*)tmpbuf);
+        kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "FREE temp buffer", (void*)tmpbuf);
 
         KFFT_TMP_FREE(tmpbuf);
     } else {

@@ -150,9 +150,8 @@ main(int argc, char* argv[]) {
             memset(amp_scalar, 0, size * sizeof(kfft_scalar));
             memset(kfft_spectr, 0, size * sizeof(kfft_cpx));
 
-            srand((unsigned)time(NULL));
             for (size_t j = 0; j < size; j++) {
-                amp_scalar[j] = rand();
+                amp_scalar[j] = j + 1;
             }
 
             ivals[i][VALS_KFFT] = kfft_ktest(amp_scalar, kfft_spectr, size);

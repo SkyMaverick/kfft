@@ -1,6 +1,6 @@
-option ('build_with_lto', type: 'boolean', value: 'true',
+option ('build_with_lto', type: 'boolean', value: 'false',
         description: 'build with link time optimization')
-option ('build_with_pgo', type: 'boolean', value: 'true',
+option ('build_with_pgo', type: 'boolean', value: 'false',
         description: 'build with profile optimization')
 option ('build_with_native', type: 'boolean', value: 'true',
         description: 'build with native CPU instructions')
@@ -25,7 +25,7 @@ option ('enable_memless', type: 'boolean', value: 'false',
 option ('build_library_api', type : 'combo', choices: ['export', 'import', 'none'], value: 'export',
         description: 'library API type')
 
-option ('limit_rader', type: 'integer', value: '50',
+option ('limit_rader', type: 'integer', value: '10',
         description: 'barier use rader or generic algorithm')
 option ('level_plan_max', type: 'integer', value: '3',
         description: 'max requrcive subplan level')

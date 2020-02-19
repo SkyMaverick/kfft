@@ -49,8 +49,6 @@ typedef struct {
 #include "incs/kfft_alloc.h"
 
 #include "incs/kfft_cpx.h"
-#include "incs/kfft_rader.h"
-
 #include "incs/kfft_real.h"
 
 #define KFFT_PLAN_ALLOCATOR(X) (*((uintptr_t*)(X)))

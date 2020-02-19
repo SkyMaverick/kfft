@@ -16,7 +16,6 @@ kfft_src = '''
     kfft_alloc.c
     kfft_cpx.c
     kfft_ext.c
-    kfft_rader.c
     kfft_real.c
 '''.split()
 
@@ -142,7 +141,6 @@ install_headers('''
         incs/kfft_alloc.h
         incs/kfft_cpx.h
         incs/kfft_macro.h
-        incs/kfft_rader.h
         incs/kfft_real.h
         incs/kfft_system.h
     '''.split(), subdir: 'kfft/incs')
