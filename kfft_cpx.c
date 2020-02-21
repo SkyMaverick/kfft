@@ -357,13 +357,18 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
         // NOTE: this is not really an in-place FFT algorithm.
         // It just performs an out-of-place FFT into a temp buffer
         kfft_cpx* tmpbuf = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * st->nfft);
+        if (tmpbuf) {
+            KFFT_ZEROMEM(tmpbuf, sizeof(kfft_cpx) * st->nfft);
 
-        kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "ALLOC temp buffer", (void*)tmpbuf);
-        kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
-        memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
-        kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "FREE temp buffer", (void*)tmpbuf);
+            kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "ALLOC temp buffer", (void*)tmpbuf);
+            kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
+            memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
+            kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "FREE temp buffer", (void*)tmpbuf);
 
-        KFFT_TMP_FREE(tmpbuf);
+            KFFT_TMP_FREE(tmpbuf);
+        } else {
+            kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "fail alloc temp buffer");
+        }
     } else {
         kf_work(fout, fin, 1, in_stride, st->factors, st);
     }

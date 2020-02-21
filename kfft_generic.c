@@ -6,7 +6,7 @@ static inline void
 rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                   uint32_t u, uint32_t m, uint32_t p) {
     uint32_t k = u, q1, idx;
-    kfft_cpx x0;
+    kfft_cpx x0 = {0, 0};
 
     // Find needed subplan
     const kfft_splan_t* sP = st->primes;
@@ -14,29 +14,36 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
         sP++;
 
     // Create suffled buffer
+    kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Remap matrix");
     C_CPY(x0, Fout[k]);
     for (q1 = 1, idx = 0; q1 < p; ++q1) {
         idx = sP->ridx[q1 - 1];
 
         k += m;
         Ftmp[idx] = Fout[k];
+
+        kfft_trace("%3u- %3lf\t%3u- %3lf\n", k, Fout[k].r, idx, Ftmp[idx].r);
+
         C_ADDTO(Ftmp[0], Fout[k]);
     }
 
     // Eval recursive subplan complex FFT
-    kfft_eval_cpx(sP->splan, Ftmp, Ftmp);
+    kfft_eval_cpx(sP->splan, Ftmp + 1, Ftmp + 1);
 
     // Reshuffle buffer
     k = u;
 
-    C_CPY(Fout[k], Ftmp[0]);
+    kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Remap inverse matrix");
+    C_ADDTO(Fout[k], Ftmp[0]);
     for (q1 = 1; q1 < p; ++q1) {
         idx = sP->ridx[q1 - 1];
 
         k += m;
 
-        C_ADDTO(Ftmp[q1], x0);
-        Fout[idx] = Ftmp[q1];
+        C_ADDTO(Ftmp[idx], x0);
+        Fout[k] = Ftmp[idx];
+
+        kfft_trace("%3u - %3lf\t%3u - %3lf\n", k, Fout[k].r, idx, Ftmp[idx].r);
     }
 }
 
