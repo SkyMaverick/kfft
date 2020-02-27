@@ -14,6 +14,8 @@ typedef struct kfft_kstate {
     kfft_pool_t* mmgr;
 
     uint32_t nfft;
+    uint32_t q;
+    uint32_t p;
 
     uint32_t level;
     uint32_t flags;

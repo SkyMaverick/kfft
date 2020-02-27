@@ -30,6 +30,10 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     // Eval recursive subplan complex FFT
     kfft_eval_cpx(sP->splan, Ftmp + 1, Ftmp + 1);
 
+    for (uint32_t i = 0; i < sP->splan->nfft; i++)
+        kfft_trace("r%.3fi%.3f ", Ftmp[i].r, Ftmp[i].i);
+    kfft_trace("%s\n", "");
+
     // Reshuffle buffer
     k = u;
 
@@ -86,7 +90,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
 
         for (uint32_t u = 0; u < m; ++u) {
 #if defined(KFFT_RADER_ALGO)
-            if ((!(p < KFFT_RADER_LIMIT) && (!(st->flags & KFFT_FLAG_GENERIC)))) {
+            if ((p >= KFFT_RADER_LIMIT) && (!(st->flags & KFFT_FLAG_GENERIC))) {
                 kfft_trace("[CORE] %s: %u\n", "Use Rader algorithm for resolve", p);
                 rader_method_eval(Fout, scratch, fstride, st, u, m, p);
             } else {

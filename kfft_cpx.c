@@ -7,8 +7,10 @@
 
 static void
 kfft_trace_plan(kfft_comp_t* P) {
-    kfft_trace("[CORE] %s: %p\n", "Create KFFT complex plan", (void*)P);
-    kfft_trace("\t %s - %u", "nfft", P->nfft);
+    kfft_trace("[CORE] %s: %p", "Create KFFT complex plan", (void*)P);
+    kfft_trace("\n\t %s - %u", "nfft", P->nfft);
+    kfft_trace("\n\t %s - %u", "prime", P->q);
+    kfft_trace("\n\t %s - %u", "prime inverse", P->p);
     kfft_trace("\n\t %s - %u", "level", P->level);
     kfft_trace("\n\t %s - %u : ", "flags", P->flags);
 
@@ -51,13 +53,18 @@ kfft_trace_plan(kfft_comp_t* P) {
 
 #endif
 
-#define TWIDDLE(i, P) P->twiddles[i]
+static inline kfft_cpx
+get_ktwiddle(const uint32_t i, const kfft_comp_t* P) {
+    return P->twiddles[i];
+}
+#define TWIDDLE(i, P) get_ktwiddle(i, P)
 
 static inline kfft_cpx
-get_kernel_twiddle(uint32_t i, const kfft_comp_t* P) {
+generate_kernel_twiddle(uint32_t i, uint32_t size, const kfft_comp_t* P) {
     kfft_cpx ret;
 
-    kfft_scalar phase = -2 * KFFT_CONST_PI * i / P->nfft;
+    kfft_scalar phase = -2 * KFFT_CONST_PI * i / size;
+
     if (P->flags & KFFT_FLAG_INVERSE)
         phase *= -1;
 
@@ -215,40 +222,32 @@ kfft_gen_ridxs(uint32_t* idx, const uint32_t size, const uint32_t root) {
     }
 }
 
-static inline void
-kfft_gen_rtws(kfft_comp_t* P, const uint32_t size, const uint32_t iroot) {
-    for (uint32_t i = 0; i < size - 1; i++) {
-        kfft_cpx* ret = &(P->twiddles[_kfr_power(iroot, i, size - 1)]);
-
-        kfft_scalar phase = -2 * KFFT_CONST_PI * i / size;
-        if (P->flags & KFFT_FLAG_INVERSE)
-            phase *= -1;
-
-        kf_cexp(ret, phase);
-    }
-}
-
 static inline int
 kfft_kinit(kfft_comp_t* st) {
-    for (uint32_t i = 0; i < st->nfft; ++i) {
-        if (st->level == 0) {
-            st->twiddles[i] = get_kernel_twiddle(i, st);
-        };
+    uint32_t size = st->nfft;
+
+    if (st->level == 0) {
+        for (uint32_t i = 0; i < size; ++i)
+            st->twiddles[i] = generate_kernel_twiddle(i, size, st);
+    } else {
+        st->q = kfft_prime_root(size + 1);
+        st->p = kfft_primei_root(st->q, size + 1);
+
+        for (uint32_t i = 0; i < size; ++i)
+            st->twiddles[i] = generate_kernel_twiddle(i, size + 1, st);
     }
 #if defined(KFFT_RADER_ALGO)
     for (size_t i = 0; i < st->prm_count; i++) {
-        uint32_t p = st->primes[i].prime;
 
-        st->primes[i].splan = kfft_config_cpx(p - 1, st->flags, st->level + 1, st->mmgr, NULL);
+        uint32_t len = st->primes[i].prime;
+        st->primes[i].splan = kfft_config_cpx(len - 1, st->flags, st->level + 1, st->mmgr, NULL);
 
         if (st->prm_count) {
-            st->primes[i].ridx = kfft_internal_alloc(st->mmgr, sizeof(uint32_t) * p);
+            st->primes[i].ridx = kfft_internal_alloc(st->mmgr, sizeof(uint32_t) * len);
             if (st->primes[i].ridx == NULL)
                 return 1;
 
-            uint32_t root = kfft_prime_root(p);
-            kfft_gen_ridxs(st->primes[i].ridx, p, root);
-            kfft_gen_rtws(st->primes[i].splan, p, kfft_primei_root(root, p));
+            kfft_gen_ridxs(st->primes[i].ridx, len, st->primes[i].splan->q);
         }
     }
 #endif
