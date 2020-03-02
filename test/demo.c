@@ -55,10 +55,11 @@ main(int argc, char* argv[]) {
         printf("Forward FFT transform\n");
         kfft_eval_real(FCfg, amp_scalar, FOut);
 
+        printf("\nRESULT >>> ");
         for (int32_t i = 0; i < argc - 1; i++) {
             printf("r%5.3fi%5.3f | ", FOut[i].r, FOut[i].i);
         }
-        printf("\n");
+        printf("\n\n");
 
         printf("Create inverse config for %d len\n", argc - 1);
 
@@ -69,11 +70,12 @@ main(int argc, char* argv[]) {
         printf("Inverse FFT transform\n");
         kfft_evali_real(FCfg, FOut, amp_scalar);
 
+        printf("\nRESULT >>> ");
         for (int32_t i = 0; i < argc - 1; i++) {
             printf("%5.3f | ", amp_scalar[i]);
         }
 
-        printf("\n");
+        printf("\n\n");
 
         free(FOut);
         free(amp_scalar);

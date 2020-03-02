@@ -2,7 +2,7 @@
 
 #if defined(KFFT_RADER_ALGO)
 
-static inline void
+static inline int
 rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                   uint32_t u, uint32_t m, uint32_t p) {
     uint32_t k = u, q1, idx;
@@ -13,47 +13,47 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     while ((sP->prime > 0) && (sP->prime != p))
         sP++;
 
-    // Create suffled buffer
-    kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Remap matrix");
-    C_CPY(x0, Fout[k]);
-    for (q1 = 1, idx = 0; q1 < p; ++q1) {
-        idx = sP->ridx[q1 - 1];
+    kfft_cpx* Ftwd = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx)*(sP->prime - 1));
+    if (Ftwd) {
+        // Create suffled buffers
+        kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Remap matrix");
+        C_CPY(x0, Fout[k]);
+        for (q1 = 1, idx = 0; q1 < p; ++q1) {
+            idx = sP->ridx[q1 - 1];
 
-        k += m;
-        Ftmp[idx] = Fout[k];
+            k += m;
+            Ftmp[idx] = Fout[k];
 
-        kfft_trace("%3u- %3lf\t%3u- %3lf\n", k, Fout[k].r, idx, Ftmp[idx].r);
+            C_ADDTO(Ftmp[0], Fout[k]);
+        }
 
-        C_ADDTO(Ftmp[0], Fout[k]);
+        // Eval recursive subplan complex FFT
+        // kfft_eval_cpx(sP->splan, Ftmp + 1, Ftmp + 1);
+
+//        for (uint32_t i = 0; i < sP->splan->nfft; i++)
+//            kfft_trace("r%.3fi%.3f ", Ftmp[i].r, Ftmp[i].i);
+//        kfft_trace("%s\n", "");
+//
+        // Reshuffle buffer
+        k = u;
+
+        C_ADDTO(Fout[k], Ftmp[0]);
+        for (q1 = 1; q1 < p; ++q1) {
+            idx = sP->ridx[q1 - 1];
+
+            k += m;
+
+            C_ADDTO(Ftmp[idx], x0);
+            Fout[k] = Ftmp[idx];
+        }
     }
 
-    // Eval recursive subplan complex FFT
-    kfft_eval_cpx(sP->splan, Ftmp + 1, Ftmp + 1);
-
-    for (uint32_t i = 0; i < sP->splan->nfft; i++)
-        kfft_trace("r%.3fi%.3f ", Ftmp[i].r, Ftmp[i].i);
-    kfft_trace("%s\n", "");
-
-    // Reshuffle buffer
-    k = u;
-
-    kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Remap inverse matrix");
-    C_ADDTO(Fout[k], Ftmp[0]);
-    for (q1 = 1; q1 < p; ++q1) {
-        idx = sP->ridx[q1 - 1];
-
-        k += m;
-
-        C_ADDTO(Ftmp[idx], x0);
-        Fout[k] = Ftmp[idx];
-
-        kfft_trace("%3u - %3lf\t%3u - %3lf\n", k, Fout[k].r, idx, Ftmp[idx].r);
-    }
+    return 0;
 }
 
 #endif /* KFFT_RADER_ALGO */
 
-static inline void
+static inline int
 std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                 uint32_t u, uint32_t m, uint32_t p) {
     uint32_t k = u, q1, q;
@@ -77,6 +77,7 @@ std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft
         }
         k += m;
     }
+    return 0;
 }
 
 static void

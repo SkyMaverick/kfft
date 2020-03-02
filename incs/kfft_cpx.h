@@ -4,9 +4,11 @@
 #define MAX_ROOTS 32
 
 typedef struct {
-    uint32_t prime;
+    uint32_t prime, p, q;
 
     uint32_t* ridx;
+    uint32_t* rtidx;
+
     struct kfft_kstate* splan;
 } kfft_splan_t;
 
@@ -14,8 +16,6 @@ typedef struct kfft_kstate {
     kfft_pool_t* mmgr;
 
     uint32_t nfft;
-    uint32_t q;
-    uint32_t p;
 
     uint32_t level;
     uint32_t flags;
