@@ -235,8 +235,8 @@ kfft_kinit(kfft_comp_t* st) {
         uint32_t len = sP->prime - 1;
 
         sP->splan = kfft_config_cpx(len, st->flags, st->level + 1, st->object.mmgr, NULL);
-        sP->splani =
-            kfft_config_cpx(len, st->flags ^ KFFT_FLAG_INVERSE, st->level + 1, st->object.mmgr, NULL);
+        sP->splani = kfft_config_cpx(len, st->flags ^ KFFT_FLAG_INVERSE, st->level + 1,
+                                     st->object.mmgr, NULL);
 
         sP->ridx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
         if (sP->ridx == NULL)
@@ -332,7 +332,7 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
     if (!st) {
     bailout:
         if (mmgr && (flag_create == true))
-            kfft_allocator_free(&mmgr);
+            kfft_allocator_free(mmgr);
         return 0;
     }
 

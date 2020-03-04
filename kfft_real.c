@@ -88,7 +88,7 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A
     if (!st) {
     bailout:
         if (mmgr && (flag_create == true)) {
-            kfft_allocator_free(&mmgr);
+            kfft_allocator_free(mmgr);
         }
         return 0;
     }

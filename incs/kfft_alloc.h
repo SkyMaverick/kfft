@@ -32,4 +32,10 @@ void
 kfft_allocator_clear(kfft_pool_t* A);
 
 void
-kfft_allocator_free(kfft_pool_t** A);
+kfft_allocator_free(kfft_pool_t* A);
+
+#define kfft_allocator_free_and_null(A)                                                            \
+    do {                                                                                           \
+        kfft_allocator_free(A);                                                                    \
+        A = NULL;                                                                                  \
+    } while (0)

@@ -56,10 +56,9 @@ typedef struct {
 KFFT_API void
 kfft_info(kfft_info_t* info);
 KFFT_API void
-kfft_cleanup (kfft_object_t* mem);
+kfft_cleanup(uintptr_t mem);
 
-#define kfft_free(X) \
-    kfft_cleanup((kfft_object_t*)(X))
+#define kfft_free(X) kfft_cleanup((uintptr_t)(X))
 
 #ifdef __cplusplus
 }

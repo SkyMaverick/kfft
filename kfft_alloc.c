@@ -58,9 +58,9 @@ kfft_allocator_clear(kfft_pool_t* A) {
 }
 
 void
-kfft_allocator_free(kfft_pool_t** A) {
-    if (*A) {
-        KFFT_FREE_NULL(A);
+kfft_allocator_free(kfft_pool_t* A) {
+    if (A) {
+        KFFT_FREE(A);
     }
 }
 

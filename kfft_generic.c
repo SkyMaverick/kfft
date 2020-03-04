@@ -6,7 +6,7 @@ static inline int
 rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                   uint32_t u, uint32_t m, uint32_t p) {
 
-    kfft_trace ("[CORE] (lvl.%d) %s\n", st->level, "Change RADER algorithm");
+    kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Change RADER algorithm");
     uint32_t k = u, q1, idx, tidx, twidx;
     kfft_cpx x0 = {0, 0};
 
@@ -28,13 +28,13 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
             if (twidx >= st->nfft)
                 twidx -= st->nfft;
 
-            C_CPY (Ftmp[idx], Fout[k]);
-            C_CPY (Ftwd[tidx], TWIDDLE(twidx, st));
+            C_CPY(Ftmp[idx], Fout[k]);
+            C_CPY(Ftwd[tidx], TWIDDLE(twidx, st));
 
             C_ADDTO(Ftmp[0], Fout[k]);
         }
 
-        //kfft_convolution(Ftmp + 1, Ftwd + 1, sP->splan, sP->splani);
+        // kfft_convolution(Ftmp + 1, Ftwd + 1, sP->splan, sP->splani);
 
         // Reshuffle buffer
         k = u;
@@ -48,7 +48,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
 
             k += m;
 
-            //C_ADDTO(Ftmp[idx], x0);
+            // C_ADDTO(Ftmp[idx], x0);
             C_CPY(Fout[k], Ftmp[idx]);
         }
     }
@@ -61,8 +61,8 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
 static inline int
 std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                 uint32_t u, uint32_t m, uint32_t p) {
-    kfft_trace ("[CORE] (lvl.%d) %s\n", st->level, "Change GENERIC algorithm");
-    
+    kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Change GENERIC algorithm");
+
     uint32_t k = u, q1, q;
     kfft_cpx t;
 

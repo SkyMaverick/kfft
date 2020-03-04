@@ -79,7 +79,7 @@ main(int argc, char* argv[]) {
 
         free(FOut);
         free(amp_scalar);
-        kfft_free(&FCfg);
+        kfft_free(FCfg);
 
         return 0;
     } else {

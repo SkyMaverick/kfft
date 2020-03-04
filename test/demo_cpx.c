@@ -64,8 +64,8 @@ main(int argc, char* argv[]) {
 
                     printf("Create inverse config for %d len\n", argc - 1);
 
-                    kfft_config_cpx(argc - 1, KFFT_FLAG_INVERSE | KFFT_FLAG_RENEW, 0, KFFT_PLAN_ALLOCATOR(FCfg),
-                                     &memneed);
+                    kfft_config_cpx(argc - 1, KFFT_FLAG_INVERSE | KFFT_FLAG_RENEW, 0,
+                                    KFFT_PLAN_ALLOCATOR(FCfg), &memneed);
                     memset(Famp, 0, argc * sizeof(kfft_cpx));
 
                     printf("Inverse FFT transform\n");
@@ -78,7 +78,7 @@ main(int argc, char* argv[]) {
 
                     printf("\n\n");
 
-                    kfft_free (FCfg);
+                    kfft_free(FCfg);
                 } else {
                     fprintf(stderr, "%s\n", "Don't create config");
                     return 1;
