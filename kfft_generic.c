@@ -5,7 +5,9 @@
 static inline int
 rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                   uint32_t u, uint32_t m, uint32_t p) {
-    uint32_t k = u, q1, idx;
+
+    kfft_trace ("[CORE] (lvl.%d) %s\n", st->level, "Change RADER algorithm");
+    uint32_t k = u, q1, idx, tidx, twidx;
     kfft_cpx x0 = {0, 0};
 
     // Find needed subplan
@@ -13,38 +15,41 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     while ((sP->prime > 0) && (sP->prime != p))
         sP++;
 
-    kfft_cpx* Ftwd = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx)*(sP->prime - 1));
+    kfft_cpx* Ftwd = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * (sP->prime));
     if (Ftwd) {
         // Create suffled buffers
-        kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Remap matrix");
         C_CPY(x0, Fout[k]);
-        for (q1 = 1, idx = 0; q1 < p; ++q1) {
+        for (q1 = 1, idx = 0, tidx = 0, twidx = 0; q1 < p; ++q1) {
             idx = sP->ridx[q1 - 1];
+            tidx = sP->rtidx[q1 - 1];
 
             k += m;
-            Ftmp[idx] = Fout[k];
+            twidx += fstride * k;
+            if (twidx >= st->nfft)
+                twidx -= st->nfft;
+
+            C_CPY (Ftmp[idx], Fout[k]);
+            C_CPY (Ftwd[tidx], TWIDDLE(twidx, st));
 
             C_ADDTO(Ftmp[0], Fout[k]);
         }
 
-        // Eval recursive subplan complex FFT
-        // kfft_eval_cpx(sP->splan, Ftmp + 1, Ftmp + 1);
+        //kfft_convolution(Ftmp + 1, Ftwd + 1, sP->splan, sP->splani);
 
-//        for (uint32_t i = 0; i < sP->splan->nfft; i++)
-//            kfft_trace("r%.3fi%.3f ", Ftmp[i].r, Ftmp[i].i);
-//        kfft_trace("%s\n", "");
-//
         // Reshuffle buffer
         k = u;
 
         C_ADDTO(Fout[k], Ftmp[0]);
         for (q1 = 1; q1 < p; ++q1) {
+            C_MULBYSCALAR(Fout[q1], 0);
+        }
+        for (q1 = 1; q1 < p; ++q1) {
             idx = sP->ridx[q1 - 1];
 
             k += m;
 
-            C_ADDTO(Ftmp[idx], x0);
-            Fout[k] = Ftmp[idx];
+            //C_ADDTO(Ftmp[idx], x0);
+            C_CPY(Fout[k], Ftmp[idx]);
         }
     }
 
@@ -56,6 +61,8 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
 static inline int
 std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                 uint32_t u, uint32_t m, uint32_t p) {
+    kfft_trace ("[CORE] (lvl.%d) %s\n", st->level, "Change GENERIC algorithm");
+    
     uint32_t k = u, q1, q;
     kfft_cpx t;
 

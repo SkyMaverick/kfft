@@ -49,13 +49,17 @@ typedef struct {
 #include "incs/kfft_alloc.h"
 
 #include "incs/kfft_cpx.h"
-#include "incs/kfft_conv.h"
 #include "incs/kfft_real.h"
 
-#define KFFT_PLAN_ALLOCATOR(X) (*((uintptr_t*)(X)))
+#define KFFT_PLAN_ALLOCATOR(X) (*((kfft_pool_t**)(X)))
 
 KFFT_API void
 kfft_info(kfft_info_t* info);
+KFFT_API void
+kfft_cleanup (kfft_object_t* mem);
+
+#define kfft_free(X) \
+    kfft_cleanup((kfft_object_t*)(X))
 
 #ifdef __cplusplus
 }

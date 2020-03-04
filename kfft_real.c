@@ -49,7 +49,7 @@ kfft_trace_plan(kfft_real_t* P) {
 ******************************************************************************** */
 
 KFFT_API kfft_real_t*
-kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, size_t* lenmem) {
+kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A, size_t* lenmem) {
     kfft_real_t* st = NULL;
 
     kfft_pool_t* mmgr = NULL;
@@ -93,20 +93,20 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const uintptr_t A, s
         return 0;
     }
 
-    st->mmgr = mmgr;
+    st->object.mmgr = mmgr;
 
-    st->tmpbuf = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * nfft);
+    st->tmpbuf = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * nfft);
     if (st->tmpbuf == NULL)
         goto bailout;
 
     // TODO Maybe memless
     if (nfft > 1) {
-        st->super_twiddles = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * (nfft / 2));
+        st->super_twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * (nfft / 2));
         if (st->super_twiddles == NULL)
             goto bailout;
     }
 
-    st->substate = kfft_config_cpx(nfft, flags | (!(KFFT_FLAG_RENEW)), 0, mmgr, NULL);
+    st->substate = kfft_config_cpx(nfft, flags | (!(KFFT_FLAG_RENEW)), 0, st->object.mmgr, NULL);
     if (st->substate == NULL)
         goto bailout;
 
@@ -210,18 +210,6 @@ kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedat
 
     for (uint32_t i = 0; i < ncfft; i++) {
         timedata[i] = S_DIV(st->tmpbuf[i].r, (2 * st->substate->nfft));
-    }
-}
-
-KFFT_API void
-kfft_free(kfft_real_t** cfg) {
-    if (cfg && *cfg) {
-        kfft_trace("[REAL] %s: %p\n", "Cleanup plan", (void*)(*cfg));
-        kfft_real_t* st = (kfft_real_t*)(*cfg);
-        if (st->mmgr != NULL) {
-            kfft_allocator_free(&(st->mmgr));
-        }
-        *cfg = 0;
     }
 }
 /* ********************************************************************************

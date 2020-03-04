@@ -43,3 +43,10 @@ kfft_next_fast_size(uint32_t n) {
     }
     return n;
 }
+
+KFFT_API void
+kfft_cleanup (kfft_object_t* mem) {
+    if (mem->mmgr) {
+        kfft_allocator_free(&(mem->mmgr));
+    }
+}

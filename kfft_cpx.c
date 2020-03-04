@@ -9,8 +9,8 @@ static void
 kfft_trace_plan(kfft_comp_t* P) {
     kfft_trace("[CORE] %s: %p", "Create KFFT complex plan", (void*)P);
     kfft_trace("\n\t %s - %u", "nfft", P->nfft);
-//    kfft_trace("\n\t %s - %u", "prime", P->q);
-//    kfft_trace("\n\t %s - %u", "prime inverse", P->p);
+    //    kfft_trace("\n\t %s - %u", "prime", P->q);
+    //    kfft_trace("\n\t %s - %u", "prime inverse", P->p);
     kfft_trace("\n\t %s - %u", "level", P->level);
     kfft_trace("\n\t %s - %u : ", "flags", P->flags);
 
@@ -71,6 +71,7 @@ generate_kernel_twiddle(uint32_t i, const kfft_comp_t* P) {
     return ret;
 }
 
+#include "kfft_conv.c"
 #include "kfft_bfly.c"
 #include "kfft_generic.c"
 
@@ -216,8 +217,8 @@ kf_factor(kfft_comp_t* st) {
 
 static inline void
 kfft_gen_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
-    for (uint32_t i = 1; i < size - 1; i++) {
-        idx[i] = _kfr_power(root, i, size) - 1;
+    for (uint32_t i = 1; i < size; i++) {
+        idx[i - 1] = _kfr_power(root, i, size);
     }
 }
 
@@ -228,27 +229,28 @@ kfft_kinit(kfft_comp_t* st) {
         st->twiddles[i] = generate_kernel_twiddle(i, st);
     }
 
-
-#if defined (KFFT_RADER_ALGO)
-    for (uint32_t i = 0; i < st->prm_count; i ++) {
+#if defined(KFFT_RADER_ALGO)
+    for (uint32_t i = 0; i < st->prm_count; i++) {
         kfft_splan_t* sP = &(st->primes[i]);
         uint32_t len = sP->prime - 1;
 
-        sP->splan = kfft_config_cpx(len, st->flags, st->level + 1, st->mmgr, NULL);
+        sP->splan = kfft_config_cpx(len, st->flags, st->level + 1, st->object.mmgr, NULL);
+        sP->splani =
+            kfft_config_cpx(len, st->flags ^ KFFT_FLAG_INVERSE, st->level + 1, st->object.mmgr, NULL);
 
-        sP->ridx = kfft_internal_alloc (st->mmgr, sizeof(uint32_t) * len);
+        sP->ridx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
         if (sP->ridx == NULL)
             return 1;
 
-        sP->rtidx = kfft_internal_alloc (st->mmgr, sizeof(uint32_t) * len);
+        sP->rtidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
         if (sP->rtidx == NULL)
             return 1;
 
-        sP->q = kfft_prime_root (sP->prime);
-        kfft_gen_idxs (sP->ridx, sP->q, sP->prime);
+        sP->q = kfft_prime_root(sP->prime);
+        kfft_gen_idxs(sP->ridx, sP->q, sP->prime);
 
-        sP->p = kfft_primei_root (sP->q, sP->prime);
-        kfft_gen_idxs (sP->rtidx, sP->p, sP->prime);
+        sP->p = kfft_primei_root(sP->q, sP->prime);
+        kfft_gen_idxs(sP->rtidx, sP->p, sP->prime);
     }
 #endif
     return 0;
@@ -271,6 +273,7 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
 
         size_t delta_mem = 0;
         kfft_config_cpx(snfft, flags, level + 1, NULL, &delta_mem);
+        delta_mem *= 2;
 
         delta_mem += 2 * sizeof(uint32_t) * snfft; // index table
         ret += delta_mem;
@@ -314,7 +317,7 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
             st = kfft_internal_alloc(mmgr, sizeof(kfft_comp_t));
     } else {
         if (A && *lenmem >= memneeded) {
-            mmgr = (kfft_pool_t*)A;
+            mmgr = A;
 
             if (flags & KFFT_FLAG_RENEW)
                 kfft_allocator_clear(mmgr);
@@ -335,8 +338,8 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
 
     memcpy(st, &tmp, sizeof(kfft_comp_t));
 
-    st->mmgr = mmgr;
-    st->twiddles = kfft_internal_alloc(st->mmgr, sizeof(kfft_cpx) * st->nfft);
+    st->object.mmgr = mmgr;
+    st->twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);
     if (st->twiddles == NULL)
         goto bailout;
 

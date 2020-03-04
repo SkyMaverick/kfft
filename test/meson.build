@@ -6,7 +6,12 @@ endif
 
 test_link = [libkfft]
 
-app_demo = executable ('demo', 'demo.c',
+app_rdemo = executable ('rdemo', 'demo_real.c',
+                       link_with: test_link,
+                       include_directories: kfft_inc,
+                       install: false)
+
+app_cdemo = executable ('cdemo', 'demo_cpx.c',
                        link_with: test_link,
                        include_directories: kfft_inc,
                        install: false)
