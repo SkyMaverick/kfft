@@ -364,16 +364,22 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
 
             kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "ALLOC temp buffer", (void*)tmpbuf);
             kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
+
             memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
             kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "FREE temp buffer", (void*)tmpbuf);
 
             KFFT_TMP_FREE(tmpbuf);
         } else {
             kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "fail alloc temp buffer");
+            return;
         }
     } else {
         kf_work(fout, fin, 1, in_stride, st->factors, st);
     }
+    
+    for (uint32_t i = 0; i < st->nfft; i++)
+        if (st->flags & KFFT_FLAG_INVERSE)
+            C_DIVBYSCALAR(fout[i], st->nfft);
 }
 
 void

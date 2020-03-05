@@ -42,9 +42,9 @@ main(int argc, char* argv[]) {
         if (Famp) {
             for (int32_t i = 1; i < argc; i++) {
                 Famp[i - 1].r = atof(argv[i]);
-                printf("%3.1fi%3.1f\t", Famp[i - 1].r, Famp[i - 1].i);
+                printf("%3.1fi%3.1f |", Famp[i - 1].r, Famp[i - 1].i);
             }
-            printf("\n");
+            printf("\n\n");
 
             kfft_cpx* FOut = calloc(argc, sizeof(kfft_cpx));
             if (FOut) {
@@ -73,7 +73,7 @@ main(int argc, char* argv[]) {
 
                     printf("\nRESULT >>> ");
                     for (int32_t i = 1; i < argc; i++) {
-                        printf("%3.1fi%3.1f\t", Famp[i - 1].r, Famp[i - 1].i);
+                        printf("%3.1fi%3.1f |", Famp[i - 1].r, Famp[i - 1].i);
                     }
 
                     printf("\n\n");

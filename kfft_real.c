@@ -209,7 +209,7 @@ kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedat
     kfft_eval_cpx(st->substate, st->tmpbuf, st->tmpbuf);
 
     for (uint32_t i = 0; i < ncfft; i++) {
-        timedata[i] = S_DIV(st->tmpbuf[i].r, (2 * st->substate->nfft));
+        timedata[i] = st->tmpbuf[i].r / 2;
     }
 }
 /* ********************************************************************************
