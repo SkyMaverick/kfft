@@ -15,43 +15,40 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     while ((sP->prime > 0) && (sP->prime != p))
         sP++;
 
-    kfft_cpx* Ftwd = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * (sP->prime));
-    if (Ftwd) {
-        // Create suffled buffers
-        C_CPY(x0, Fout[k]);
-        for (q1 = 1, idx = 0, tidx = 0, twidx = 0; q1 < p; ++q1) {
-            idx = sP->ridx[q1 - 1];
-            tidx = sP->rtidx[q1 - 1];
+    trace_seq_cpx(Fout, sP->prime);
+    trace_seq_cpx(sP->shuffle_twiddles, sP->prime - 1);
+    // Create suffled buffers
+    C_CPY(x0, Fout[k]);
+    for (q1 = 1, idx = 0, tidx = 0, twidx = 0; q1 < p; ++q1) {
+        idx = sP->ridx[q1 - 1];
 
-            k += m;
-            twidx += fstride * k;
-            if (twidx >= st->nfft)
-                twidx -= st->nfft;
+        k += m;
 
-            C_CPY(Ftmp[idx], Fout[k]);
-            C_CPY(Ftwd[tidx], TWIDDLE(twidx, st));
-
-            C_ADDTO(Ftmp[0], Fout[k]);
-        }
-
-        // kfft_convolution(Ftmp + 1, Ftwd + 1, sP->splan, sP->splani);
-
-        // Reshuffle buffer
-        k = u;
-
-        C_ADDTO(Fout[k], Ftmp[0]);
-        for (q1 = 1; q1 < p; ++q1) {
-            C_MULBYSCALAR(Fout[q1], 0);
-        }
-        for (q1 = 1; q1 < p; ++q1) {
-            idx = sP->ridx[q1 - 1];
-
-            k += m;
-
-            // C_ADDTO(Ftmp[idx], x0);
-            C_CPY(Fout[k], Ftmp[idx]);
-        }
+        C_CPY(Ftmp[idx], Fout[k]);
+        C_ADDTO(Ftmp[0], Fout[k]);
     }
+
+    kfft_part_convolution(&Ftmp[1], sP->shuffle_twiddles, sP->splan, sP->splani);
+    trace_seq_cpx(Ftmp, sP->prime);
+
+    // Reshuffle buffer
+    k = u;
+
+    C_ADDTO(Fout[k], Ftmp[0]);
+    //        for (q1 = 1; q1 < p; ++q1) {
+    //            C_MULBYSCALAR(Fout[q1], 0);
+    //        }
+    kfft_trace("%3.3f %3.3fi\n", x0.r, x0.i);
+
+    for (q1 = 1; q1 < p; ++q1) {
+        idx = sP->ridx[q1 - 1];
+
+        k += m;
+
+        C_ADDTO(Ftmp[idx], x0);
+        C_CPY(Fout[k], Ftmp[idx]);
+    }
+    trace_seq_cpx(Fout, sP->prime);
 
     return 0;
 }

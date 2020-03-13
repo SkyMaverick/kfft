@@ -26,6 +26,7 @@ static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
     size_t ret = sizeof(kfft_real_t) + sizeof(kfft_cpx) * (nfft * 3 / 2);
     size_t subsize = 0;
+
     kfft_config_cpx(nfft, flags, 0, NULL, &subsize);
 
     ret += subsize;

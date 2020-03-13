@@ -11,7 +11,8 @@ typedef struct {
     uint32_t prime, p, q;
 
     uint32_t* ridx;
-    uint32_t* rtidx;
+    //    uint32_t* rtidx;
+    kfft_cpx* shuffle_twiddles;
 
     struct kfft_kstate* splan;
     struct kfft_kstate* splani;
