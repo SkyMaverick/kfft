@@ -7,7 +7,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
                   uint32_t u, uint32_t m, uint32_t p) {
 
     kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Change RADER algorithm");
-    uint32_t k = u, q1, idx, tidx, twidx;
+    uint32_t k = u, q1, idx;
     kfft_cpx x0 = {0, 0};
 
     // Find needed subplan
@@ -19,8 +19,8 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     trace_seq_cpx(sP->shuffle_twiddles, sP->prime - 1);
     // Create suffled buffers
     C_CPY(x0, Fout[k]);
-    for (q1 = 1, idx = 0, tidx = 0, twidx = 0; q1 < p; ++q1) {
-        idx = sP->ridx[q1 - 1];
+    for (q1 = 1, idx = 0; q1 < p; ++q1) {
+        idx = sP->qidx[q1 - 1];
 
         k += m;
 
@@ -35,17 +35,15 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     k = u;
 
     C_ADDTO(Fout[k], Ftmp[0]);
-    //        for (q1 = 1; q1 < p; ++q1) {
-    //            C_MULBYSCALAR(Fout[q1], 0);
-    //        }
-    kfft_trace("%3.3f %3.3fi\n", x0.r, x0.i);
+    //  for (q1 = 1; q1 < p; ++q1) {
+    //      C_MULBYSCALAR(Fout[q1], 0);
+    //  }
 
     for (q1 = 1; q1 < p; ++q1) {
-        idx = sP->ridx[q1 - 1];
+        idx = sP->pidx[q1 - 1];
+        C_ADDTO(Ftmp[idx], x0);
 
         k += m;
-
-        C_ADDTO(Ftmp[idx], x0);
         C_CPY(Fout[k], Ftmp[idx]);
     }
     trace_seq_cpx(Fout, sP->prime);

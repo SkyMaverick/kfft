@@ -43,9 +43,12 @@ kfft_trace_plan(kfft_comp_t* P) {
 
     kfft_trace("\n\t %s - %u", "primes count", P->prm_count);
     for (uint32_t i = 0; i < P->prm_count; i++) {
-        kfft_trace("\n\t %d %s", P->primes[i].prime, "idx -");
+        kfft_trace("\n\t %d %s", P->primes[i].prime, "qidx -");
         for (uint32_t j = 0; j < P->primes[i].prime - 1; j++)
-            kfft_trace(" %u", P->primes[i].ridx[j]);
+            kfft_trace(" %u", P->primes[i].qidx[j]);
+        kfft_trace("\n\t %d %s", P->primes[i].prime, "pidx -");
+        for (uint32_t j = 0; j < P->primes[i].prime - 1; j++)
+            kfft_trace(" %u", P->primes[i].pidx[j]);
     }
 
     kfft_trace("\n\t %s - %p\n", "twiddles", (void*)(P->twiddles));
@@ -150,22 +153,26 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
     Fout = Fout_beg;
 
     // recombine the p smaller DFTs
-    switch (p) {
-    case 2:
-        kf_bfly2(Fout, fstride, st, m);
-        break;
-    case 3:
-        kf_bfly3(Fout, fstride, st, m);
-        break;
-    case 4:
-        kf_bfly4(Fout, fstride, st, m);
-        break;
-    case 5:
-        kf_bfly5(Fout, fstride, st, m);
-        break;
-    default:
+    if (st->flags & KFFT_FLAG_GENERIC_ONLY) {
         kf_bfly_generic(Fout, fstride, st, m, p);
-        break;
+    } else {
+        switch (p) {
+        case 2:
+            kf_bfly2(Fout, fstride, st, m);
+            break;
+        case 3:
+            kf_bfly3(Fout, fstride, st, m);
+            break;
+        case 4:
+            kf_bfly4(Fout, fstride, st, m);
+            break;
+        case 5:
+            kf_bfly5(Fout, fstride, st, m);
+            break;
+        default:
+            kf_bfly_generic(Fout, fstride, st, m, p);
+            break;
+        }
     }
 }
 
@@ -234,28 +241,26 @@ kfft_kinit(kfft_comp_t* st) {
         kfft_splan_t* sP = &(st->primes[i]);
         uint32_t len = sP->prime - 1;
 
-        sP->splan = kfft_config_cpx(len, st->flags, st->level + 1, st->object.mmgr, NULL);
-        sP->splani = kfft_config_cpx(len, st->flags ^ KFFT_FLAG_INVERSE, st->level + 1,
-                                     st->object.mmgr, NULL);
+        sP->qidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
+        sP->pidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
 
-        sP->ridx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
-        if (sP->ridx) {
+        if (sP->qidx && sP->pidx) {
+
+            sP->splan = kfft_config_cpx(len, (st->flags), st->level + 1, st->object.mmgr, NULL);
+            sP->splani = kfft_config_cpx(len, ((st->flags ^ KFFT_FLAG_INVERSE)), st->level + 1,
+                                         st->object.mmgr, NULL);
 
             sP->q = kfft_prime_root(sP->prime);
-            kfft_gen_idxs(sP->ridx, sP->q, sP->prime);
-
-            for (uint32_t j = 0; j < len; j++)
-                kfft_trace("%u ", sP->ridx[j]);
-            kfft_trace("%s\n", "");
+            kfft_gen_idxs(sP->qidx, sP->q, sP->prime);
 
             sP->p = kfft_primei_root(sP->q, sP->prime);
+            kfft_gen_idxs(sP->pidx, sP->p, sP->prime);
 
             sP->shuffle_twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
             if (sP->shuffle_twiddles) {
 
                 for (uint32_t j = 0; j < len; j++) {
-                    uint32_t ip = _kfr_power(sP->p, j, sP->prime);
-                    kfft_trace("\n%u ", ip);
+                    uint32_t ip = sP->pidx[j];
 
                     sP->shuffle_twiddles[ip - 1] =
                         generate_kernel_twiddle(j, sP->prime, st->flags & KFFT_FLAG_INVERSE);
@@ -293,8 +298,8 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
         kfft_config_cpx(snfft, flags, level + 1, NULL, &delta_mem);
         delta_mem *= 2; // splan and splani
 
-        delta_mem += sizeof(uint32_t) * snfft; // index table
-        delta_mem += sizeof(kfft_cpx) * snfft; // shuffle twiddles
+        delta_mem += sizeof(uint32_t) * snfft * 2; // index table
+        delta_mem += sizeof(kfft_cpx) * snfft;     // shuffle twiddles
 
         ret += delta_mem;
     }

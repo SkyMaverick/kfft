@@ -30,7 +30,7 @@ kfft_ktest(kfft_scalar* amp_scalar, kfft_cpx* tmp_buffer, size_t size) {
         assert("Allocation FAIL");
     }
     kfft_eval_real(FCfg, amp_scalar, tmp_buffer);
-    kfft_free(&FCfg);
+    kfft_free(FCfg);
 
     return (clock() - t_start) * 1000 / CLOCKS_PER_SEC;
 #else

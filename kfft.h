@@ -33,7 +33,8 @@ enum {
     KFFT_FLAG_NORMAL = 0,
     KFFT_FLAG_INVERSE = 1 << 0,
     KFFT_FLAG_RENEW = 1 << 1,
-    KFFT_FLAG_GENERIC = 1 << 2
+    KFFT_FLAG_GENERIC = 1 << 2,
+    KFFT_FLAG_GENERIC_ONLY = 1 << 3
 };
 
 typedef struct {
