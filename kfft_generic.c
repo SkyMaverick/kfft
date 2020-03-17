@@ -85,7 +85,7 @@ std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft
 static void
 kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
                 uint32_t p) {
-    kfft_trace("%s: m - %d | p - %d\n", "Generic FFT", m, p);
+    kfft_trace("%s: m - %d | p - %d | stride - %zu\n", "Generic FFT", m, p, fstride);
 
     kfft_cpx* scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * p);
 
@@ -93,7 +93,8 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
 
         for (uint32_t u = 0; u < m; ++u) {
 #if defined(KFFT_RADER_ALGO)
-            if ((p >= KFFT_RADER_LIMIT) && (!(st->flags & KFFT_FLAG_GENERIC))) {
+            if ((p >= KFFT_RADER_LIMIT) &&
+                (!((st->flags & KFFT_FLAG_GENERIC) || (st->flags & KFFT_FLAG_GENERIC_ONLY)))) {
                 kfft_trace("[CORE] %s: %u\n", "Use Rader algorithm for resolve", p);
                 rader_method_eval(Fout, scratch, fstride, st, u, m, p);
             } else {

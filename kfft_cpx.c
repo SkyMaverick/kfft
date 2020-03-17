@@ -27,6 +27,9 @@ kfft_trace_plan(kfft_comp_t* P) {
                 case 2:
                     kfft_trace("| %s ", "KFFT_FLAG_GENERIC");
                     break;
+                case 3:
+                    kfft_trace("| %s ", "KFFT_FLAG_GENERIC_ONLY");
+                    break;
                 }
             }
         }
@@ -127,35 +130,37 @@ kfft_primei_root(uint32_t a, uint32_t m) {
 static void
 kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_stride,
         uint32_t* factors, const kfft_comp_t* st) {
+
     kfft_cpx* Fout_beg = Fout;
-    const uint32_t p = *factors++; /* the radix  */
-    const uint32_t m = *factors++; /* stage's fft length/p */
-    const kfft_cpx* Fout_end = Fout + p * m;
-
-    kfft_trace("[CORE] Work: p - %u | m - %u\n", p, m);
-
-    if (m == 1) {
-        do {
-            *Fout = *f;
-            f += fstride * in_stride;
-        } while (++Fout != Fout_end);
-    } else {
-        do {
-            // recursive call:
-            // DFT of size m*p performed by doing
-            // p instances of smaller DFTs of size m,
-            // each one takes a decimated version of the input
-            kf_work(Fout, f, fstride * p, in_stride, factors, st);
-            f += fstride * in_stride;
-        } while ((Fout += m) != Fout_end);
-    }
-
-    Fout = Fout_beg;
-
-    // recombine the p smaller DFTs
     if (st->flags & KFFT_FLAG_GENERIC_ONLY) {
-        kf_bfly_generic(Fout, fstride, st, m, p);
+        //        memcpy(Fout, f, sizeof(kfft_cpx) * st->nfft);
+        kf_bfly_generic(Fout, 1, st, 1, st->nfft);
     } else {
+        const uint32_t p = *factors++; /* the radix  */
+        const uint32_t m = *factors++; /* stage's fft length/p */
+        const kfft_cpx* Fout_end = Fout + p * m;
+
+        kfft_trace("[CORE] Work: p - %u | m - %u\n", p, m);
+
+        if (m == 1) {
+            do {
+                *Fout = *f;
+                f += fstride * in_stride;
+            } while (++Fout != Fout_end);
+        } else {
+            do {
+                // recursive call:
+                // DFT of size m*p performed by doing
+                // p instances of smaller DFTs of size m,
+                // each one takes a decimated version of the input
+                kf_work(Fout, f, fstride * p, in_stride, factors, st);
+                f += fstride * in_stride;
+            } while ((Fout += m) != Fout_end);
+        }
+
+        Fout = Fout_beg;
+
+        // recombine the p smaller DFTs
         switch (p) {
         case 2:
             kf_bfly2(Fout, fstride, st, m);
@@ -237,42 +242,45 @@ kfft_kinit(kfft_comp_t* st) {
     }
 
 #if defined(KFFT_RADER_ALGO)
-    for (uint32_t i = 0; i < st->prm_count; i++) {
-        kfft_splan_t* sP = &(st->primes[i]);
-        uint32_t len = sP->prime - 1;
+    if (!(st->flags & KFFT_FLAG_GENERIC_ONLY)) {
 
-        sP->qidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
-        sP->pidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
+        for (uint32_t i = 0; i < st->prm_count; i++) {
+            kfft_splan_t* sP = &(st->primes[i]);
+            uint32_t len = sP->prime - 1;
 
-        if (sP->qidx && sP->pidx) {
+            sP->qidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
+            sP->pidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
 
-            sP->splan = kfft_config_cpx(len, (st->flags), st->level + 1, st->object.mmgr, NULL);
-            sP->splani = kfft_config_cpx(len, ((st->flags ^ KFFT_FLAG_INVERSE)), st->level + 1,
-                                         st->object.mmgr, NULL);
+            if (sP->qidx && sP->pidx) {
 
-            sP->q = kfft_prime_root(sP->prime);
-            kfft_gen_idxs(sP->qidx, sP->q, sP->prime);
+                sP->splan = kfft_config_cpx(len, (st->flags), st->level + 1, st->object.mmgr, NULL);
+                sP->splani = kfft_config_cpx(len, ((st->flags ^ KFFT_FLAG_INVERSE)), st->level + 1,
+                                             st->object.mmgr, NULL);
 
-            sP->p = kfft_primei_root(sP->q, sP->prime);
-            kfft_gen_idxs(sP->pidx, sP->p, sP->prime);
+                sP->q = kfft_prime_root(sP->prime);
+                kfft_gen_idxs(sP->qidx, sP->q, sP->prime);
 
-            sP->shuffle_twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
-            if (sP->shuffle_twiddles) {
+                sP->p = kfft_primei_root(sP->q, sP->prime);
+                kfft_gen_idxs(sP->pidx, sP->p, sP->prime);
 
-                for (uint32_t j = 0; j < len; j++) {
-                    uint32_t ip = sP->pidx[j];
+                sP->shuffle_twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
+                if (sP->shuffle_twiddles) {
 
-                    sP->shuffle_twiddles[ip - 1] =
-                        generate_kernel_twiddle(j, sP->prime, st->flags & KFFT_FLAG_INVERSE);
+                    for (uint32_t j = 0; j < len; j++) {
+                        uint32_t ip = sP->qidx[j];
+
+                        sP->shuffle_twiddles[ip - 1] =
+                            generate_kernel_twiddle(j, sP->prime, st->flags & KFFT_FLAG_INVERSE);
+                    }
+
+                    kfft_eval_cpx(sP->splan, sP->shuffle_twiddles, sP->shuffle_twiddles);
+
+                } else {
+                    return 1;
                 }
-
-                kfft_eval_cpx(sP->splan, sP->shuffle_twiddles, sP->shuffle_twiddles);
-
             } else {
-                return 1;
+                return 2;
             }
-        } else {
-            return 2;
         }
     }
 #endif
@@ -288,20 +296,23 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
     st->flags = flags;
     st->level = level;
 
-    kf_factor(st);
+    if (!(flags & KFFT_FLAG_GENERIC_ONLY)) {
 
-    /* Recursive clculate memory for plan and all subplans */
-    for (size_t i = 0; i < st->prm_count; i++) {
-        size_t snfft = st->primes[i].prime - 1;
+        kf_factor(st);
 
-        size_t delta_mem = 0;
-        kfft_config_cpx(snfft, flags, level + 1, NULL, &delta_mem);
-        delta_mem *= 2; // splan and splani
+        /* Recursive clculate memory for plan and all subplans */
+        for (size_t i = 0; i < st->prm_count; i++) {
+            size_t snfft = st->primes[i].prime - 1;
 
-        delta_mem += sizeof(uint32_t) * snfft * 2; // index table
-        delta_mem += sizeof(kfft_cpx) * snfft;     // shuffle twiddles
+            size_t delta_mem = 0;
+            kfft_config_cpx(snfft, flags, level + 1, NULL, &delta_mem);
+            delta_mem *= 2; // splan and splani
 
-        ret += delta_mem;
+            delta_mem += sizeof(uint32_t) * snfft * 2; // index table
+            delta_mem += sizeof(kfft_cpx) * snfft;     // shuffle twiddles
+
+            ret += delta_mem;
+        }
     }
 
     return ret;
@@ -409,5 +420,11 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
 
 void
 kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
-    kfft_kstride(cfg, fin, fout, 1);
+    if (cfg->flags & KFFT_FLAG_GENERIC_ONLY) {
+        if (fin != fout)
+            memcpy(fout, fin, sizeof(kfft_cpx) * cfg->nfft);
+        kf_work(fout, NULL, 1, 1, 0, cfg);
+    } else {
+        kfft_kstride(cfg, fin, fout, 1);
+    }
 }
