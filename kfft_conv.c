@@ -2,13 +2,6 @@
 #include "kfft_math.h"
 
 static inline void
-trace_seq_cpx(kfft_cpx* F, uint32_t size) {
-    for (uint32_t i = 0; i < size; i++)
-        kfft_trace("%3.3f %3.3fi\n", F[i].r, F[i].i);
-    kfft_trace("%s\n", "");
-}
-
-static inline void
 kfft_mul(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
     // FIXME Now primitive algorithm
     kfft_cpx tmp;
@@ -20,23 +13,9 @@ kfft_mul(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
 
 static inline int
 kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi) {
-    kfft_trace("%s\n", "FOut input");
-    trace_seq_cpx(Fout, P->nfft);
-
     kfft_eval_cpx(P, Fout, Fout);
-
-    kfft_trace("%s\n", "FOut FFT");
-    trace_seq_cpx(Fout, P->nfft);
-
     kfft_mul(Fout, Fin, P->nfft);
-
-    kfft_trace("%s\n", "Multiple FFT");
-    trace_seq_cpx(Fout, P->nfft);
-
     kfft_eval_cpx(Pi, Fout, Fout);
-
-    kfft_trace("%s\n", "Inverse FFT");
-    trace_seq_cpx(Fout, P->nfft);
 }
 
 /*

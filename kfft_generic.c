@@ -15,21 +15,18 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     while ((sP->prime > 0) && (sP->prime != p))
         sP++;
 
-    trace_seq_cpx(Fout, sP->prime);
     // Create suffled buffers
     C_CPY(x0, Fout[k]);
     for (q1 = 1, idx = 0; q1 < p; ++q1) {
         idx = sP->qidx[q1 - 1];
 
         k += m;
-        kfft_trace("idx - %u < k - %u (%3.3f %3.3fi)\n", idx, k, Fout[k].r, Fout[k].i);
+        
         C_CPY(Ftmp[q1], Fout[idx]);
         C_ADDTO(Ftmp[0], Fout[k]);
     }
 
     kfft_part_convolution(&Ftmp[1], sP->shuffle_twiddles, sP->splan, sP->splani);
-    trace_seq_cpx(Ftmp, sP->prime);
-
     // Reshuffle buffer
     k = u;
 
@@ -40,10 +37,9 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
         C_ADDTO(Ftmp[q1], x0);
 
         k = u + m * idx;
-        kfft_trace("q1 - %u > k - %u (%3.3f %3.3fi)\n", q1, k, Ftmp[q1].r, Ftmp[q1].i);
+    
         C_CPY(Fout[k], Ftmp[q1]);
     }
-    trace_seq_cpx(Fout, sP->prime);
 
     return 0;
 }

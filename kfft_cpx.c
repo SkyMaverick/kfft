@@ -275,12 +275,10 @@ kfft_kinit(kfft_comp_t* st) {
                     }
 
                     kfft_trace("%s\n", "Shuffle twiddles");
-                    trace_seq_cpx(sP->shuffle_twiddles, len);
 
                     kfft_eval_cpx(sP->splan, sP->shuffle_twiddles, sP->shuffle_twiddles);
 
                     kfft_trace("%s\n", "Shuffle twiddles FFT");
-                    trace_seq_cpx(sP->shuffle_twiddles, len);
 
                 } else {
                     return 1;
