@@ -253,8 +253,9 @@ kfft_kinit(kfft_comp_t* st) {
 
             if (sP->qidx && sP->pidx) {
 
-                sP->splan = kfft_config_cpx(len, (st->flags), st->level + 1, st->object.mmgr, NULL);
-                sP->splani = kfft_config_cpx(len, ((st->flags ^ KFFT_FLAG_INVERSE)), st->level + 1,
+                sP->splan = kfft_config_cpx(len, (st->flags & (~KFFT_FLAG_INVERSE)), st->level + 1,
+                                            st->object.mmgr, NULL);
+                sP->splani = kfft_config_cpx(len, ((st->flags | KFFT_FLAG_INVERSE)), st->level + 1,
                                              st->object.mmgr, NULL);
 
                 sP->q = kfft_prime_root(sP->prime);
