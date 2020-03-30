@@ -20,9 +20,23 @@ kfft_mul(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
 
 static inline int
 kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi) {
+    kfft_trace("%s\n", "FOut input");
+    trace_seq_cpx(Fout, P->nfft);
+
     kfft_eval_cpx(P, Fout, Fout);
+
+    kfft_trace("%s\n", "FOut FFT");
+    trace_seq_cpx(Fout, P->nfft);
+
     kfft_mul(Fout, Fin, P->nfft);
+
+    kfft_trace("%s\n", "Multiple FFT");
+    trace_seq_cpx(Fout, P->nfft);
+
     kfft_eval_cpx(Pi, Fout, Fout);
+
+    kfft_trace("%s\n", "Inverse FFT");
+    trace_seq_cpx(Fout, P->nfft);
 }
 
 /*

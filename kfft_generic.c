@@ -16,15 +16,14 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
         sP++;
 
     trace_seq_cpx(Fout, sP->prime);
-    trace_seq_cpx(sP->shuffle_twiddles, sP->prime - 1);
     // Create suffled buffers
     C_CPY(x0, Fout[k]);
     for (q1 = 1, idx = 0; q1 < p; ++q1) {
         idx = sP->qidx[q1 - 1];
 
         k += m;
-
-        C_CPY(Ftmp[idx], Fout[k]);
+        kfft_trace("idx - %u < k - %u (%3.3f %3.3fi)\n", idx, k, Fout[k].r, Fout[k].i);
+        C_CPY(Ftmp[q1], Fout[idx]);
         C_ADDTO(Ftmp[0], Fout[k]);
     }
 
@@ -35,16 +34,14 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     k = u;
 
     C_ADDTO(Fout[k], Ftmp[0]);
-    //  for (q1 = 1; q1 < p; ++q1) {
-    //      C_MULBYSCALAR(Fout[q1], 0);
-    //  }
 
     for (q1 = 1; q1 < p; ++q1) {
         idx = sP->pidx[q1 - 1];
-        C_ADDTO(Ftmp[idx], x0);
+        C_ADDTO(Ftmp[q1], x0);
 
-        k += m;
-        C_CPY(Fout[k], Ftmp[idx]);
+        k = u + m * idx;
+        kfft_trace("q1 - %u > k - %u (%3.3f %3.3fi)\n", q1, k, Ftmp[q1].r, Ftmp[q1].i);
+        C_CPY(Fout[k], Ftmp[q1]);
     }
     trace_seq_cpx(Fout, sP->prime);
 

@@ -267,13 +267,19 @@ kfft_kinit(kfft_comp_t* st) {
                 if (sP->shuffle_twiddles) {
 
                     for (uint32_t j = 0; j < len; j++) {
-                        uint32_t ip = sP->qidx[j];
+                        uint32_t ip = sP->pidx[j];
 
-                        sP->shuffle_twiddles[ip - 1] =
-                            generate_kernel_twiddle(j, sP->prime, st->flags & KFFT_FLAG_INVERSE);
+                        sP->shuffle_twiddles[j] =
+                            generate_kernel_twiddle(ip, sP->prime, st->flags & KFFT_FLAG_INVERSE);
                     }
 
+                    kfft_trace("%s\n", "Shuffle twiddles");
+                    trace_seq_cpx(sP->shuffle_twiddles, len);
+
                     kfft_eval_cpx(sP->splan, sP->shuffle_twiddles, sP->shuffle_twiddles);
+
+                    kfft_trace("%s\n", "Shuffle twiddles FFT");
+                    trace_seq_cpx(sP->shuffle_twiddles, len);
 
                 } else {
                     return 1;
