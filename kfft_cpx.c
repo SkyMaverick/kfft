@@ -59,11 +59,7 @@ kfft_trace_plan(kfft_comp_t* P) {
 
 #endif
 
-static inline kfft_cpx
-get_ktwiddle(const uint32_t i, const kfft_comp_t* P) {
-    return P->twiddles[i];
-}
-#define TWIDDLE(i, P) get_ktwiddle(i, P)
+#define TWIDDLE(i, P) P->twiddles[i]
 
 static inline kfft_cpx
 generate_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
@@ -417,10 +413,6 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
     } else {
         kf_work(fout, fin, 1, in_stride, st->factors, st);
     }
-
-    for (uint32_t i = 0; i < st->nfft; i++)
-        if (st->flags & KFFT_FLAG_INVERSE)
-            C_DIVBYSCALAR(fout[i], st->nfft);
 }
 
 void
@@ -432,4 +424,8 @@ kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     } else {
         kfft_kstride(cfg, fin, fout, 1);
     }
+
+    for (uint32_t i = 0; i < cfg->nfft; i++)
+        if (cfg->flags & KFFT_FLAG_INVERSE)
+            C_DIVBYSCALAR(fout[i], cfg->nfft);
 }

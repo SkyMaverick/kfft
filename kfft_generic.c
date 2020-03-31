@@ -21,7 +21,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
         idx = sP->qidx[q1 - 1];
 
         k += m;
-        
+
         C_CPY(Ftmp[q1], Fout[idx]);
         C_ADDTO(Ftmp[0], Fout[k]);
     }
@@ -37,7 +37,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
         C_ADDTO(Ftmp[q1], x0);
 
         k = u + m * idx;
-    
+
         C_CPY(Fout[k], Ftmp[q1]);
     }
 

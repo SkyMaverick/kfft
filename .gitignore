@@ -6,6 +6,7 @@
 *.s~
 *.log
 ~*
+*.out.*
 
 aukfcmp
 aukfcmpwp

@@ -45,6 +45,8 @@ typedef struct {
     uint16_t flags;
 } kfft_info_t;
 
+enum { KFFT_ERROR_ALLOCATE_FAIL, KFFT_ERROR_BUFFER_OVVERFLOW };
+
 #include "incs/kfft_macro.h"
 #include "incs/kfft_system.h"
 #include "incs/kfft_alloc.h"

@@ -10,7 +10,7 @@
     #define SUPER_TWIDDLE(i, P) P->super_twiddles[i]
 #else
 static inline kfft_cpx
-get_super_twiddle(uint32_t i, kfft_plan_t* P) {
+get_super_twiddle(uint32_t i, kfft_real_t* P) {
     kfft_cpx ret;
 
     kfft_scalar phase = -KFFT_CONST_PI * ((kfft_scalar)(i + 1) / P->substate->nfft + .5);
