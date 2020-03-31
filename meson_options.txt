@@ -19,7 +19,7 @@ option ('enable_fastmath', type: 'boolean', value: 'false',
         description: 'use -ffast-math optimization (maybe dangerouse)')
 option ('enable_extended', type: 'boolean', value: 'true',
         description: 'enable extended algoritms')
-option ('enable_memless', type: 'boolean', value: 'false',
+option ('enable_memless', type: 'boolean', value: 'true',
         description: 'use memory less mode (very slow)')
 
 option ('build_library_api', type : 'combo', choices: ['export', 'import', 'none'], value: 'export',

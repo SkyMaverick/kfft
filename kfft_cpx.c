@@ -59,8 +59,6 @@ kfft_trace_plan(kfft_comp_t* P) {
 
 #endif
 
-#define TWIDDLE(i, P) P->twiddles[i]
-
 static inline kfft_cpx
 generate_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
     kfft_cpx ret = {0, 0};
@@ -71,6 +69,19 @@ generate_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
 
     kf_cexp(&ret, phase);
     return ret;
+}
+
+#if defined(KFFT_MEMLESS_MODE)
+    #define TWIDDLE(i, P) generate_kernel_twiddle(i, P->nfft, (P->flags & KFFT_FLAG_INVERSE))
+#else
+    #define TWIDDLE(i, P) P->twiddles[i]
+#endif
+
+static inline void
+kfft_gen_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
+    for (uint32_t i = 0; i < size - 1; i++) {
+        idx[i] = _kfr_power(root, i, size);
+    }
 }
 
 #include "kfft_conv.c"
@@ -208,7 +219,7 @@ kf_factor(kfft_comp_t* st) {
             if (p > floor_sqrt)
                 p = n; /* no more factors, skip to end */
         }
-#if defined(KFFT_RADER_ALGO) && !defined(KFFT_MEMLESS_MODE)
+#if defined(KFFT_RADER_ALGO)
         if (st->level < KFFT_PLAN_LEVEL && p > KFFT_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
             pbuf->prime = p;
             st->prm_count++;
@@ -223,19 +234,14 @@ kf_factor(kfft_comp_t* st) {
     } while (n > 1);
 }
 
-static inline void
-kfft_gen_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
-    for (uint32_t i = 0; i < size - 1; i++) {
-        idx[i] = _kfr_power(root, i, size);
-    }
-}
-
 static inline int
 kfft_kinit(kfft_comp_t* st) {
     /* Generate twiddles  */
+#if !defined(KFFT_MEMLESS_MODE)
     for (uint32_t i = 0; i < st->nfft; ++i) {
         st->twiddles[i] = generate_kernel_twiddle(i, st->nfft, st->flags & KFFT_FLAG_INVERSE);
     }
+#endif
 
 #if defined(KFFT_RADER_ALGO)
     if (!(st->flags & KFFT_FLAG_GENERIC_ONLY)) {
@@ -291,7 +297,11 @@ kfft_kinit(kfft_comp_t* st) {
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_comp_t* st) {
 
-    size_t ret = sizeof(kfft_comp_t) + sizeof(kfft_cpx) * nfft;
+    size_t ret = sizeof(kfft_comp_t);
+
+#if !defined(KFFT_MEMLESS_MODE)
+    ret += sizeof(kfft_cpx) * nfft;
+#endif
 
     st->nfft = nfft;
     st->flags = flags;
@@ -301,6 +311,7 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
 
         kf_factor(st);
 
+#if defined(KFFT_RADER_ALGO)
         /* Recursive clculate memory for plan and all subplans */
         for (size_t i = 0; i < st->prm_count; i++) {
             size_t snfft = st->primes[i].prime - 1;
@@ -314,6 +325,7 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
 
             ret += delta_mem;
         }
+#endif /* KFFT_RADER_ALGO */
     }
 
     return ret;
@@ -376,9 +388,12 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
     memcpy(st, &tmp, sizeof(kfft_comp_t));
 
     st->object.mmgr = mmgr;
+
+#if !defined(KFFT_MEMLESS_MODE)
     st->twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);
     if (st->twiddles == NULL)
         goto bailout;
+#endif /* KFFT_MEMLESS_MODE */
 
     if (kfft_kinit(st))
         goto bailout;
