@@ -44,10 +44,21 @@ kfft_next_fast_size(uint32_t n) {
     return n;
 }
 
-KFFT_API void
+KFFT_API kfft_return_t
 kfft_cleanup(uintptr_t mem) {
     kfft_object_t* M = (kfft_object_t*)(mem);
-    if (M->mmgr) {
-        kfft_allocator_free(M->mmgr);
-    }
+    if (M->mmgr == NULL)
+        return KFFT_RET_FREE_NULL;
+
+    kfft_allocator_free(M->mmgr);
+    return KFFT_RET_SUCCESS;
+}
+
+static const char* errors[] = {"Success operation result", "Internal allocation memory fail",
+                               "Temporary buffer allocation fail",
+                               "Invalide free() operation for NULL buffer"};
+
+KFFT_API const char*
+kfft_strerr(const kfft_return_t code) {
+    return errors[code];
 }

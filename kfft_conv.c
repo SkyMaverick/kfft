@@ -11,11 +11,14 @@ kfft_mul(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
     }
 }
 
-static inline int
+static inline kfft_return_t
 kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi) {
-    kfft_eval_cpx(P, Fout, Fout);
-    kfft_mul(Fout, Fin, P->nfft);
-    kfft_eval_cpx(Pi, Fout, Fout);
+    kfft_return_t ret = kfft_eval_cpx(P, Fout, Fout);
+    if (ret == KFFT_RET_SUCCESS) {
+        kfft_mul(Fout, Fin, P->nfft);
+        ret = kfft_eval_cpx(Pi, Fout, Fout);
+    }
+    return ret;
 }
 
 /*
@@ -25,8 +28,9 @@ kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t
         - Per-elements multiplify to Fout
         - Inverse FFT Fout sequence
  */
-static inline int
+static inline kfft_return_t
 kfft_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi) {
-    kfft_eval_cpx(P, Fin, Fin);
-    return kfft_part_convolution(Fout, Fin, P, Pi);
+
+    kfft_return_t ret = kfft_eval_cpx(P, Fin, Fin);
+    return (ret == KFFT_RET_SUCCESS) ? kfft_part_convolution(Fout, Fin, P, Pi) : ret;
 }

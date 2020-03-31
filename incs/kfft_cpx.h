@@ -50,7 +50,7 @@ KFFT_API kfft_comp_t*
 kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
                 size_t* lenmem);
 
-KFFT_API void
+KFFT_API kfft_return_t
 kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
 
 #define kfft_kfree(X)                                                                              \

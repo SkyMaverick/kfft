@@ -2,11 +2,15 @@
 
 #if defined(KFFT_RADER_ALGO)
 
-static inline int
+static inline kfft_return_t
 rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                   uint32_t u, uint32_t m, uint32_t p) {
 
+    (void)fstride; // disable unused parameter
+
     kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Change RADER algorithm");
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+
     uint32_t k = u, q1, idx;
     kfft_cpx x0 = {0, 0};
 
@@ -26,22 +30,24 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
         C_ADDTO(Ftmp[0], Fout[k]);
     }
 
-    kfft_part_convolution(&Ftmp[1], sP->shuffle_twiddles, sP->splan, sP->splani);
-    // Reshuffle buffer
-    k = u;
+    ret = kfft_part_convolution(&Ftmp[1], sP->shuffle_twiddles, sP->splan, sP->splani);
+    if (ret == KFFT_RET_SUCCESS) {
+        // Reshuffle buffer
+        k = u;
 
-    C_ADDTO(Fout[k], Ftmp[0]);
+        C_ADDTO(Fout[k], Ftmp[0]);
 
-    for (q1 = 1; q1 < p; ++q1) {
-        idx = RAD_INVERSE_IDX(q1 - 1, sP);
-        C_ADDTO(Ftmp[q1], x0);
+        for (q1 = 1; q1 < p; ++q1) {
+            idx = RAD_INVERSE_IDX(q1 - 1, sP);
+            C_ADDTO(Ftmp[q1], x0);
 
-        k = u + m * idx;
+            k = u + m * idx;
 
-        C_CPY(Fout[k], Ftmp[q1]);
+            C_CPY(Fout[k], Ftmp[q1]);
+        }
     }
 
-    return 0;
+    return ret;
 }
 
 #endif /* KFFT_RADER_ALGO */
@@ -50,6 +56,7 @@ static inline int
 std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                 uint32_t u, uint32_t m, uint32_t p) {
     kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Change GENERIC algorithm");
+    kfft_return_t ret = KFFT_RET_SUCCESS;
 
     uint32_t k = u, q1, q;
     kfft_cpx t;
@@ -72,35 +79,48 @@ std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft
         }
         k += m;
     }
-    return 0;
+    return ret;
 }
 
-static void
+static kfft_return_t
 kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
                 uint32_t p) {
+
     kfft_trace("%s: m - %d | p - %d | stride - %zu\n", "Generic FFT", m, p, fstride);
 
-    kfft_cpx* scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * p);
+    kfft_return_t ret = KFFT_RET_SUCCESS;
 
+    kfft_cpx* scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * p);
     if (scratch) {
 
         for (uint32_t u = 0; u < m; ++u) {
 #if defined(KFFT_RADER_ALGO)
             if ((p >= KFFT_RADER_LIMIT) &&
                 (!((st->flags & KFFT_FLAG_GENERIC) || (st->flags & KFFT_FLAG_GENERIC_ONLY)))) {
+
                 kfft_trace("[CORE] %s: %u\n", "Use Rader algorithm for resolve", p);
-                rader_method_eval(Fout, scratch, fstride, st, u, m, p);
+                ret = rader_method_eval(Fout, scratch, fstride, st, u, m, p);
+
+                if (ret != KFFT_RET_SUCCESS) {
+                    break;
+                }
             } else {
 #endif /* KFFT_RADER_ALGO */
+
                 kfft_trace("[CORE] %s: %u\n", "Use standart algorithm for resolve", p);
-                std_method_eval(Fout, scratch, fstride, st, u, m, p);
+                ret = std_method_eval(Fout, scratch, fstride, st, u, m, p);
+
+                if (ret != KFFT_RET_SUCCESS) {
+                    break;
+                }
 #if defined(KFFT_RADER_ALGO)
             }
 #endif /* KFFT_RADER_ALGO */
         }
-
         KFFT_TMP_FREE(scratch);
     } else {
         kfft_trace("[LEVEL %d] %s\n", st->level, "Temporary buffer create fail.");
+        ret = KFFT_RET_BUFFER_FAIL;
     }
+    return ret;
 }

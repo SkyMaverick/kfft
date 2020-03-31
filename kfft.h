@@ -47,9 +47,11 @@ typedef struct {
 
 enum {
     KFFT_RET_SUCCESS = 0x0000,
-    KFFT_RET_ALLOCATE_FAIL = 0x0001,
-    KFFT_RET_BUFFER_OVVERFLOW = 0x0002
+    KFFT_RET_ALLOC_FAIL = 0x0001,
+    KFFT_RET_BUFFER_FAIL = 0x0002,
+    KFFT_RET_FREE_NULL = 0x0003
 };
+typedef unsigned kfft_return_t;
 
 #include "incs/kfft_macro.h"
 #include "incs/kfft_system.h"
@@ -62,7 +64,7 @@ enum {
 
 KFFT_API void
 kfft_info(kfft_info_t* info);
-KFFT_API void
+KFFT_API kfft_return_t
 kfft_cleanup(uintptr_t mem);
 
 #define kfft_free(X) kfft_cleanup((uintptr_t)(X))

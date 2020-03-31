@@ -148,14 +148,16 @@ kfft_primei_root(uint32_t a, uint32_t m) {
 
 #endif /* KFFT_RADER_ALGO */
 
-static void
+static kfft_return_t
 kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_stride,
         uint32_t* factors, const kfft_comp_t* st) {
+
+    kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_cpx* Fout_beg = Fout;
     if (st->flags & KFFT_FLAG_GENERIC_ONLY) {
         //        memcpy(Fout, f, sizeof(kfft_cpx) * st->nfft);
-        kf_bfly_generic(Fout, 1, st, 1, st->nfft);
+        ret = kf_bfly_generic(Fout, 1, st, 1, st->nfft);
     } else {
         const uint32_t p = *factors++; /* the radix  */
         const uint32_t m = *factors++; /* stage's fft length/p */
@@ -174,7 +176,11 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
                 // DFT of size m*p performed by doing
                 // p instances of smaller DFTs of size m,
                 // each one takes a decimated version of the input
-                kf_work(Fout, f, fstride * p, in_stride, factors, st);
+                ret = kf_work(Fout, f, fstride * p, in_stride, factors, st);
+
+                if (ret != KFFT_RET_SUCCESS)
+                    goto bailout;
+
                 f += fstride * in_stride;
             } while ((Fout += m) != Fout_end);
         }
@@ -196,10 +202,12 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
             kf_bfly5(Fout, fstride, st, m);
             break;
         default:
-            kf_bfly_generic(Fout, fstride, st, m, p);
+            ret = kf_bfly_generic(Fout, fstride, st, m, p);
             break;
         }
     }
+bailout:
+    return ret;
 }
 
 /*  facbuf is populated by p1,m1,p2,m2, ...
@@ -250,8 +258,10 @@ kf_factor(kfft_comp_t* st) {
     } while (n > 1);
 }
 
-static inline int
+static inline kfft_return_t
 kfft_kinit(kfft_comp_t* st) {
+    
+    kfft_return_t ret = KFFT_RET_SUCCESS;
     /* Generate twiddles  */
 #if !defined(KFFT_MEMLESS_MODE)
     for (uint32_t i = 0; i < st->nfft; ++i) {
@@ -293,24 +303,19 @@ kfft_kinit(kfft_comp_t* st) {
                             kfft_kernel_twiddle(ip, sP->prime, st->flags & KFFT_FLAG_INVERSE);
                     }
 
-                    kfft_trace("%s\n", "Shuffle twiddles");
-
-                    kfft_eval_cpx(sP->splan, sP->shuffle_twiddles, sP->shuffle_twiddles);
-
-                    kfft_trace("%s\n", "Shuffle twiddles FFT");
-
+                    ret = kfft_eval_cpx(sP->splan, sP->shuffle_twiddles, sP->shuffle_twiddles);
                 } else {
-                    return 1;
+                    ret = KFFT_RET_ALLOC_FAIL;
                 }
     #if !defined(KFFT_MEMLESS_MODE)
             } else {
-                return 2;
+                ret = KFFT_RET_ALLOC_FAIL;
             }
     #endif /* not KFFT_MEMLESS_MODE */
         }
     }
 #endif /* KFFT_RADER_ALGO */
-    return 0;
+    return ret;
 }
 
 static inline size_t
@@ -380,7 +385,6 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
             mmgr = A;
             kfft_trace("[CORE] %s: %p\n", "Use allocator and create plan", (void*)mmgr);
         }
-
         if (mmgr)
             st = kfft_internal_alloc(mmgr, sizeof(kfft_comp_t));
     } else {
@@ -391,7 +395,6 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
                 kfft_allocator_clear(mmgr);
 
             st = kfft_internal_alloc(mmgr, sizeof(kfft_comp_t));
-
             kfft_trace("[CORE] %s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
         }
         *lenmem = memneeded;
@@ -401,7 +404,7 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
     bailout:
         if (mmgr && (flag_create == true))
             kfft_allocator_free(mmgr);
-        return 0;
+        return NULL;
     }
 
     memcpy(st, &tmp, sizeof(kfft_comp_t));
@@ -424,8 +427,10 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
     return st;
 }
 
-static inline void
+static inline kfft_return_t
 kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_stride) {
+
+    kfft_return_t ret = KFFT_RET_SUCCESS;
     if (fin == fout) {
         // NOTE: this is not really an in-place FFT algorithm.
         // It just performs an out-of-place FFT into a temp buffer
@@ -434,32 +439,41 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
             KFFT_ZEROMEM(tmpbuf, sizeof(kfft_cpx) * st->nfft);
 
             kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "ALLOC temp buffer", (void*)tmpbuf);
-            kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
+            ret = kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
 
-            memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
+            if (ret == KFFT_RET_SUCCESS)
+                memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
+
             kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "FREE temp buffer", (void*)tmpbuf);
-
             KFFT_TMP_FREE(tmpbuf);
         } else {
             kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "fail alloc temp buffer");
-            return;
+            ret = KFFT_RET_BUFFER_FAIL;
         }
     } else {
-        kf_work(fout, fin, 1, in_stride, st->factors, st);
+        ret = kf_work(fout, fin, 1, in_stride, st->factors, st);
     }
+    return ret;
 }
 
-void
+kfft_return_t
 kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
+
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+
     if (cfg->flags & KFFT_FLAG_GENERIC_ONLY) {
         if (fin != fout)
             memcpy(fout, fin, sizeof(kfft_cpx) * cfg->nfft);
-        kf_work(fout, NULL, 1, 1, 0, cfg);
+        ret = kf_work(fout, NULL, 1, 1, 0, cfg);
     } else {
-        kfft_kstride(cfg, fin, fout, 1);
+        ret = kfft_kstride(cfg, fin, fout, 1);
     }
 
-    for (uint32_t i = 0; i < cfg->nfft; i++)
-        if (cfg->flags & KFFT_FLAG_INVERSE)
-            C_DIVBYSCALAR(fout[i], cfg->nfft);
+    if (ret == KFFT_RET_SUCCESS) {
+        for (uint32_t i = 0; i < cfg->nfft; i++)
+            if (cfg->flags & KFFT_FLAG_INVERSE)
+                C_DIVBYSCALAR(fout[i], cfg->nfft);
+    }
+
+    return ret;
 }
