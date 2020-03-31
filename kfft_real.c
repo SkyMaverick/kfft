@@ -6,11 +6,8 @@
 #include "kfft_math.h"
 #include "kfft_trace.h"
 
-#ifndef KFFT_MEMLESS_MODE
-    #define SUPER_TWIDDLE(i, P) P->super_twiddles[i]
-#else
 static inline kfft_cpx
-get_super_twiddle(uint32_t i, kfft_real_t* P) {
+kfft_real_twiddle(uint32_t i, kfft_real_t* P) {
     kfft_cpx ret;
 
     kfft_scalar phase = -KFFT_CONST_PI * ((kfft_scalar)(i + 1) / P->substate->nfft + .5);
@@ -19,19 +16,26 @@ get_super_twiddle(uint32_t i, kfft_real_t* P) {
     kf_cexp(&ret, phase);
     return ret;
 }
-    #define SUPER_TWIDDLE(i, P) get_super_twiddle(i, P)
+
+#if defined (KFFT_MEMLESS_MODE)
+    #define SUPER_TWIDDLE(i, P) kfft_real_twiddle(i, P)
+#else
+    #define SUPER_TWIDDLE(i, P) P->super_twiddles[i]
 #endif /* KFFT_MEMLESS_MODE */
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
-    size_t ret = sizeof(kfft_real_t) + sizeof(kfft_cpx) * (nfft * 3 / 2);
+    size_t ret = sizeof(kfft_real_t);
+#if !defined (KFFT_MEMLESS_MODE)
+    ret += sizeof(kfft_cpx) * (nfft * 0.5);
+#endif
     size_t subsize = 0;
 
-    kfft_config_cpx(nfft, flags, 0, NULL, &subsize);
-
-    ret += subsize;
-
-    return ret;
+    if (kfft_config_cpx(nfft, flags, 0, NULL, &subsize) == KFFT_RET_SUCCESS) {
+        ret += subsize;
+        return ret;
+    }
+    return 0;
 }
 
 #ifdef KFFT_TRACE
@@ -40,7 +44,6 @@ static void
 kfft_trace_plan(kfft_real_t* P) {
     kfft_trace("[REAL] %s: %p", "Create KFFT real plan", (void*)P);
     kfft_trace("\n\t %s - %p", "Uses complex plan", (void*)(P->substate));
-    kfft_trace("\n\t %s - %p", "Temporary buffer", (void*)(P->tmpbuf));
     kfft_trace("\n\t %s - %p\n", "Real twiddles", (void*)(P->super_twiddles));
 }
 
@@ -96,27 +99,25 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A
 
     st->object.mmgr = mmgr;
 
-    st->tmpbuf = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * nfft);
-    if (st->tmpbuf == NULL)
+//    st->tmpbuf = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * nfft);
+//    if (st->tmpbuf == NULL)
+//        goto bailout;
+//
+    st->substate = kfft_config_cpx(nfft, flags | (!(KFFT_FLAG_RENEW)), 0, st->object.mmgr, NULL);
+    if (st->substate == NULL)
         goto bailout;
 
-    // TODO Maybe memless
+#if !defined (KFFT_MEMLESS_MODE)
     if (nfft > 1) {
         st->super_twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * (nfft / 2));
         if (st->super_twiddles == NULL)
             goto bailout;
     }
 
-    st->substate = kfft_config_cpx(nfft, flags | (!(KFFT_FLAG_RENEW)), 0, st->object.mmgr, NULL);
-    if (st->substate == NULL)
-        goto bailout;
-
     for (uint32_t i = 0; i < nfft / 2; ++i) {
-        double phase = -KFFT_CONST_PI * ((double)(i + 1) / nfft + .5);
-        if (flags & KFFT_FLAG_INVERSE)
-            phase *= -1;
-        kf_cexp(st->super_twiddles + i, phase);
+        st->super_twiddles[i] = kfft_real_twiddle (i, st);
     }
+#endif /* not KFFT_MEMLESS_MODE */
 
 #ifdef KFFT_TRACE
     kfft_trace_plan(st);
@@ -125,7 +126,7 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A
     return st;
 }
 
-KFFT_API void
+KFFT_API kfft_return_t
 kfft_eval_real(kfft_real_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
     /* input buffer timedata is stored row-wise */
     uint32_t k, ncfft;
@@ -173,7 +174,7 @@ kfft_eval_real(kfft_real_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata
     }
 }
 
-KFFT_API void
+KFFT_API kfft_return_t
 kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
     /* input buffer timedata is stored row-wise */
     uint32_t k, ncfft;

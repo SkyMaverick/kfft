@@ -56,8 +56,9 @@ kfft_trace_plan(kfft_comp_t* P) {
             kfft_trace(" %u", P->primes[i].pidx[j]);
     }
 
-    kfft_trace("\n\t %s - %p\n", "twiddles", (void*)(P->twiddles));
+    kfft_trace("\n\t %s - %p", "twiddles", (void*)(P->twiddles));
     #endif /* KFFT_MEMLESS_MODE */
+    kfft_trace ("%s\n", "");
 }
 
 #endif /* KFFT_TRACE */
@@ -322,7 +323,6 @@ static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_comp_t* st) {
 
     size_t ret = sizeof(kfft_comp_t);
-
 #if !defined(KFFT_MEMLESS_MODE)
     ret += sizeof(kfft_cpx) * nfft;
 #endif
@@ -351,7 +351,6 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
         }
 #endif /* KFFT_RADER_ALGO */
     }
-
     return ret;
 }
 
@@ -417,7 +416,7 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
         goto bailout;
 #endif /* not KFFT_MEMLESS_MODE */
 
-    if (kfft_kinit(st))
+    if (kfft_kinit(st) != KFFT_RET_SUCCESS)
         goto bailout;
 
 #ifdef KFFT_TRACE
