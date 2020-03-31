@@ -20,7 +20,7 @@ get_super_twiddle(uint32_t i, kfft_real_t* P) {
     return ret;
 }
     #define SUPER_TWIDDLE(i, P) get_super_twiddle(i, P)
-#endif
+#endif /* KFFT_MEMLESS_MODE */
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
@@ -44,7 +44,7 @@ kfft_trace_plan(kfft_real_t* P) {
     kfft_trace("\n\t %s - %p\n", "Real twiddles", (void*)(P->super_twiddles));
 }
 
-#endif
+#endif /* KFFT_TRACE */
 /* ********************************************************************************
       TODO  Functionality
 ******************************************************************************** */

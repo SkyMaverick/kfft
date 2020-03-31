@@ -18,7 +18,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     // Create suffled buffers
     C_CPY(x0, Fout[k]);
     for (q1 = 1, idx = 0; q1 < p; ++q1) {
-        idx = sP->qidx[q1 - 1];
+        idx = RAD_PRIME_IDX(q1 - 1, sP);
 
         k += m;
 
@@ -33,7 +33,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     C_ADDTO(Fout[k], Ftmp[0]);
 
     for (q1 = 1; q1 < p; ++q1) {
-        idx = sP->pidx[q1 - 1];
+        idx = RAD_INVERSE_IDX(q1 - 1, sP);
         C_ADDTO(Ftmp[q1], x0);
 
         k = u + m * idx;
