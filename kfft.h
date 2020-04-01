@@ -13,7 +13,11 @@
 extern "C" {
 #endif
 
+#if defined(KFFT_HALF_SCALAR)
+typedef float kfft_scalar;
+#else
 typedef double kfft_scalar;
+#endif
 
 typedef struct {
     kfft_scalar r;

@@ -58,7 +58,7 @@ kfft_trace_plan(kfft_comp_t* P) {
 
     kfft_trace("\n\t %s - %p", "twiddles", (void*)(P->twiddles));
     #endif /* KFFT_MEMLESS_MODE */
-    kfft_trace ("%s\n", "");
+    kfft_trace("%s\n", "");
 }
 
 #endif /* KFFT_TRACE */
@@ -261,7 +261,7 @@ kf_factor(kfft_comp_t* st) {
 
 static inline kfft_return_t
 kfft_kinit(kfft_comp_t* st) {
-    
+
     kfft_return_t ret = KFFT_RET_SUCCESS;
     /* Generate twiddles  */
 #if !defined(KFFT_MEMLESS_MODE)
@@ -294,7 +294,7 @@ kfft_kinit(kfft_comp_t* st) {
                 sP->splani = kfft_config_cpx(len, ((st->flags | KFFT_FLAG_INVERSE)), st->level + 1,
                                              st->object.mmgr, NULL);
 
-                sP->shuffle_twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
+                sP->shuffle_twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * len);
                 if (sP->shuffle_twiddles) {
 
                     for (uint32_t j = 0; j < len; j++) {
@@ -435,7 +435,7 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
         // It just performs an out-of-place FFT into a temp buffer
         kfft_cpx* tmpbuf = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * st->nfft);
         if (tmpbuf) {
-            KFFT_ZEROMEM(tmpbuf, sizeof(kfft_cpx) * st->nfft);
+            KFFT_TMP_ZEROMEM(tmpbuf, sizeof(kfft_cpx) * st->nfft);
 
             kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "ALLOC temp buffer", (void*)tmpbuf);
             ret = kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);

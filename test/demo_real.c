@@ -38,7 +38,7 @@ main(int argc, char* argv[]) {
         display_info();
         printf("\n");
 
-        double* amp_scalar = calloc(argc, sizeof(double));
+        kfft_scalar* amp_scalar = calloc(argc, sizeof(double));
         for (int32_t i = 1; i < argc; i++) {
             amp_scalar[i - 1] = atof(argv[i]);
             printf("%5.3f ", amp_scalar[i - 1]);

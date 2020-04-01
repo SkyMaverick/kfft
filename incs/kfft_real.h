@@ -6,7 +6,6 @@ typedef struct kfft_state {
     kfft_object_t object;
 
     kfft_comp_t* substate;
-    kfft_cpx* tmpbuf;
     kfft_cpx* super_twiddles;
 } kfft_real_t;
 
