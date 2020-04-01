@@ -31,6 +31,7 @@ enum {
     KFFT_INFO_USE_SYSMATH = 1 << 3,
     KFFT_INFO_RADER_ALGO = 1 << 4,
     KFFT_INFO_MEMLESS_MODE = 1 << 5,
+    KFFT_INFO_HALF_SCALAR = 1 << 6,
 };
 
 enum {

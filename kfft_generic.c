@@ -92,6 +92,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
 
     kfft_cpx* scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * p);
     if (scratch) {
+        KFFT_ALLOCA_CLEAR(scratch, sizeof(kfft_cpx) * p);
 
         for (uint32_t u = 0; u < m; ++u) {
 #if defined(KFFT_RADER_ALGO)

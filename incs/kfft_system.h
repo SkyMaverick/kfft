@@ -30,17 +30,17 @@
     #define KFFT_TMP_ALLOC(nbytes) alloca(nbytes)
     #define KFFT_TMP_FREE(ptr)
 
-static inline void*
-zmemory(void* mem, size_t nmem) {
-    for (size_t i = 0; i < nmem; i++)
-        ((char*)(mem))[i] = 0;
-    return mem;
-}
-    #define KFFT_TMP_ZEROMEM(M, X) zmemory((M), (X))
+    #define KFFT_TMP_ZEROMEM(M, X)                                                                 \
+        do {                                                                                       \
+            for (size_t i = 0; i < (X); i++)                                                       \
+                ((char*)((M)))[i] = 0;                                                             \
+        } while (0)
+    #define KFFT_ALLOCA_CLEAR(M, X) KFFT_TMP_ZEROMEM((M), (X))
 #else
     #define KFFT_TMP_ALLOC(nbytes) KFFT_MALLOC(nbytes)
     #define KFFT_TMP_FREE(ptr) KFFT_FREE(ptr)
     #define KFFT_TMP_ZEROMEM(M, X) KFFT_ZEROMEM(M, X)
+    #define KFFT_ALLOCA_CLEAR(M, X)
 #endif /* KFFT_USE_ALLOCA */
 
 #define KFFT_TMP_FREE_NULL(X)                                                                      \

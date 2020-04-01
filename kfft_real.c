@@ -170,7 +170,8 @@ kfft_eval_real(kfft_real_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata
 
     kfft_cpx* tmpbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft);
     if (tmpbuf) {
-        KFFT_ZEROMEM(tmpbuf, sizeof(kfft_cpx) * ncfft);
+        KFFT_ALLOCA_CLEAR(tmpbuf, sizeof(kfft_cpx) * ncfft);
+
         for (uint32_t i = 0; i < ncfft; i++) {
             freqdata[i].r = timedata[i];
         }
@@ -229,7 +230,8 @@ kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedat
 
     kfft_cpx* tmpbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft);
     if (tmpbuf) {
-        KFFT_ZEROMEM(tmpbuf, sizeof(kfft_cpx) * ncfft);
+        KFFT_ALLOCA_CLEAR(tmpbuf, sizeof(kfft_cpx) * ncfft);
+
         ret = eval_inverse_internal(st, freqdata, tmpbuf);
         if (ret == KFFT_RET_SUCCESS) {
             ret = kfft_eval_cpx(st->substate, tmpbuf, tmpbuf);

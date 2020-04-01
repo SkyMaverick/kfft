@@ -30,6 +30,8 @@ display_info(void) {
             (info.flags & KFFT_INFO_RADER_ALGO) ? "YES" : "NO");
     fprintf(stdout, "%s - %s\n", "Enable lesser memory mode",
             (info.flags & KFFT_INFO_MEMLESS_MODE) ? "YES" : "NO");
+    fprintf(stdout, "%s - %s\n", "Enable half scalar mode",
+            (info.flags & KFFT_INFO_HALF_SCALAR) ? "YES" : "NO");
 }
 
 int

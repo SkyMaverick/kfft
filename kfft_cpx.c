@@ -435,7 +435,7 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
         // It just performs an out-of-place FFT into a temp buffer
         kfft_cpx* tmpbuf = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * st->nfft);
         if (tmpbuf) {
-            KFFT_TMP_ZEROMEM(tmpbuf, sizeof(kfft_cpx) * st->nfft);
+            KFFT_ALLOCA_CLEAR(tmpbuf, sizeof(kfft_cpx) * st->nfft);
 
             kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "ALLOC temp buffer", (void*)tmpbuf);
             ret = kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
