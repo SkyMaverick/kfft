@@ -1,5 +1,5 @@
 project ('kfft', 'c',
-         version: '0.1.5',
+         version: '0.2.0',
          license: 'Zlib',
          default_options:[
             'c_std=gnu11',
