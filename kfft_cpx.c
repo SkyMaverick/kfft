@@ -7,7 +7,7 @@
 
 static void
 kfft_trace_plan(kfft_comp_t* P) {
-    kfft_trace("[CORE] %s: %p", "Create KFFT complex plan", (void*)P);
+    kfft_trace_core(P->level, "%s: %p", "Create KFFT complex plan", (void*)P);
     kfft_trace("\n\t %s - %u", "nfft", P->nfft);
     //    kfft_trace("\n\t %s - %u", "prime", P->q);
     //    kfft_trace("\n\t %s - %u", "prime inverse", P->p);
@@ -164,7 +164,7 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
         const uint32_t m = *factors++; /* stage's fft length/p */
         const kfft_cpx* Fout_end = Fout + p * m;
 
-        kfft_trace("[CORE] Work: p - %u | m - %u\n", p, m);
+        kfft_trace_core(st->level, "Work: p - %u | m - %u\n", p, m);
 
         if (m == 1) {
             do {
@@ -379,10 +379,10 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
             mmgr = kfft_allocator_create(memneeded);
             flag_create = true;
 
-            kfft_trace("[CORE] %s: %p\n", "Create new allocator and plan", (void*)mmgr);
+            kfft_trace_core(level, "%s: %p\n", "Create new allocator and plan", (void*)mmgr);
         } else {
             mmgr = A;
-            kfft_trace("[CORE] %s: %p\n", "Use allocator and create plan", (void*)mmgr);
+            kfft_trace_core(level, "%s: %p\n", "Use allocator and create plan", (void*)mmgr);
         }
         if (mmgr)
             st = kfft_internal_alloc(mmgr, sizeof(kfft_comp_t));
@@ -394,7 +394,7 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
                 kfft_allocator_clear(mmgr);
 
             st = kfft_internal_alloc(mmgr, sizeof(kfft_comp_t));
-            kfft_trace("[CORE] %s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
+            kfft_trace_core(level, "%s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
         }
         *lenmem = memneeded;
     }
@@ -437,16 +437,16 @@ kfft_kstride(kfft_comp_t* st, const kfft_cpx* fin, kfft_cpx* fout, uint32_t in_s
         if (tmpbuf) {
             KFFT_ALLOCA_CLEAR(tmpbuf, sizeof(kfft_cpx) * st->nfft);
 
-            kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "ALLOC temp buffer", (void*)tmpbuf);
+            kfft_trace_core(st->level, "%s: %p\n", "ALLOC temp buffer", (void*)tmpbuf);
             ret = kf_work(tmpbuf, fin, 1, in_stride, st->factors, st);
 
             if (ret == KFFT_RET_SUCCESS)
                 memcpy(fout, tmpbuf, sizeof(kfft_cpx) * st->nfft);
 
-            kfft_trace("[CORE] (lvl.%d) %s: %p\n", st->level, "FREE temp buffer", (void*)tmpbuf);
+            kfft_trace_core(st->level, "%s: %p\n", "FREE temp buffer", (void*)tmpbuf);
             KFFT_TMP_FREE(tmpbuf);
         } else {
-            kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "fail alloc temp buffer");
+            kfft_trace_core(st->level, "%s\n", "fail alloc temp buffer");
             ret = KFFT_RET_BUFFER_FAIL;
         }
     } else {

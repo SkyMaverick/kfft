@@ -42,7 +42,7 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
 
 static void
 kfft_trace_plan(kfft_real_t* P) {
-    kfft_trace("[REAL] %s: %p", "Create KFFT real plan", (void*)P);
+    kfft_trace_real("%s: %p", "Create KFFT real plan", (void*)P);
     kfft_trace("\n\t %s - %p", "Uses complex plan", (void*)(P->substate));
     kfft_trace("\n\t %s - %p\n", "Real twiddles", (void*)(P->super_twiddles));
 }
@@ -66,10 +66,10 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A
             mmgr = kfft_allocator_create(memneeded);
             flag_create = true;
 
-            kfft_trace("[REAL] %s: %p\n", "Create new allocator and plan", (void*)mmgr);
+            kfft_trace_real("%s: %p\n", "Create new allocator and plan", (void*)mmgr);
         } else {
             mmgr = (kfft_pool_t*)A;
-            kfft_trace("[REAL] %s: %p\n", "Use allocator and create plan", (void*)mmgr);
+            kfft_trace_real("%s: %p\n", "Use allocator and create plan", (void*)mmgr);
         }
 
         if (mmgr)
@@ -84,7 +84,7 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A
 
             st = kfft_internal_alloc(mmgr, sizeof(kfft_real_t));
 
-            kfft_trace("[REAL] %s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
+            kfft_trace_real("%s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
         }
         *lenmem = memneeded;
     }
@@ -162,7 +162,7 @@ kfft_eval_real(kfft_real_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata
     kfft_real_t* st = (kfft_real_t*)stu;
 
     if (st->substate->flags & KFFT_FLAG_INVERSE) {
-        kfft_trace("[REAL] %s\n", "kiss fft usage error: improper alloc");
+        kfft_trace_real("%s\n", "kiss fft usage error: improper alloc");
         return KFFT_RET_IMPROPER_PLAN;
     }
 
@@ -222,7 +222,7 @@ kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedat
     kfft_real_t* st = (kfft_real_t*)stu;
 
     if (!(st->substate->flags & KFFT_FLAG_INVERSE)) {
-        kfft_trace("[REAL] %s\n", "kiss fft usage error: improper alloc");
+        kfft_trace_real("%s\n", "kiss fft usage error: improper alloc");
         return KFFT_RET_IMPROPER_PLAN;
     }
 

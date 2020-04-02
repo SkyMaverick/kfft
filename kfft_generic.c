@@ -7,8 +7,6 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
                   uint32_t u, uint32_t m, uint32_t p) {
 
     (void)fstride; // disable unused parameter
-
-    kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Change RADER algorithm");
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     uint32_t k = u, q1, idx;
@@ -55,7 +53,6 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
 static inline int
 std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                 uint32_t u, uint32_t m, uint32_t p) {
-    kfft_trace("[CORE] (lvl.%d) %s\n", st->level, "Change GENERIC algorithm");
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     uint32_t k = u, q1, q;
@@ -86,7 +83,8 @@ static kfft_return_t
 kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
                 uint32_t p) {
 
-    kfft_trace("%s: m - %d | p - %d | stride - %zu\n", "Generic FFT", m, p, fstride);
+    kfft_trace_core(st->level, "%s: m - %d | p - %d | stride - %zu\n", "Generic FFT", m, p,
+                    fstride);
 
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
@@ -99,7 +97,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
             if ((p >= KFFT_RADER_LIMIT) &&
                 (!((st->flags & KFFT_FLAG_GENERIC) || (st->flags & KFFT_FLAG_GENERIC_ONLY)))) {
 
-                kfft_trace("[CORE] %s: %u\n", "Use Rader algorithm for resolve", p);
+                kfft_trace_core(st->level, "%s: %u\n", "Use Rader algorithm for resolve", p);
                 ret = rader_method_eval(Fout, scratch, fstride, st, u, m, p);
 
                 if (ret != KFFT_RET_SUCCESS) {
@@ -108,7 +106,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
             } else {
 #endif /* KFFT_RADER_ALGO */
 
-                kfft_trace("[CORE] %s: %u\n", "Use standart algorithm for resolve", p);
+                kfft_trace_core(st->level, "%s: %u\n", "Use standart algorithm for resolve", p);
                 ret = std_method_eval(Fout, scratch, fstride, st, u, m, p);
 
                 if (ret != KFFT_RET_SUCCESS) {
@@ -120,7 +118,6 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
         }
         KFFT_TMP_FREE(scratch);
     } else {
-        kfft_trace("[LEVEL %d] %s\n", st->level, "Temporary buffer create fail.");
         ret = KFFT_RET_BUFFER_FAIL;
     }
     return ret;

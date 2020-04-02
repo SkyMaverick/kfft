@@ -1,5 +1,10 @@
 #pragma once
 
+// clang-format off
+#define kfft_trace_core(level, fmt, ...)                                                           \
+    kfft_trace("[CORE (L%d)]"" " fmt,level, __VA_ARGS__)
+// clang-format on
+
 #define MAX_FACTORS 32
 #define MAX_ROOTS 32
 
