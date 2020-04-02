@@ -163,7 +163,7 @@ kfft_eval_real(kfft_real_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata
 
     if (st->substate->flags & KFFT_FLAG_INVERSE) {
         kfft_trace("[REAL] %s\n", "kiss fft usage error: improper alloc");
-        exit(1);
+        return KFFT_RET_IMPROPER_PLAN;
     }
 
     uint32_t ncfft = st->substate->nfft;
@@ -223,7 +223,7 @@ kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedat
 
     if (!(st->substate->flags & KFFT_FLAG_INVERSE)) {
         kfft_trace("[REAL] %s\n", "kiss fft usage error: improper alloc");
-        exit(1);
+        return KFFT_RET_IMPROPER_PLAN;
     }
 
     uint32_t ncfft = st->substate->nfft;

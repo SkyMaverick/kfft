@@ -54,7 +54,8 @@ enum {
     KFFT_RET_SUCCESS = 0x0000,
     KFFT_RET_ALLOC_FAIL = 0x0001,
     KFFT_RET_BUFFER_FAIL = 0x0002,
-    KFFT_RET_FREE_NULL = 0x0003
+    KFFT_RET_FREE_NULL = 0x0003,
+    KFFT_RET_IMPROPER_PLAN = 0x0004,
 };
 typedef unsigned kfft_return_t;
 
