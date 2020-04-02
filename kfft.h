@@ -39,7 +39,7 @@ enum {
     KFFT_FLAG_INVERSE = 1 << 0,
     KFFT_FLAG_RENEW = 1 << 1,
     KFFT_FLAG_GENERIC = 1 << 2,
-    KFFT_FLAG_GENERIC_ONLY = 1 << 3
+    KFFT_FLAG_GENERIC_ONLY = 1 << 3,
 };
 
 typedef struct {
@@ -72,6 +72,8 @@ KFFT_API void
 kfft_info(kfft_info_t* info);
 KFFT_API kfft_return_t
 kfft_cleanup(uintptr_t mem);
+KFFT_API void
+kfft_shift(kfft_cpx* buf, const uint32_t size, const bool is_inverse);
 
 #define kfft_free(X) kfft_cleanup((uintptr_t)(X))
 

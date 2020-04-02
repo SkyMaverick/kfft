@@ -15,8 +15,9 @@ kfft_src = '''
     kfft.h
     kfft_alloc.c
     kfft_cpx.c
-    kfft_ext.c
     kfft_real.c
+    kfft_ext.c
+    kfft_shift.c
 '''.split()
 
 cc = meson.get_compiler('c')

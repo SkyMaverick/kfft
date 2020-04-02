@@ -2,7 +2,7 @@
 
 #include "kfft_config.h"
 
-#ifndef USE_SYSMATH
+#ifndef KFFT_USE_SYSMATH
     #define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
 #else
     #include <math.h>
@@ -22,8 +22,15 @@
 
 #define C_CPY(m, a)                                                                                \
     do {                                                                                           \
-        m.r = a.r;                                                                                 \
-        m.i = a.i;                                                                                 \
+        (m).r = (a).r;                                                                             \
+        (m).i = (a).i;                                                                             \
+    } while (0)
+
+#define C_SWAP(m, a, b)                                                                            \
+    do {                                                                                           \
+        C_CPY((m), (a));                                                                           \
+        C_CPY((a), (b));                                                                           \
+        C_CPY((b), (m));                                                                           \
     } while (0)
 
 #define C_MUL(m, a, b)                                                                             \
