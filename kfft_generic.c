@@ -95,7 +95,8 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
         for (uint32_t u = 0; u < m; ++u) {
 #if defined(KFFT_RADER_ALGO)
             if ((p >= KFFT_RADER_LIMIT) &&
-                (!((st->flags & KFFT_FLAG_GENERIC) || (st->flags & KFFT_FLAG_GENERIC_ONLY)))) {
+                (!((st->flags & KFFT_FLAG_GENERIC) || (st->flags & KFFT_FLAG_GENERIC_ONLY))) &&
+                st->prm_count) {
 
                 kfft_trace_core(st->level, "%s: %u\n", "Use Rader algorithm for resolve", p);
                 ret = rader_method_eval(Fout, scratch, fstride, st, u, m, p);

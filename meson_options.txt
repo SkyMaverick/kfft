@@ -27,9 +27,10 @@ option ('enable_half_scalar', type: 'boolean', value: 'false',
 option ('build_library_api', type : 'combo', choices: ['export', 'import', 'none'], value: 'export',
         description: 'library API type')
 
-option ('limit_rader', type: 'integer', value: '5',
+option ('limit_rader', type: 'integer', value: '6',
         description: 'barier use rader or generic algorithm')
 option ('level_plan_max', type: 'integer', value: '3',
-        description: 'max requrcive subplan level')
+        description: 'max reqursive subplan level')
+
 option ('level_bfly_max', type: 'integer', value: '5',
         description: 'max butterfly level')

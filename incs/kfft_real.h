@@ -22,4 +22,3 @@ KFFT_API kfft_return_t
 kfft_evali_real(kfft_real_t* cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
 KFFT_API uint32_t
 kfft_next_fast_size(uint32_t n);
-

@@ -271,48 +271,51 @@ kfft_kinit(kfft_comp_t* st) {
 #endif /* not KFFT_MEMLESS_MODE */
 
 #if defined(KFFT_RADER_ALGO)
-    if (!(st->flags & KFFT_FLAG_GENERIC_ONLY)) {
+    if (st->prm_count > 0) {
+        if (!(st->flags & KFFT_FLAG_GENERIC_ONLY)) {
 
-        for (uint32_t i = 0; i < st->prm_count; i++) {
-            kfft_splan_t* sP = &(st->primes[i]);
-            uint32_t len = sP->prime - 1;
+            for (uint32_t i = 0; i < st->prm_count; i++) {
+                kfft_splan_t* sP = &(st->primes[i]);
+                uint32_t len = sP->prime - 1;
 
-            sP->q = kfft_prime_root(sP->prime);
-            sP->p = kfft_primei_root(sP->q, sP->prime);
+                sP->q = kfft_prime_root(sP->prime);
+                sP->p = kfft_primei_root(sP->q, sP->prime);
 
     #if !defined(KFFT_MEMLESS_MODE)
-            sP->qidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
-            sP->pidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
+                sP->qidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
+                sP->pidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
 
-            if (sP->qidx && sP->pidx) {
+                if (sP->qidx && sP->pidx) {
 
-                kfft_rader_idxs(sP->qidx, sP->q, sP->prime);
-                kfft_rader_idxs(sP->pidx, sP->p, sP->prime);
+                    kfft_rader_idxs(sP->qidx, sP->q, sP->prime);
+                    kfft_rader_idxs(sP->pidx, sP->p, sP->prime);
     #endif /* not KFFT_MEMLESS_MODE */
-                sP->splan = kfft_config_cpx(len, (st->flags & (~KFFT_FLAG_INVERSE)), st->level + 1,
-                                            st->object.mmgr, NULL);
-                sP->splani = kfft_config_cpx(len, ((st->flags | KFFT_FLAG_INVERSE)), st->level + 1,
-                                             st->object.mmgr, NULL);
+                    sP->splan = kfft_config_cpx(len, (st->flags & (~KFFT_FLAG_INVERSE)),
+                                                st->level + 1, st->object.mmgr, NULL);
+                    sP->splani = kfft_config_cpx(len, ((st->flags | KFFT_FLAG_INVERSE)),
+                                                 st->level + 1, st->object.mmgr, NULL);
 
-                sP->shuffle_twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * len);
-                if (sP->shuffle_twiddles) {
+                    sP->shuffle_twiddles =
+                        kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * len);
+                    if (sP->shuffle_twiddles) {
 
-                    for (uint32_t j = 0; j < len; j++) {
-                        uint32_t ip = RAD_INVERSE_IDX(j, sP);
+                        for (uint32_t j = 0; j < len; j++) {
+                            uint32_t ip = RAD_INVERSE_IDX(j, sP);
 
-                        sP->shuffle_twiddles[j] =
-                            kfft_kernel_twiddle(ip, sP->prime, st->flags & KFFT_FLAG_INVERSE);
+                            sP->shuffle_twiddles[j] =
+                                kfft_kernel_twiddle(ip, sP->prime, st->flags & KFFT_FLAG_INVERSE);
+                        }
+
+                        ret = kfft_eval_cpx(sP->splan, sP->shuffle_twiddles, sP->shuffle_twiddles);
+                    } else {
+                        ret = KFFT_RET_ALLOC_FAIL;
                     }
-
-                    ret = kfft_eval_cpx(sP->splan, sP->shuffle_twiddles, sP->shuffle_twiddles);
+    #if !defined(KFFT_MEMLESS_MODE)
                 } else {
                     ret = KFFT_RET_ALLOC_FAIL;
                 }
-    #if !defined(KFFT_MEMLESS_MODE)
-            } else {
-                ret = KFFT_RET_ALLOC_FAIL;
-            }
     #endif /* not KFFT_MEMLESS_MODE */
+            }
         }
     }
 #endif /* KFFT_RADER_ALGO */
