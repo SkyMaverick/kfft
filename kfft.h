@@ -62,18 +62,13 @@ typedef unsigned kfft_return_t;
 #include "incs/kfft_macro.h"
 #include "incs/kfft_system.h"
 #include "incs/kfft_alloc.h"
+#include "incs/kfft_ext.h"
+#include "incs/kfft_shift.h"
 
 #include "incs/kfft_cpx.h"
 #include "incs/kfft_real.h"
 
 #define KFFT_PLAN_ALLOCATOR(X) (*((kfft_pool_t**)(X)))
-
-KFFT_API void
-kfft_info(kfft_info_t* info);
-KFFT_API kfft_return_t
-kfft_cleanup(uintptr_t mem);
-KFFT_API void
-kfft_shift(kfft_cpx* buf, const uint32_t size, const bool is_inverse);
 
 #define kfft_free(X) kfft_cleanup((uintptr_t)(X))
 

@@ -1,5 +1,5 @@
 project ('kfft', 'c',
-         version: '0.2.0',
+         version: '0.2.1',
          license: 'Zlib',
          default_options:[
             'c_std=gnu11',
@@ -140,11 +140,13 @@ libkfft = shared_library (meson.project_name(), kfft_src,
 
 install_headers('kfft.h', subdir: 'kfft')
 install_headers('''
-        incs/kfft_alloc.h
-        incs/kfft_cpx.h
-        incs/kfft_macro.h
-        incs/kfft_real.h
-        incs/kfft_system.h
+    incs/kfft_alloc.h
+    incs/kfft_cpx.h
+    incs/kfft_ext.h
+    incs/kfft_macro.h
+    incs/kfft_real.h
+    incs/kfft_shift.h
+    incs/kfft_system.h
     '''.split(), subdir: 'kfft/incs')
 install_headers(kfft_cfg, subdir: 'kfft/incs')
 
