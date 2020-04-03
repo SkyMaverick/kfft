@@ -9,8 +9,6 @@ static void
 kfft_trace_plan(kfft_comp_t* P) {
     kfft_trace_core(P->level, "%s: %p", "Create KFFT complex plan", (void*)P);
     kfft_trace("\n\t %s - %u", "nfft", P->nfft);
-    //    kfft_trace("\n\t %s - %u", "prime", P->q);
-    //    kfft_trace("\n\t %s - %u", "prime inverse", P->p);
     kfft_trace("\n\t %s - %u", "level", P->level);
     kfft_trace("\n\t %s - %u : ", "flags", P->flags);
 
