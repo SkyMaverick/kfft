@@ -27,8 +27,20 @@
     // 2. "in-place" FFTs.  Notice the quotes, since kissfft does not really do an in-place
     // transform.
     #include <alloca.h>
-    #define KFFT_TMP_ALLOC(nbytes) alloca(nbytes)
-    #define KFFT_TMP_FREE(ptr)
+    #if defined(KFFT_TRACE)
+static inline void*
+__trace_alloca(size_t nmem) {
+    void* ret = alloca(nmem);
+    kfft_trace("[SYS] %s - %zu: %p\n", "Allocate temporary buffer", nmem, ret);
+    return ret;
+}
+        #define KFFT_TMP_ALLOC(nbytes) __trace_alloca(nbytes)
+        #define KFFT_TMP_FREE(ptr)                                                                 \
+            kfft_trace("[SYS] %s: %p\n", "Free temporary buffer (noop)", (void*)ptr);
+    #else
+        #define KFFT_TMP_ALLOC(nbytes) alloca(nbytes)
+        #define KFFT_TMP_FREE(ptr)
+    #endif
 
     #define KFFT_TMP_ZEROMEM(M, X)                                                                 \
         do {                                                                                       \
@@ -37,8 +49,23 @@
         } while (0)
     #define KFFT_ALLOCA_CLEAR(M, X) KFFT_TMP_ZEROMEM((M), (X))
 #else
-    #define KFFT_TMP_ALLOC(nbytes) KFFT_MALLOC(nbytes)
-    #define KFFT_TMP_FREE(ptr) KFFT_FREE(ptr)
+    #if defined(KFFT_TRACE)
+static inline void*
+__trace_malloc(size_t nmem) {
+    void* ret = KFFT_MALLOC(nmem);
+    kfft_trace("[SYS] %s - %zu: %p\n", "Allocate temporary buffer", nmem, ret);
+    return ret;
+}
+        #define KFFT_TMP_ALLOC(nbytes) __trace_malloc(nbytes)
+        #define KFFT_TMP_FREE(ptr)                                                                 \
+            do {                                                                                   \
+                kfft_trace("[SYS] %s: %p\n", "Free temporary buffer", (void*)ptr);                        \
+                KFFT_FREE(ptr);                                                                     \
+            } while (0)
+    #else
+        #define KFFT_TMP_ALLOC(nbytes) KFFT_MALLOC(nbytes)
+        #define KFFT_TMP_FREE(ptr) KFFT_FREE(ptr)
+    #endif
     #define KFFT_TMP_ZEROMEM(M, X) KFFT_ZEROMEM(M, X)
     #define KFFT_ALLOCA_CLEAR(M, X)
 #endif /* KFFT_USE_ALLOCA */

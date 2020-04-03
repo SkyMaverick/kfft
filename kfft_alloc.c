@@ -17,7 +17,7 @@ kfft_allocator_init(void* mem, const size_t nmem) {
 
         ret->cur = ret->head;
 
-        kfft_trace_kia("Address: %p . Head - %p; tail - %p\n", mem, ret->head, ret->tail);
+        kfft_trace_kia("Address: %p . Head - %p; tail - %p\n", (void*)mem, (void*)ret->head, (void*)ret->tail);
     }
     return ret;
 }
@@ -43,7 +43,7 @@ kfft_internal_alloc(kfft_pool_t* A, const size_t nmem) {
             A->cur += nmem;
         } else {
             kfft_trace_kia("%s: %zu byte. Tail - %p, cur - %p\n", "Overflow - ",
-                           nmem - (A->tail - A->cur), A->tail, A->cur);
+                           nmem - (A->tail - A->cur), (void*)A->tail, (void*)A->cur);
         }
     }
     return (void*)ret;
