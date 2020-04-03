@@ -19,6 +19,7 @@ kfft_src = '''
     kfft_cpx.c
     kfft_real.c
     kfft_ext.c
+    kfft_math.c
     kfft_shift.c
 '''.split()
 

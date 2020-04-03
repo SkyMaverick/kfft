@@ -83,7 +83,7 @@ kfft_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
 static inline void
 kfft_rader_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
     for (uint32_t i = 0; i < size - 1; i++) {
-        idx[i] = _kfr_power(root, i, size);
+        idx[i] = kfft_math_modpow(root, i, size);
     }
 }
 
@@ -100,52 +100,6 @@ kfft_rader_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
 #include "kfft_conv.c"
 #include "kfft_bfly.c"
 #include "kfft_generic.c"
-
-#ifdef KFFT_RADER_ALGO
-static uint32_t
-_kfr_gcd(uint32_t a, uint32_t b) {
-    if (a == 0)
-        return b;
-    return _kfr_gcd(b % a, a);
-}
-
-// WARNING in kfft num - always prime. Don't check this
-uint32_t
-kfft_prime_root(uint32_t num) {
-    uint32_t phi = num - 1;
-    uint32_t n = phi;
-
-    uint32_t primes[MAX_ROOTS];
-    uint32_t count = 0;
-
-    for (uint32_t i = 2; i * i <= n; i++) {
-        if (n % i == 0) {
-            primes[count++] = i;
-            while (n % i == 0)
-                n /= i;
-        }
-    }
-    if (n > 1)
-        primes[count++] = n;
-
-    for (uint32_t res = 2; res <= num; ++res) {
-        bool ok = true;
-        for (uint32_t i = 0; count > i && ok; ++i) {
-            if (_kfr_power(res, phi / primes[i], num) == 1)
-                ok = false;
-        }
-        if (ok)
-            return res;
-    }
-    return 0;
-}
-
-uint32_t
-kfft_primei_root(uint32_t a, uint32_t m) {
-    return (_kfr_gcd(a, m) != 1) ? 0 : _kfr_power(a, m - 2, m);
-}
-
-#endif /* KFFT_RADER_ALGO */
 
 static kfft_return_t
 kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_stride,
@@ -275,8 +229,8 @@ kfft_kinit(kfft_comp_t* st) {
                 kfft_splan_t* sP = &(st->primes[i]);
                 uint32_t len = sP->prime - 1;
 
-                sP->q = kfft_prime_root(sP->prime);
-                sP->p = kfft_primei_root(sP->q, sP->prime);
+                sP->q = kfft_math_prmn(sP->prime);
+                sP->p = kfft_math_prmni(sP->q, sP->prime);
 
     #if !defined(KFFT_MEMLESS_MODE)
                 sP->qidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
