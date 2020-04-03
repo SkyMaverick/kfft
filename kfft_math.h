@@ -25,14 +25,18 @@
         (m).r = (a).r;                                                                             \
         (m).i = (a).i;                                                                             \
     } while (0)
-
 #define C_SWAP(m, a, b)                                                                            \
     do {                                                                                           \
         C_CPY((m), (a));                                                                           \
         C_CPY((a), (b));                                                                           \
         C_CPY((b), (m));                                                                           \
     } while (0)
-
+#define S_SWAP(m, a, b)                                                                            \
+    do {                                                                                           \
+        (m) = (a);                                                                                 \
+        (a) = (b);                                                                                 \
+        (b) = (m);                                                                                 \
+    } while (0)
 #define C_MUL(m, a, b)                                                                             \
     do {                                                                                           \
         (m).r = (a).r * (b).r - (a).i * (b).i;                                                     \
