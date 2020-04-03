@@ -58,6 +58,9 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
 KFFT_API kfft_return_t
 kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
 
+KFFT_API kfft_return_t
+kfft_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi);
+
 #define kfft_kfree(X)                                                                              \
     do {                                                                                           \
         free(X);                                                                                   \
