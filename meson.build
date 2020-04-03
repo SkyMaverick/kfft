@@ -4,6 +4,8 @@ project ('kfft', 'c',
          default_options:[
             'c_std=gnu11',
             'warning_level=3',
+            'strip=true',
+            'b_pie=true'
          ],
          meson_version: '>=0.52')
 
@@ -18,6 +20,16 @@ kfft_src = '''
     kfft_real.c
     kfft_ext.c
     kfft_shift.c
+'''.split()
+
+kfft_headers = '''
+    incs/kfft_alloc.h
+    incs/kfft_cpx.h
+    incs/kfft_ext.h
+    incs/kfft_macro.h
+    incs/kfft_real.h
+    incs/kfft_shift.h
+    incs/kfft_system.h
 '''.split()
 
 cc = meson.get_compiler('c')
@@ -117,10 +129,10 @@ foreach item : kfft_defs
     add_project_arguments (item, language: 'c')
 endforeach
 
-kfft_inc= include_directories('''
-        .
-        ./incs
-    '''.split())
+kfft_idirs='''
+    .
+    ./incs
+'''.split()
 
 optimize_opts = []
 if not (get_option('buildtype') == 'debug')
@@ -129,6 +141,19 @@ if not (get_option('buildtype') == 'debug')
             get_option('build_with_pgo') ? 'b_pgo=use'  : 'b_pg=none',
         ]
 endif
+
+if get_option('enable_2d')
+    kfft_src += '''
+        2d/kfft_cpx2.c
+        2d/kfft_real2.c
+    '''.split()
+    kfft_headers += '''
+        2d/kfft_cpx2.h
+        2d/kfft_real2.h
+    '''.split()
+endif
+
+kfft_inc = include_directories (kfft_idirs)
 
 # build library
 libkfft = shared_library (meson.project_name(), kfft_src,
@@ -139,15 +164,7 @@ libkfft = shared_library (meson.project_name(), kfft_src,
                           install: true)
 
 install_headers('kfft.h', subdir: 'kfft')
-install_headers('''
-    incs/kfft_alloc.h
-    incs/kfft_cpx.h
-    incs/kfft_ext.h
-    incs/kfft_macro.h
-    incs/kfft_real.h
-    incs/kfft_shift.h
-    incs/kfft_system.h
-    '''.split(), subdir: 'kfft/incs')
+install_headers(kfft_headers, subdir: 'kfft/incs')
 install_headers(kfft_cfg, subdir: 'kfft/incs')
 
 if get_option('enable_tests')
