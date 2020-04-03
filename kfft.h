@@ -68,6 +68,11 @@ typedef unsigned kfft_return_t;
 #include "incs/kfft_cpx.h"
 #include "incs/kfft_real.h"
 
+#if defined(KFFT_2D_ENABLE)
+    #include "2d/kfft_cpx2.h"
+    #include "2d/kfft_real2.h"
+#endif
+
 #define KFFT_PLAN_ALLOCATOR(X) (*((kfft_pool_t**)(X)))
 
 #define kfft_free(X) kfft_cleanup((uintptr_t)(X))

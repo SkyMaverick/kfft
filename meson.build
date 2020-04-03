@@ -103,6 +103,8 @@ kfft_cfg_data = configuration_data({
     'KFFT_RADER_ALGO'   : get_option('enable_extended')     ,
     'KFFT_MEMLESS_MODE' : get_option('enable_memless')      ,
     'KFFT_HALF_SCALAR'  : get_option('enable_half_scalar')  ,
+    'KFFT_2D_ENABLE'    : get_option('enable_2d')           ,
+    
     'KFFT_RADER_LIMIT'  : get_option('limit_rader')         ,
     'KFFT_PLAN_LEVEL'   : get_option('level_plan_max')      ,
     'KFFT_BFLY_LEVEL'   : get_option('level_bfly_max')      ,

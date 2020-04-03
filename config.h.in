@@ -11,6 +11,7 @@
 #mesondefine KFFT_RADER_ALGO
 #mesondefine KFFT_MEMLESS_MODE
 #mesondefine KFFT_HALF_SCALAR
+#mesondefine KFFT_2D_ENABLE
 
 #mesondefine KFFT_RADER_LIMIT
 #mesondefine KFFT_PLAN_LEVEL
