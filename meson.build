@@ -27,9 +27,11 @@ kfft_headers = '''
     incs/kfft_cpx.h
     incs/kfft_ext.h
     incs/kfft_macro.h
+    incs/kfft_math.h
     incs/kfft_real.h
     incs/kfft_shift.h
     incs/kfft_system.h
+    incs/kfft_trace.h
 '''.split()
 
 cc = meson.get_compiler('c')

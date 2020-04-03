@@ -1,7 +1,5 @@
 #pragma once
 
-#include "kfft_config.h"
-
 #ifndef KFFT_USE_SYSMATH
     #define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
 #else
