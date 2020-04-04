@@ -396,13 +396,15 @@ kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
             if (tmpbuf) {
                 KFFT_ALLOCA_CLEAR(tmpbuf, sizeof(kfft_cpx) * cfg->nfft);
 
-//                kfft_trace_core(cfg->level, "%s: %p\n", "ALLOC temp buffer", (void*)tmpbuf);
+                //                kfft_trace_core(cfg->level, "%s: %p\n", "ALLOC temp buffer",
+                //                (void*)tmpbuf);
                 ret = kf_work(tmpbuf, fin, 1, 1, cfg->factors, cfg);
 
                 if (ret == KFFT_RET_SUCCESS)
                     memcpy(fout, tmpbuf, sizeof(kfft_cpx) * cfg->nfft);
 
-//                kfft_trace_core(cfg->level, "%s: %p\n", "FREE temp buffer", (void*)tmpbuf);
+                //                kfft_trace_core(cfg->level, "%s: %p\n", "FREE temp buffer",
+                //                (void*)tmpbuf);
                 KFFT_TMP_FREE(tmpbuf);
             } else {
                 ret = KFFT_RET_BUFFER_FAIL;

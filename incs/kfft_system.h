@@ -28,16 +28,8 @@
     // transform.
     #include <alloca.h>
     #if defined(KFFT_TRACE)
-static inline void*
-__trace_alloca(size_t nmem) {
-    void* ret = alloca(nmem);
-    kfft_trace("[SYS] %s - %zu: %p\n", "Allocate temporary buffer", nmem, ret);
-    return ret;
-}
-        #define KFFT_TMP_ALLOC(nbytes) __trace_alloca(nbytes)
-        #define KFFT_TMP_FREE(ptr)                                                                 \
-            kfft_trace("[SYS] %s: %p\n", "Free temporary buffer (noop)", (void*)ptr);
-    #else
+        #define KFFT_TMP_ALLOC(nbytes) alloca(nbytes)
+        #define KFFT_TMP_FREE(ptr)
         #define KFFT_TMP_ALLOC(nbytes) alloca(nbytes)
         #define KFFT_TMP_FREE(ptr)
     #endif
@@ -59,8 +51,8 @@ __trace_malloc(size_t nmem) {
         #define KFFT_TMP_ALLOC(nbytes) __trace_malloc(nbytes)
         #define KFFT_TMP_FREE(ptr)                                                                 \
             do {                                                                                   \
-                kfft_trace("[SYS] %s: %p\n", "Free temporary buffer", (void*)ptr);                        \
-                KFFT_FREE(ptr);                                                                     \
+                kfft_trace("[SYS] %s: %p\n", "Free temporary buffer", (void*)ptr);                 \
+                KFFT_FREE(ptr);                                                                    \
             } while (0)
     #else
         #define KFFT_TMP_ALLOC(nbytes) KFFT_MALLOC(nbytes)

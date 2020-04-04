@@ -17,7 +17,8 @@ kfft_allocator_init(void* mem, const size_t nmem) {
 
         ret->cur = ret->head;
 
-        kfft_trace_kia("Address: %p . Head - %p; tail - %p\n", (void*)mem, (void*)ret->head, (void*)ret->tail);
+        kfft_trace_kia("Address: %p . Head - %p; tail - %p\n", (void*)mem, (void*)ret->head,
+                       (void*)ret->tail);
     }
     return ret;
 }
