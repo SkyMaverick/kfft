@@ -116,3 +116,8 @@ kfft_math_prmni(uint32_t a, uint32_t m);
 
 void
 kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size);
+void
+kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, const uint32_t y);
+void
+kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint32_t x,
+                           const uint32_t y);

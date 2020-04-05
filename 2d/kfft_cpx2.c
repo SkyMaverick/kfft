@@ -40,7 +40,7 @@ kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
     kfft_config_cpx(szx, flags, 0, NULL, &delta);
     ret += delta;
 
-    if (szy != szx) {
+    if ((szy != szx) || (szy > 1)) {
         kfft_config_cpx(szy, flags, 0, NULL, &delta);
         ret += delta;
     }
@@ -49,7 +49,7 @@ kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
 }
 
 KFFT_API kfft_comp2_t*
-kfft_config_cpx2(const uint32_t x_size, const uint32_t y_size, const uint32_t flags, kfft_pool_t* A,
+kfft_config2_cpx(const uint32_t x_size, const uint32_t y_size, const uint32_t flags, kfft_pool_t* A,
                  size_t* lenmem) {
 
     kfft_comp2_t* st = NULL;
@@ -107,9 +107,60 @@ kfft_config_cpx2(const uint32_t x_size, const uint32_t y_size, const uint32_t fl
     return st;
 }
 
-KFFT_API kfft_return_t
-kfft_eval_cpx2(kfft_comp2_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
+static kfft_return_t
+kfft_2transform(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* ftmp, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
+
+    kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
+    for (uint32_t i = 0; i < st->y; i++) {
+        uint64_t bp = st->x * i;
+        ret = kfft_eval_cpx(st->plan_x, &(fin[bp]), &(ftmp[bp]));
+        if (ret != KFFT_RET_SUCCESS)
+            goto bailout;
+    }
+
+    kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
+    kfft_math_transpose_cpx(ftmp, fout, st->x, st->y);
+
+    kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
+    for (uint32_t i = 0; i < st->x; i++) {
+        uint64_t bp = st->y * i;
+        ret = kfft_eval_cpx(st->plan_y, &(fout[bp]), &(ftmp[bp]));
+        if (ret != KFFT_RET_SUCCESS)
+            goto bailout;
+    }
+    kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
+    kfft_math_transpose_cpx(ftmp, fout, st->y, st->x);
+
+bailout:
+    return ret;
+}
+
+KFFT_API kfft_return_t
+kfft_eval2_cpx(kfft_comp2_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+    size_t memneeded = cfg->nfft * sizeof(kfft_cpx);
+
+    kfft_cpx* Ft = KFFT_TMP_ALLOC(memneeded);
+    if (Ft) {
+        if (fin == fout) {
+            kfft_cpx* Fbuf = KFFT_TMP_ALLOC(memneeded);
+            if (Fbuf) {
+                ret = kfft_2transform(cfg, fin, Ft, Fbuf);
+                if (ret == KFFT_RET_SUCCESS) {
+                    memcpy(fout, Fbuf, memneeded);
+                }
+                KFFT_TMP_FREE(Fbuf);
+            } else {
+                ret = KFFT_RET_BUFFER_FAIL;
+            } /* Fbuf */
+        } else {
+            ret = kfft_2transform(cfg, fin, Ft, fout);
+        } /* fin == fout */
+        KFFT_TMP_FREE(Ft);
+    } else {
+        ret = KFFT_RET_BUFFER_FAIL;
+    } /* Ft */
 
     return ret;
 }

@@ -48,3 +48,64 @@ kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
         C_CPY(Fout[i], tmp);
     }
 }
+
+void
+kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, const uint32_t y) {
+    for (uint64_t n = 0; n < x * y; n++) {
+        uint32_t i = n / y;
+        uint32_t j = n % y;
+        C_CPY(Fout[n], Fin[x * j + i]);
+    }
+}
+void
+kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint32_t x,
+                           const uint32_t y) {
+    for (uint64_t n = 0; n < x * y; n++) {
+        uint32_t i = n / y;
+        uint32_t j = n % y;
+        Fout[n] = Fin[x * j + i];
+    }
+}
+
+// void
+// kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y) {
+//     uint32_t r = y;
+//     uint32_t c = x;
+//
+//     if (r <= 1 || c <= 1)
+//         return;
+//
+//     for (uint32_t ind_last = r * c - 2; c > 1; --ind_last, --c) {
+//         for (ssize_t i = r - 2; i != -1; --i) {
+//             uint32_t ind = i * c + (c - 1);
+//             kfft_cpx buf = {0, 0};
+//             C_CPY(buf, Fin[ind]);
+//             while (ind < ind_last) {
+//                 C_CPY(Fin[ind], Fin[ind + 1]);
+//                 ++ind;
+//             }
+//             C_CPY(Fin[ind_last], buf);
+//             --ind_last;
+//         }
+//     }
+// }
+// void
+// kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t y) {
+//     uint32_t c = x, r = y;
+//
+//     if (r <= 1 || c <= 1)
+//         return;
+//
+//     for (uint32_t ind_last = r * c - 2; c > 1; --ind_last, --c) {
+//         for (ssize_t i = r - 2; i != -1; --i) {
+//             uint32_t ind = i * c + (c - 1);
+//             kfft_scalar buf = Fin[ind];
+//             while (ind < ind_last) {
+//                 Fin[ind] = Fin[ind + 1];
+//                 ++ind;
+//             }
+//             Fin[ind_last] = buf;
+//             --ind_last;
+//         }
+//     }
+// }
