@@ -6,7 +6,7 @@
 static inline uint32_t
 get_size(const uint32_t n) {
     size_t memneeded = 0;
-    kfft_config_real(n, 0, 0, &memneeded);
+    kfft_config_scalar(n, 0, 0, &memneeded);
     return memneeded;
 }
 
@@ -52,10 +52,10 @@ main(int argc, char* argv[]) {
         size_t memneed = get_size(argc - 1);
 
         printf("Create forward config for %d len\n", argc - 1);
-        kfft_real_t* FCfg = kfft_config_real(argc - 1, KFFT_FLAG_NORMAL, 0, NULL);
+        kfft_sclr_t* FCfg = kfft_config_scalar(argc - 1, KFFT_FLAG_NORMAL, 0, NULL);
 
         printf("Forward FFT transform\n");
-        kfft_eval_real(FCfg, amp_scalar, FOut);
+        kfft_eval_scalar(FCfg, amp_scalar, FOut);
 
         printf("\nRESULT >>> ");
         for (int32_t i = 0; i < argc - 1; i++) {
@@ -65,12 +65,12 @@ main(int argc, char* argv[]) {
 
         printf("Create inverse config for %d len\n", argc - 1);
 
-        kfft_config_real(argc - 1, KFFT_FLAG_INVERSE | KFFT_FLAG_RENEW, KFFT_PLAN_ALLOCATOR(FCfg),
-                         &memneed);
+        kfft_config_scalar(argc - 1, KFFT_FLAG_INVERSE | KFFT_FLAG_RENEW, KFFT_PLAN_ALLOCATOR(FCfg),
+                           &memneed);
         memset(amp_scalar, 0, argc * sizeof(double));
 
         printf("Inverse FFT transform\n");
-        kfft_evali_real(FCfg, FOut, amp_scalar);
+        kfft_evali_scalar(FCfg, FOut, amp_scalar);
 
         printf("\nRESULT >>> ");
         for (int32_t i = 0; i < argc - 1; i++) {

@@ -69,7 +69,7 @@ typedef unsigned kfft_return_t;
 #include "incs/kfft_shift.h"
 
 #include "incs/kfft_cpx.h"
-#include "incs/kfft_real.h"
+#include "incs/kfft_scalar.h"
 
 #if defined(KFFT_2D_ENABLE)
     #include "2d/kfft_cpx2.h"

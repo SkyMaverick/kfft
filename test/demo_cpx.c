@@ -6,7 +6,7 @@
 static inline uint32_t
 get_size(const uint32_t n) {
     size_t memneeded = 0;
-    kfft_config_real(n, 0, 0, &memneeded);
+    kfft_config_scalar(n, 0, 0, &memneeded);
     return memneeded;
 }
 

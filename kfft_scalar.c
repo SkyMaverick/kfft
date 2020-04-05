@@ -7,7 +7,7 @@
 #include "kfft_trace.h"
 
 static inline kfft_cpx
-kfft_real_twiddle(uint32_t i, const kfft_real_t* P) {
+kfft_sclr_twiddle(uint32_t i, const kfft_sclr_t* P) {
     kfft_cpx ret;
 
     kfft_scalar phase = -KFFT_CONST_PI * ((kfft_scalar)(i + 1) / P->substate->nfft + .5);
@@ -18,14 +18,14 @@ kfft_real_twiddle(uint32_t i, const kfft_real_t* P) {
 }
 
 #if defined(KFFT_MEMLESS_MODE)
-    #define SUPER_TWIDDLE(i, P) kfft_real_twiddle(i, P)
+    #define SUPER_TWIDDLE(i, P) kfft_sclr_twiddle(i, P)
 #else
     #define SUPER_TWIDDLE(i, P) P->super_twiddles[i]
 #endif /* KFFT_MEMLESS_MODE */
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
-    size_t ret = sizeof(kfft_real_t);
+    size_t ret = sizeof(kfft_sclr_t);
 #if !defined(KFFT_MEMLESS_MODE)
     ret += sizeof(kfft_cpx) * (nfft / 2);
 #endif
@@ -41,10 +41,10 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
 #ifdef KFFT_TRACE
 
 static void
-kfft_trace_plan(kfft_real_t* P) {
-    kfft_trace_real("%s: %p", "Create KFFT real plan", (void*)P);
+kfft_trace_plan(kfft_sclr_t* P) {
+    kfft_trace_scalar("%s: %p", "Create KFFT scalar plan", (void*)P);
     kfft_trace("\n\t %s - %p", "Uses complex plan", (void*)(P->substate));
-    kfft_trace("\n\t %s - %p\n", "Real twiddles", (void*)(P->super_twiddles));
+    kfft_trace("\n\t %s - %p\n", "scalar twiddles", (void*)(P->super_twiddles));
 }
 
 #endif /* KFFT_TRACE */
@@ -52,9 +52,10 @@ kfft_trace_plan(kfft_real_t* P) {
       TODO  Functionality
 ******************************************************************************** */
 
-KFFT_API kfft_real_t*
-kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A, size_t* lenmem) {
-    kfft_real_t* st = NULL;
+KFFT_API kfft_sclr_t*
+kfft_config_scalar(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A,
+                   size_t* lenmem) {
+    kfft_sclr_t* st = NULL;
 
     kfft_pool_t* mmgr = NULL;
     bool flag_create = false;
@@ -66,14 +67,14 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A
             mmgr = kfft_allocator_create(memneeded);
             flag_create = true;
 
-            kfft_trace_real("%s: %p\n", "Create new allocator and plan", (void*)mmgr);
+            kfft_trace_scalar("%s: %p\n", "Create new allocator and plan", (void*)mmgr);
         } else {
             mmgr = (kfft_pool_t*)A;
-            kfft_trace_real("%s: %p\n", "Use allocator and create plan", (void*)mmgr);
+            kfft_trace_scalar("%s: %p\n", "Use allocator and create plan", (void*)mmgr);
         }
 
         if (mmgr)
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_real_t));
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_sclr_t));
     } else {
         size_t memneeded = kfft_calculate(nfft, flags);
         if (A && *lenmem >= memneeded) {
@@ -82,9 +83,9 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A
             if (flags & KFFT_FLAG_RENEW)
                 kfft_allocator_clear(mmgr);
 
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_real_t));
+            st = kfft_internal_alloc(mmgr, sizeof(kfft_sclr_t));
 
-            kfft_trace_real("%s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
+            kfft_trace_scalar("%s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
         }
         *lenmem = memneeded;
     }
@@ -110,7 +111,7 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A
             goto bailout;
     }
     for (uint32_t i = 0; i < nfft / 2; ++i) {
-        st->super_twiddles[i] = kfft_real_twiddle(i, st);
+        st->super_twiddles[i] = kfft_sclr_twiddle(i, st);
     }
 #endif /* not KFFT_MEMLESS_MODE */
 
@@ -122,7 +123,7 @@ kfft_config_real(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A
 }
 
 static inline kfft_return_t
-eval_forward_internal(const kfft_real_t* st, const kfft_cpx* Fin, kfft_cpx* Fout) {
+eval_forward_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     kfft_cpx fpnk, fpk, f1k, f2k, tw;
 
@@ -155,14 +156,14 @@ eval_forward_internal(const kfft_real_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
 }
 
 KFFT_API kfft_return_t
-kfft_eval_real(kfft_real_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
+kfft_eval_scalar(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
 
     kfft_return_t ret = KFFT_RET_SUCCESS;
     /* input buffer timedata is stored row-wise */
-    kfft_real_t* st = (kfft_real_t*)stu;
+    kfft_sclr_t* st = (kfft_sclr_t*)stu;
 
     if (st->substate->flags & KFFT_FLAG_INVERSE) {
-        kfft_trace_real("%s\n", "kiss fft usage error: improper alloc");
+        kfft_trace_scalar("%s\n", "kiss fft usage error: improper alloc");
         return KFFT_RET_IMPROPER_PLAN;
     }
 
@@ -187,7 +188,7 @@ kfft_eval_real(kfft_real_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata
 }
 
 static inline kfft_return_t
-eval_inverse_internal(const kfft_real_t* st, const kfft_cpx* Fin, kfft_cpx* Fout) {
+eval_inverse_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     kfft_cpx fk, fnkc, fek, fok, tmp;
 
@@ -216,13 +217,13 @@ eval_inverse_internal(const kfft_real_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
 }
 
 KFFT_API kfft_return_t
-kfft_evali_real(kfft_real_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
+kfft_evali_scalar(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
     /* input buffer timedata is stored row-wise */
     kfft_return_t ret = KFFT_RET_SUCCESS;
-    kfft_real_t* st = (kfft_real_t*)stu;
+    kfft_sclr_t* st = (kfft_sclr_t*)stu;
 
     if (!(st->substate->flags & KFFT_FLAG_INVERSE)) {
-        kfft_trace_real("%s\n", "kiss fft usage error: improper alloc");
+        kfft_trace_scalar("%s\n", "kiss fft usage error: improper alloc");
         return KFFT_RET_IMPROPER_PLAN;
     }
 

@@ -25,22 +25,22 @@ kfft_ktest(kfft_scalar* amp_scalar, kfft_cpx* tmp_buffer, size_t size) {
 #ifndef CHECK_WITHOUT_PLAN
     clock_t t_start = clock();
 
-    kfft_real_t* FCfg = kfft_config_real(size, 0, 0, NULL);
+    kfft_sclr_t* FCfg = kfft_config_scalar(size, 0, 0, NULL);
     if (FCfg == NULL) {
         assert("Allocation FAIL");
     }
-    kfft_eval_real(FCfg, amp_scalar, tmp_buffer);
+    kfft_eval_scalar(FCfg, amp_scalar, tmp_buffer);
     kfft_free(FCfg);
 
     return (clock() - t_start) * 1000 / CLOCKS_PER_SEC;
 #else
 
-    kfft_real_t* FCfg = kfft_config_real(size, 0, 0, NULL);
+    kfft_sclr_t* FCfg = kfft_config_scalar(size, 0, 0, NULL);
     if (FCfg == NULL) {
         assert("Allocation FAIL");
     }
     clock_t t_start = clock();
-    kfft_eval_real(FCfg, amp_scalar, tmp_buffer);
+    kfft_eval_scalar(FCfg, amp_scalar, tmp_buffer);
     clock_t t_ret = clock();
 
     kfft_free(FCfg);

@@ -17,7 +17,7 @@ kfft_src = '''
     kfft.h
     kfft_alloc.c
     kfft_cpx.c
-    kfft_real.c
+    kfft_scalar.c
     kfft_ext.c
     kfft_math.c
     kfft_shift.c
@@ -29,7 +29,7 @@ kfft_headers = '''
     incs/kfft_ext.h
     incs/kfft_macro.h
     incs/kfft_math.h
-    incs/kfft_real.h
+    incs/kfft_scalar.h
     incs/kfft_shift.h
     incs/kfft_system.h
     incs/kfft_trace.h
