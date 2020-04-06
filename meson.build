@@ -50,6 +50,25 @@ kfft_defs    = '''
 
 kfft_deps = []
 
+kfft_cfg_data = {
+    'KFFT_MAJOR_VERSION': kfft_ver[0],
+    'KFFT_MINOR_VERSION': kfft_ver[1],
+    'KFFT_PATCH_VERSION': kfft_ver[2],
+
+    'KFFT_TRACE'        : get_option('enable_traces')       ,
+    'KFFT_USE_SIMD'     : get_option('enable_simd')         ,
+    'KFFT_USE_ALLOCA'   : get_option('enable_alloca')       ,
+    'KFFT_USE_SYSMATH'  : get_option('enable_sysmath')      ,
+    'KFFT_RADER_ALGO'   : get_option('enable_extended')     ,
+    'KFFT_MEMLESS_MODE' : get_option('enable_memless')      ,
+    'KFFT_HALF_SCALAR'  : get_option('enable_half_scalar')  ,
+    'KFFT_2D_ENABLE'    : get_option('enable_2d')           ,
+
+    'KFFT_RADER_LIMIT'  : get_option('limit_rader')         ,
+    'KFFT_PLAN_LEVEL'   : get_option('level_plan_max')      ,
+    'KFFT_BFLY_LEVEL'   : get_option('level_bfly_max')      ,
+}
+
 # Validate system depends
 
 if get_option ('enable_sysmath')
@@ -76,6 +95,15 @@ if get_option ('enable_alloca')
         error ('Header <alloca.h> not found. Disable enable_alloca option')
     endif
 endif
+if get_option ('enable_openmp')
+    fomp = dependency ('openmp', language: 'c')
+    if fomp.found()
+        kfft_deps += fomp
+        kfft_cflags += '-fopenmp'
+
+        kfft_cfg_data += {'KFFT_USE_OPENMP': get_option('enable_openmp')}
+    endif
+endif
 if get_option ('build_with_native')
     if (ccid == 'gcc') or (ccid == 'clang')
         kfft_cflags += '''
@@ -94,28 +122,9 @@ endif
 
 # Define configuration file
 
-kfft_cfg_data = configuration_data({
-    'KFFT_MAJOR_VERSION': kfft_ver[0],
-    'KFFT_MINOR_VERSION': kfft_ver[1],
-    'KFFT_PATCH_VERSION': kfft_ver[2],
-    
-    'KFFT_TRACE'        : get_option('enable_traces')       ,
-    'KFFT_USE_SIMD'     : get_option('enable_simd')         ,
-    'KFFT_USE_ALLOCA'   : get_option('enable_alloca')       ,
-    'KFFT_USE_SYSMATH'  : get_option('enable_sysmath')      ,
-    'KFFT_RADER_ALGO'   : get_option('enable_extended')     ,
-    'KFFT_MEMLESS_MODE' : get_option('enable_memless')      ,
-    'KFFT_HALF_SCALAR'  : get_option('enable_half_scalar')  ,
-    'KFFT_2D_ENABLE'    : get_option('enable_2d')           ,
-    
-    'KFFT_RADER_LIMIT'  : get_option('limit_rader')         ,
-    'KFFT_PLAN_LEVEL'   : get_option('level_plan_max')      ,
-    'KFFT_BFLY_LEVEL'   : get_option('level_bfly_max')      ,
-})
-
 kfft_cfg = configure_file (input: 'config.h.in',
                            output: 'kfft_config.h',
-                           configuration: kfft_cfg_data)
+                           configuration: configuration_data(kfft_cfg_data))
 
 # Apply all argments
 

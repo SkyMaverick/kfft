@@ -1,6 +1,10 @@
 #include "kfft.h"
 #include "kfft_trace.h"
 
+#if defined(KFFT_USE_OPENMP)
+    #include <omp.h>
+#endif
+
 // clang-format off
 #define kfft_trace_2d(fmt, ...)                                                           \
     kfft_trace("[CPX_2D]"" " fmt, __VA_ARGS__)
@@ -114,27 +118,24 @@ kfft_2transform(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* ftmp, kfft_cpx*
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
+#pragma omp for schedule(static)
     for (uint32_t i = 0; i < st->y; i++) {
         uint64_t bp = st->x * i;
         ret = kfft_eval_cpx(st->plan_x, &(fin[bp]), &(ftmp[bp]));
-        if (ret != KFFT_RET_SUCCESS)
-            goto bailout;
     }
 
     kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
     kfft_math_transpose_cpx(ftmp, fout, st->x, st->y);
 
     kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
+#pragma omp for schedule(static)
     for (uint32_t i = 0; i < st->x; i++) {
         uint64_t bp = st->y * i;
         ret = kfft_eval_cpx(st->plan_y, &(fout[bp]), &(ftmp[bp]));
-        if (ret != KFFT_RET_SUCCESS)
-            goto bailout;
     }
     kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
     kfft_math_transpose_cpx(ftmp, fout, st->y, st->x);
 
-bailout:
     return ret;
 }
 
