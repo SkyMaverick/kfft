@@ -6,6 +6,7 @@
     kfft_trace("[CPX_2D]"" " fmt, __VA_ARGS__)
 // clang-format on
 
+#if defined(KFFT_TRACE)
 static void
 kfft_trace_plan(kfft_comp2_t* P) {
     kfft_trace_2d("%s: %p", "Create KFFT complex plan", (void*)P);
@@ -16,6 +17,7 @@ kfft_trace_plan(kfft_comp2_t* P) {
     kfft_trace("\n\t %s - %p", "Plan for X dim", (void*)P->plan_x);
     kfft_trace("\n\t %s - %p\n", "Plan for Y dim", (void*)P->plan_y);
 }
+#endif /*KFFT_TRACE */
 
 static inline kfft_return_t
 kfft_init(kfft_comp2_t* st) {

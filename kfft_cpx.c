@@ -215,11 +215,13 @@ kfft_kinit(kfft_comp_t* st) {
 
     kfft_return_t ret = KFFT_RET_SUCCESS;
     /* Generate twiddles  */
-#if !defined(KFFT_MEMLESS_MODE)
+#if defined(KFFT_MEMLESS_MODE)
+    (void*)st; // unused warning disable
+#else
     for (uint32_t i = 0; i < st->nfft; ++i) {
         st->twiddles[i] = kfft_kernel_twiddle(i, st->nfft, st->flags & KFFT_FLAG_INVERSE);
     }
-#endif /* not KFFT_MEMLESS_MODE */
+#endif /* KFFT_MEMLESS_MODE */
 
 #if defined(KFFT_RADER_ALGO)
     if (st->prm_count > 0) {

@@ -51,25 +51,20 @@ main(int argc, char* argv[]) {
 
         size_t memneed = get_size(argc - 1);
 
-        printf("Create forward config for %d len\n", argc - 1);
         kfft_sclr_t* FCfg = kfft_config_scalar(argc - 1, KFFT_FLAG_NORMAL, 0, NULL);
 
-        printf("Forward FFT transform\n");
         kfft_eval_scalar(FCfg, amp_scalar, FOut);
 
         printf("\nRESULT >>> ");
         for (int32_t i = 0; i < argc - 1; i++) {
             printf("r%5.3fi%5.3f | ", FOut[i].r, FOut[i].i);
         }
-        printf("\n\n");
-
-        printf("Create inverse config for %d len\n", argc - 1);
+        printf("\n");
 
         kfft_config_scalar(argc - 1, KFFT_FLAG_INVERSE | KFFT_FLAG_RENEW, KFFT_PLAN_ALLOCATOR(FCfg),
                            &memneed);
         memset(amp_scalar, 0, argc * sizeof(double));
 
-        printf("Inverse FFT transform\n");
         kfft_evali_scalar(FCfg, FOut, amp_scalar);
 
         printf("\nRESULT >>> ");
@@ -77,7 +72,7 @@ main(int argc, char* argv[]) {
             printf("%5.3f | ", amp_scalar[i]);
         }
 
-        printf("\n\n");
+        printf("\n");
 
         free(FOut);
         free(amp_scalar);

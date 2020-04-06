@@ -52,25 +52,20 @@ main(int argc, char* argv[]) {
             if (FOut) {
                 size_t memneed = get_size(argc - 1);
 
-                printf("Create forward config for %d len\n", argc - 1);
                 kfft_comp_t* FCfg = kfft_config_cpx(argc - 1, KFFT_FLAG_NORMAL, 0, 0, NULL);
                 if (FCfg) {
-                    printf("Forward FFT transform\n");
                     kfft_eval_cpx(FCfg, Famp, FOut);
 
                     printf("\nRESULT >>> ");
                     for (int32_t i = 0; i < argc - 1; i++) {
                         printf("r%3.3fi%3.3f | ", FOut[i].r, FOut[i].i);
                     }
-                    printf("\n\n");
-
-                    printf("Create inverse config for %d len\n", argc - 1);
+                    printf("\n");
 
                     kfft_config_cpx(argc - 1, KFFT_FLAG_INVERSE | KFFT_FLAG_RENEW, 0,
                                     KFFT_PLAN_ALLOCATOR(FCfg), &memneed);
                     memset(Famp, 0, argc * sizeof(kfft_cpx));
 
-                    printf("Inverse FFT transform\n");
                     kfft_eval_cpx(FCfg, FOut, Famp);
 
                     printf("\nRESULT >>> ");
@@ -78,7 +73,7 @@ main(int argc, char* argv[]) {
                         printf("%3.3fi%3.3f |", Famp[i - 1].r, Famp[i - 1].i);
                     }
 
-                    printf("\n\n");
+                    printf("\n");
 
                     kfft_free(FCfg);
                 } else {
