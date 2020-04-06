@@ -29,9 +29,10 @@ enum {
     KFFT_INFO_USE_SIMD = 1 << 1,
     KFFT_INFO_USE_ALLOCA = 1 << 2,
     KFFT_INFO_USE_SYSMATH = 1 << 3,
-    KFFT_INFO_RADER_ALGO = 1 << 4,
-    KFFT_INFO_MEMLESS_MODE = 1 << 5,
-    KFFT_INFO_HALF_SCALAR = 1 << 6,
+    KFFT_INFO_USE_OPENMP = 1 << 4,
+    KFFT_INFO_RADER_ALGO = 1 << 5,
+    KFFT_INFO_MEMLESS_MODE = 1 << 6,
+    KFFT_INFO_HALF_SCALAR = 1 << 7,
 };
 
 enum {

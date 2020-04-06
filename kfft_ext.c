@@ -19,6 +19,9 @@ kfft_info(kfft_info_t* info) {
 #if defined(KFFT_USE_SYSMATH)
     info->flags |= KFFT_INFO_USE_SYSMATH;
 #endif
+#if defined(KFFT_USE_OPENMP)
+    info->flags |= KFFT_INFO_USE_OPENMP;
+#endif
 #if defined(KFFT_RADER_ALGO)
     info->flags |= KFFT_INFO_RADER_ALGO;
 #endif
