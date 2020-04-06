@@ -73,7 +73,6 @@ typedef unsigned kfft_return_t;
 
 #if defined(KFFT_2D_ENABLE)
     #include "2d/kfft_cpx2.h"
-    #include "2d/kfft_real2.h"
 #endif
 
 #define KFFT_PLAN_ALLOCATOR(X) (*((kfft_pool_t**)(X)))

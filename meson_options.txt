@@ -7,6 +7,8 @@ option ('build_with_native', type: 'boolean', value: 'true',
 
 option ('enable_tests', type: 'boolean', value: 'true',
         description: 'build with tests applications')
+option ('enable_demo', type: 'boolean', value: 'true',
+        description: 'build with demo applications')
 option ('enable_traces', type: 'boolean', value: 'true',
         description: 'use stdio messages in kfft lib')
 option ('enable_simd', type: 'boolean', value: 'false',
