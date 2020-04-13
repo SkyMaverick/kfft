@@ -9,6 +9,7 @@
 
 typedef struct kfft_state {
     kfft_object_t object;
+    bool pad;
 
     kfft_comp_t* substate;
     kfft_cpx* super_twiddles;

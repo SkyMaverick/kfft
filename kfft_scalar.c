@@ -129,13 +129,7 @@ eval_forward_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
 
     uint32_t k, ncfft = st->substate->nfft;
 
-    Fout[0].r = Fin[0].r + Fin[0].i;
-    Fout[ncfft].r = Fin[0].r - Fin[0].i;
-#ifdef KFFT_USE_SIMD
-    Fout[ncfft].i = Fout[0].i = _mm_set1_ps(0);
-#else
-    Fout[ncfft].i = Fout[0].i = 0;
-#endif
+    C_CPY(Fout[0], Fin[0]);
 
     for (k = 1; k <= ncfft / 2; ++k) {
         fpk = Fin[k];
@@ -163,7 +157,6 @@ kfft_eval_scalar(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cpx* freqda
     kfft_sclr_t* st = (kfft_sclr_t*)stu;
 
     if (st->substate->flags & KFFT_FLAG_INVERSE) {
-        kfft_trace_scalar("%s\n", "kiss fft usage error: improper alloc");
         return KFFT_RET_IMPROPER_PLAN;
     }
 
@@ -194,8 +187,8 @@ eval_inverse_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
 
     uint32_t k, ncfft = st->substate->nfft;
 
-    Fout[0].r = Fin[0].r + Fin[ncfft].r;
-    Fout[0].i = Fin[0].r - Fin[ncfft].r;
+    C_CPY(Fout[0], Fin[0]);
+    C_MULBYSCALAR(Fout[0], 2);
 
     for (k = 1; k <= ncfft / 2; ++k) {
         fk = Fin[k];
@@ -223,7 +216,6 @@ kfft_evali_scalar(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timed
     kfft_sclr_t* st = (kfft_sclr_t*)stu;
 
     if (!(st->substate->flags & KFFT_FLAG_INVERSE)) {
-        kfft_trace_scalar("%s\n", "kiss fft usage error: improper alloc");
         return KFFT_RET_IMPROPER_PLAN;
     }
 
