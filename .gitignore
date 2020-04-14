@@ -8,14 +8,6 @@
 ~*
 *.out.*
 
-aukfcmp
-aukfcmpwp
-demo
-usdemo
-ukfcmp
-ukfcmpwp
-ustest
-
 exp/
 build/
 find.sh
