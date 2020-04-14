@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/ioctl.h> /* FIONREAD ioctl() */
 
 #if defined(KFFT_OS_WINDOWS)
     #include "getopt_win.h"
@@ -10,9 +11,7 @@
 #endif
 
 #include "kfft.h"
-
-#define STDIN_BUF_SIZE 0xFF
-#define STDOUT_BUF_SIZE 0xFF
+#include "const.h"
 
 typedef struct {
     void* buf;
@@ -58,10 +57,9 @@ display_help(void) {
     kfft_info_t info;
     kfft_info(&info);
 
-    fprintf(stdout, "LibKFFT version : %d.%d.%d\n\n", info.vmajor, info.vminor, info.vpatch);
+    fprintf(stdout, "Use libkfft version : %d.%d.%d\n\n", info.vmajor, info.vminor, info.vpatch);
 
-    const char* help_msg = " kfft [gGidsSx:f:vV?]\n";
-    fprintf(stdout, help_msg, "");
+    fprintf(stdout, "%s", help_msg);
 }
 
 static size_t
@@ -72,8 +70,6 @@ parse_buffer(void** out, char* buf, bool as_cpx) {
     // Analize
     while ((args = strchr(args, ' ')) != NULL)
         len++, *args = '\0', args++;
-
-    //    printf("LENGHT %zu\n", len);
 
     args = buf;
 
@@ -88,26 +84,42 @@ parse_buffer(void** out, char* buf, bool as_cpx) {
     return (as_cpx) ? len / 2 : len;
 }
 
+int
+stdin_check(void) {
+    fd_set rd;
+    struct timeval tv = {1, 0};
+    int ret;
+
+    FD_ZERO(&rd);
+    FD_SET(STDIN_FILENO, &rd);
+    ret = select(1, &rd, NULL, NULL, &tv);
+
+    return (ret > 0);
+}
+
 static char*
 read_stdin(void) {
     char buf[STDIN_BUF_SIZE];
     size_t ret_size = 1;
     char* ret = NULL;
-    ret = malloc(STDIN_BUF_SIZE * sizeof(char));
-    if (ret) {
-        ret[0] = '\0';
-        size_t n = 0;
-        while ((n = fread(buf, 1, STDIN_BUF_SIZE, stdin)) > 0) {
-            char* old = ret;
-            ret_size += n;
-            ret = realloc(ret, ret_size + 1);
-            if (ret == NULL) {
-                free(old);
-                return NULL;
-            };
-            strcat(ret, buf);
-        }
-        ret[ret_size] = '\0';
+
+    if (stdin_check() > 0) {
+        ret = malloc(STDIN_BUF_SIZE * sizeof(char));
+        if (ret) {
+            ret[0] = '\0';
+            size_t n = 0;
+            while ((n = fread(buf, 1, STDIN_BUF_SIZE, stdin)) > 0) {
+                char* old = ret;
+                ret_size += n;
+                ret = realloc(ret, ret_size + 1);
+                if (ret == NULL) {
+                    free(old);
+                    return NULL;
+                };
+                strcat(ret, buf);
+            }
+            ret[ret_size] = '\0';
+        } /* ret allocated */
     }
     return ret;
 }
@@ -133,8 +145,10 @@ write_stdout(kfft_scalar* in, size_t sz) {
         out[out_size] = '\0';
 
         fprintf(stdout, "%s", out);
+        fflush(stdout);
+
         free(out);
-    }
+    } /* out allocated */
 }
 
 static char*
@@ -195,10 +209,10 @@ cmd_line_parse(int argc, char* argv[], app_mode_t* mode) {
                 } while (argc > ++optind);
 
                 buf[strlen(buf) - 1] = '\0';
-            }
+            } /* buf allocated */
             ret = buf;
         }
-    }
+    } /* ret == NULL */
 bailout:
     return ret;
 }
