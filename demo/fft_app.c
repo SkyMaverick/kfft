@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/ioctl.h> /* FIONREAD ioctl() */
 
 #if defined(KFFT_OS_WINDOWS)
     #include "getopt_win.h"
@@ -12,6 +11,7 @@
 
 #include "kfft.h"
 #include "const.h"
+#include "config.h"
 
 typedef struct {
     void* buf;
@@ -33,7 +33,9 @@ display_info(void) {
     kfft_info_t info;
     kfft_info(&info);
 
+    fprintf(stdout, "%s version: %d.%d.%d\n", APP_NAME, VER_MAJOR, VER_MINOR, VER_PATCH);
     fprintf(stdout, "LibKFFT version : %d.%d.%d\n\n", info.vmajor, info.vminor, info.vpatch);
+
     fprintf(stdout, "%s - %s\n", "Enable trace messages",
             (info.flags & KFFT_INFO_TRACE) ? "YES" : "NO");
     fprintf(stdout, "%s - %s\n", "Enable use SIMD instructions",
@@ -54,11 +56,6 @@ display_info(void) {
 
 static void
 display_help(void) {
-    kfft_info_t info;
-    kfft_info(&info);
-
-    fprintf(stdout, "Use libkfft version : %d.%d.%d\n\n", info.vmajor, info.vminor, info.vpatch);
-
     fprintf(stdout, "%s", help_msg);
 }
 
@@ -151,9 +148,16 @@ write_stdout(kfft_scalar* in, size_t sz) {
     } /* out allocated */
 }
 
+static void
+xarg_parse(char* arg, app_mode_t* M) {
+    size_t X = atol(arg);
+    if (X > 0) {
+        M->x = X;
+    }
+}
+
 static char*
 cmd_line_parse(int argc, char* argv[], app_mode_t* mode) {
-    kfft_info_t info;
     char* ret = NULL;
 
     int opt = 0;
@@ -174,12 +178,14 @@ cmd_line_parse(int argc, char* argv[], app_mode_t* mode) {
         case 'S':
             mode->is_cpx = false;
             break;
+        case 'x':
+            xarg_parse(optarg, mode);
+            break;
         case '?':
             display_help();
             exit(0);
         case 'v':
-            kfft_info(&info);
-            fprintf(stdout, "%d.%d.%d\n", info.vmajor, info.vminor, info.vpatch);
+            fprintf(stdout, "%d.%d.%d\n", VER_MAJOR, VER_MINOR, VER_PATCH);
             exit(0);
         case 'V':
             display_info();
@@ -217,58 +223,8 @@ bailout:
     return ret;
 }
 
-static kfft_return_t
-work_cpx(char* buf, app_mode_t* M) {
-    kfft_return_t ret = KFFT_RET_SUCCESS;
-
-    if (M->is_2d) {
-    } else {
-    }
-    return ret;
-}
-
-static kfft_return_t
-work_scalar(char* buf, app_mode_t* M) {
-
-#define _VC(X) ((kfft_cpx*)(X))
-#define _VS(X) ((kfft_scalar*)(X))
-
-    kfft_return_t ret = KFFT_RET_SUCCESS;
-
-    void* fin = NULL;
-    ssize_t nfft = parse_buffer(&fin, buf, (M->flags & KFFT_FLAG_INVERSE) ? true : false);
-    if (nfft > 0) {
-        void* ftmp = (M->flags & KFFT_FLAG_INVERSE) ? calloc(nfft, sizeof(kfft_scalar))
-                                                    : calloc(nfft, sizeof(kfft_cpx));
-        if (fin && ftmp) {
-            if (M->is_2d) {
-
-            } else {
-                kfft_sclr_t* plan = kfft_config_scalar(nfft, M->flags, 0, NULL);
-                if (plan) {
-                    ret = (M->flags & KFFT_FLAG_INVERSE)
-                              ? kfft_evali_scalar(plan, _VC(fin), _VS(ftmp))
-                              : kfft_eval_scalar(plan, _VS(fin), _VC(ftmp));
-                    kfft_free(plan);
-                } else {
-                    ret = KFFT_RET_ALLOC_FAIL;
-                } /* plan != NULL */
-            }     /* is_2d */
-            if (ret == KFFT_RET_SUCCESS) {
-                if (M->flags & KFFT_FLAG_INVERSE) {
-                    write_stdout(_VS(ftmp), nfft);
-                } else {
-                    write_stdout(_VS(ftmp), nfft * 2);
-                }
-                fprintf(stdout, "%s\n", "");
-            }
-            free(ftmp);
-        } /* in && ftmp */
-    }
-    return ret;
-#undef _VC
-#undef _VS
-}
+#include "cwork.c"
+#include "swork.c"
 
 int
 main(int argc, char* argv[]) {
