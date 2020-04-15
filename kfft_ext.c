@@ -60,10 +60,12 @@ kfft_cleanup(uintptr_t mem) {
     return KFFT_RET_SUCCESS;
 }
 
-static const char* errors[] = {"Success operation result", "Internal allocation memory fail",
+static const char* errors[] = {"Success operation result",
+                               "Internal allocation memory fail",
                                "Temporary buffer allocation fail",
                                "Invalide free() operation for NULL buffer",
-                               "Use improper real function for this plan"};
+                               "Use improper real function for this plan",
+                               "Use missing argument for configure plan"};
 
 KFFT_API const char*
 kfft_strerr(const kfft_return_t code) {

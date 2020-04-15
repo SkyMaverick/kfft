@@ -57,6 +57,7 @@ enum {
     KFFT_RET_BUFFER_FAIL = 0x0002,
     KFFT_RET_FREE_NULL = 0x0003,
     KFFT_RET_IMPROPER_PLAN = 0x0004,
+    KFFT_RET_BADARGUMENTS = 0x0005
 };
 typedef unsigned kfft_return_t;
 
