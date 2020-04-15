@@ -46,33 +46,34 @@ cmd_line_parse(int argc, char* argv[], app_mode_t* mode) {
             exit(0);
         }
     }
-    if (mode->is_stdin) {
-        ret = read_stdin();
+
+    if (optind < argc) {
+        size_t tmp_size = 1;
+        char* buf = calloc(1, tmp_size);
+        if (buf) {
+            do {
+                char* old = buf;
+                tmp_size += strlen(argv[optind]) + 1;
+
+                buf = realloc(buf, tmp_size);
+                if (buf == NULL) {
+                    free(old);
+                    goto bailout;
+                }
+
+                strcat(buf, argv[optind]);
+                strcat(buf, " ");
+            } while (argc > ++optind);
+
+            buf[strlen(buf) - 1] = '\0';
+        } /* buf allocated */
+        ret = buf;
     }
+
     if (ret == NULL) {
-        if (optind < argc) {
-            size_t tmp_size = 1;
-            char* buf = calloc(1, tmp_size);
-            if (buf) {
-                do {
-                    char* old = buf;
-                    tmp_size += strlen(argv[optind]) + 1;
-
-                    buf = realloc(buf, tmp_size);
-                    if (buf == NULL) {
-                        free(old);
-                        goto bailout;
-                    }
-
-                    strcat(buf, argv[optind]);
-                    strcat(buf, " ");
-                } while (argc > ++optind);
-
-                buf[strlen(buf) - 1] = '\0';
-            } /* buf allocated */
-            ret = buf;
-        }
-    } /* ret == NULL */
+        ret = read_stdin();
+        mode->is_stdin = true;
+    }
 bailout:
     return ret;
 }
