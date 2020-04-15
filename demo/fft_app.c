@@ -184,5 +184,8 @@ main(int argc, char* argv[]) {
     fflush(stdout);
     fclose(stdout);
 
+    if (ret != KFFT_RET_SUCCESS)
+        fprintf(stderr, "%s\n", kfft_strerr(ret));
+
     return ret;
 }
