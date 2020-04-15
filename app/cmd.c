@@ -1,3 +1,4 @@
+#if defined(KFFT_2D_ENABLE)
 static int
 prepare_2d(app_mode_t* M) {
     if ((M->len > 0) && (M->x > 0) && (M->len % M->x > 0))
@@ -6,6 +7,7 @@ prepare_2d(app_mode_t* M) {
     M->y = M->len / M->x;
     return 0;
 }
+#endif /* KFFT_2D_ENABLE */
 
 static inline char*
 cmd_line_parse(int argc, char* argv[], app_mode_t* mode) {

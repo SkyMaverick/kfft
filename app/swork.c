@@ -1,3 +1,5 @@
+#if defined(KFFT_2D_ENABLE)
+
 static kfft_return_t
 work_scalar_forward2(kfft_scalar* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
@@ -10,6 +12,7 @@ work_scalar_inverse2(kfft_cpx* buf, app_mode_t* M) {
     // TODO
     return ret;
 }
+#endif /* KFFT_2D_ENABLE */
 
 static kfft_return_t
 work_scalar_forward(kfft_scalar* buf, app_mode_t* M) {
@@ -71,18 +74,18 @@ work_scalar(char* buf, app_mode_t* M) {
     M->len = parse_buffer(&fin, buf, (M->flags & KFFT_FLAG_INVERSE) ? true : false);
     if (fin != NULL) {
         if (M->len > 0) {
+#if defined(KFFT_2D_ENABLE)
             if (M->is_2d) {
                 if (prepare_2d(M) == 0) {
                     ret = (M->flags & KFFT_FLAG_INVERSE)
                               ? work_scalar_inverse2((kfft_cpx*)fin, M)
                               : work_scalar_forward2((kfft_scalar*)fin, M);
-                } else {
+                } else
                     ret = KFFT_RET_BADARGUMENTS;
-                }
-            } else {
+            } else
+#endif /* KFFT_2D_ENABLE */
                 ret = (M->flags & KFFT_FLAG_INVERSE) ? work_scalar_inverse((kfft_cpx*)fin, M)
                                                      : work_scalar_forward((kfft_scalar*)fin, M);
-            }
         }
         free(fin);
     }

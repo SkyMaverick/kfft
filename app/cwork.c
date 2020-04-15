@@ -1,3 +1,5 @@
+#if defined(KFFT_2D_ENABLE)
+
 static kfft_return_t
 work_cpx_internal2(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_ALLOC_FAIL;
@@ -28,6 +30,7 @@ work_cpx_internal2(kfft_cpx* buf, app_mode_t* M) {
     } /* in && ftmp */
     return ret;
 }
+#endif /* KFFT_2D_ENABLE */
 
 static kfft_return_t
 work_cpx_internal(kfft_cpx* buf, app_mode_t* M) {
@@ -66,15 +69,16 @@ work_cpx(char* buf, app_mode_t* M) {
     M->len = parse_buffer((void**)(&fin), buf, true);
     if (fin != NULL) {
         if (M->len > 0) {
+#if defined(KFFT_2D_ENABLE)
             if (M->is_2d) {
                 if (prepare_2d(M) == 0) {
                     ret = work_cpx_internal2(fin, M);
                 } else {
                     ret = KFFT_RET_BADARGUMENTS;
                 }
-            } else {
+            } else
+#endif /* KFFT_2D_ENABLE */
                 ret = work_cpx_internal(fin, M);
-            }
         }
         free(fin);
     }
