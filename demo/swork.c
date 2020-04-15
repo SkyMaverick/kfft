@@ -1,12 +1,3 @@
-static int
-prepare_2d(app_mode_t* M) {
-    if ((M->len > 0) && (M->x > 0) && (M->len % M->x > 0))
-        return 1;
-
-    M->y = M->len / M->x;
-    return 0;
-}
-
 static kfft_return_t
 work_scalar_forward2(kfft_scalar* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
@@ -82,6 +73,8 @@ work_scalar(char* buf, app_mode_t* M) {
         if (M->len > 0) {
             if (M->is_2d) {
                 if (prepare_2d(M) == 0) {
+                    ret = (M->flags & KFFT_FLAG_INVERSE) ? work_scalar_inverse2((kfft_cpx*)fin, M)
+                                                     : work_scalar_forward2((kfft_scalar*)fin, M);
                 } else {
                     ret = KFFT_RET_BADARGUMENTS;
                 }

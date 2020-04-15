@@ -8,7 +8,7 @@
 #define __HELP_SRING                                                                               \
     "Fast Fourier Transform for input sequence. Use kfft library.\n"                               \
     "\nUse program:\n"                                                                             \
-    "\t" APP_NAME " [" FMT_OPTSTRING "] <sequence>\n"                                              \
+    "\t" APP_NAME " [-" FMT_OPTSTRING "] <sequence>\n"                                             \
     "\nInput/output buffer format - float / double numbers separated by spaces \n"                 \
     "Input format: \n"                                                                             \
     "\t- " APP_NAME " <args> x0 x1 x2 .. xN (for scalar sequence) \n"                              \

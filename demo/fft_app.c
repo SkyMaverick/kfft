@@ -70,7 +70,10 @@ parse_buffer(void** out, char* buf, bool as_cpx) {
 
     args = buf;
 
-    kfft_scalar* tmp = calloc(len, sizeof(kfft_cpx));
+    size_t alloc_size = (as_cpx) ? ((len % 2) ? ((len + 1) / 2) : (len / 2)) * sizeof(kfft_cpx)
+                                 : len * sizeof(kfft_scalar);
+
+    kfft_scalar* tmp = calloc(len, alloc_size);
     if (tmp) {
         for (size_t i = 0; i < len; i++) {
             tmp[i] = (kfft_scalar)atof(args);
@@ -78,7 +81,7 @@ parse_buffer(void** out, char* buf, bool as_cpx) {
         }
     }
     *out = tmp;
-    return (as_cpx) ? len / 2 : len;
+    return (as_cpx) ? ((len % 2) ? ((len + 1) / 2) : (len / 2)) : len;
 }
 
 int
@@ -139,7 +142,7 @@ write_stdout(kfft_scalar* in, size_t sz) {
             }
             strcat(out, buf);
         }
-        out[out_size] = '\0';
+        out[out_size - 2] = '\0'; // erase last space
 
         fprintf(stdout, "%s", out);
         fflush(stdout);
