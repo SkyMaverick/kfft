@@ -157,7 +157,7 @@ main(int argc, char* argv[]) {
     // clang-format off
     app_mode_t mode = {
             .buf = NULL,
-            .is_shift = true,
+            .is_shift = false,
             .is_cpx = true,
             .is_2d = false,
             .is_stdin = true,
