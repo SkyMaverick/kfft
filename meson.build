@@ -182,6 +182,6 @@ install_headers(kfft_cfg, subdir: 'kfft/incs')
 if get_option('enable_tests')
     subdir('test')
 endif
-if get_option('enable_demo')
-    subdir('demo')
+if get_option('enable_app')
+    subdir('app')
 endif
