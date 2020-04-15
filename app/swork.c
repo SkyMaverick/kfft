@@ -1,13 +1,13 @@
 #if defined(KFFT_2D_ENABLE)
 
 static kfft_return_t
-work_scalar_forward2(kfft_scalar* buf, app_mode_t* M) {
+work_scalar2_forward(kfft_scalar* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     // TODO
     return ret;
 }
 static kfft_return_t
-work_scalar_inverse2(kfft_cpx* buf, app_mode_t* M) {
+work_scalar2_inverse(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     // TODO
     return ret;
@@ -78,8 +78,8 @@ work_scalar(char* buf, app_mode_t* M) {
             if (M->is_2d) {
                 if (prepare_2d(M) == 0) {
                     ret = (M->flags & KFFT_FLAG_INVERSE)
-                              ? work_scalar_inverse2((kfft_cpx*)fin, M)
-                              : work_scalar_forward2((kfft_scalar*)fin, M);
+                              ? work_scalar2_inverse((kfft_cpx*)fin, M)
+                              : work_scalar2_forward((kfft_scalar*)fin, M);
                 } else
                     ret = KFFT_RET_BADARGUMENTS;
             } else

@@ -1,7 +1,7 @@
 #if defined(KFFT_2D_ENABLE)
 
 static kfft_return_t
-work_cpx_internal2(kfft_cpx* buf, app_mode_t* M) {
+work_cpx2_internal(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_ALLOC_FAIL;
 
     kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
@@ -72,7 +72,7 @@ work_cpx(char* buf, app_mode_t* M) {
 #if defined(KFFT_2D_ENABLE)
             if (M->is_2d) {
                 if (prepare_2d(M) == 0) {
-                    ret = work_cpx_internal2(fin, M);
+                    ret = work_cpx2_internal(fin, M);
                 } else {
                     ret = KFFT_RET_BADARGUMENTS;
                 }
