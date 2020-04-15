@@ -7,8 +7,11 @@
 
 #define __HELP_SRING                                                                               \
     "Fast Fourier Transform for input sequence. Use kfft library.\n"                               \
-    "\nUse program:\n"                                                                             \
+    "\nUse the program independently:\n"                                                           \
     "\t" APP_NAME " [-" FMT_OPTSTRING "] <sequence>\n"                                             \
+    "or as part of an operations pipeline:\n"                                                      \
+    "\t... <sequence> | " APP_NAME " [-" FMT_OPTSTRING "] | " APP_NAME " [-" FMT_OPTSTRING         \
+    "] | <sequence>...\n"                                                                          \
     "\nInput/output buffer format - float / double numbers separated by spaces \n"                 \
     "Input format: \n"                                                                             \
     "\t- " APP_NAME " <args> x0 x1 x2 .. xN (for scalar sequence) \n"                              \
