@@ -16,6 +16,8 @@ cmd_line_parse(int argc, char* argv[], app_mode_t* mode) {
     int opt = 0;
     while ((opt = getopt(argc, argv, FMT_OPTSTRING)) != -1) {
         switch (opt) {
+        case 'f':
+            goto buffer_work;
         case 'g':
             mode->flags |= KFFT_FLAG_GENERIC;
             break;
@@ -37,18 +39,18 @@ cmd_line_parse(int argc, char* argv[], app_mode_t* mode) {
                 exit(1);
             mode->is_2d = true;
             break;
-        case '?':
-            display_help();
-            exit(0);
         case 'v':
             fprintf(stdout, "%d.%d.%d\n", VER_MAJOR, VER_MINOR, VER_PATCH);
             exit(0);
         case 'V':
             display_info();
             exit(0);
+        case '?':
+            display_help();
+            exit(0);
         }
     }
-
+buffer_work:
     if (optind < argc) {
         size_t tmp_size = 1;
         char* buf = calloc(1, tmp_size);

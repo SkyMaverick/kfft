@@ -38,8 +38,8 @@ work_cpx_internal(kfft_cpx* buf, app_mode_t* M) {
 
     kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
     if (buf && ftmp) {
-        if ((!(M->flags & KFFT_FLAG_INVERSE)) && (M->is_shift))
-            kfft_shift_cpx(ftmp, M->len, true);
+        if ((M->flags & KFFT_FLAG_INVERSE) && (M->is_shift))
+            kfft_shift_cpx(buf, M->len, true);
 
         kfft_comp_t* plan = kfft_config_cpx(M->len, M->flags, 0, 0, NULL);
         if (plan) {
@@ -50,8 +50,8 @@ work_cpx_internal(kfft_cpx* buf, app_mode_t* M) {
         } /* plan != NULL */
 
         if (ret == KFFT_RET_SUCCESS) {
-            if ((M->flags & KFFT_FLAG_INVERSE) && (M->is_shift))
-                kfft_shift_cpx(ftmp, M->len, true);
+            if ((!(M->flags & KFFT_FLAG_INVERSE)) && (M->is_shift))
+                kfft_shift_cpx(ftmp, M->len, false);
 
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");

@@ -1,6 +1,6 @@
 #include "config.h"
 
-#define FMT_OPTSTRING "gGisSx:vV?"
+#define FMT_OPTSTRING "gGisSx:vVf?"
 
 #define STDIN_BUF_SIZE 0xFF
 #define STDOUT_BUF_SIZE 0xFF
@@ -22,6 +22,7 @@
     "\nArguments: \n"                                                                              \
     "\t-g - use generic algorithm for prime size chuncks evalation \n"                             \
     "\t-G - use ONLY generic algorithm for all sequence evalation \n"                              \
+    "\t-f - parse last args as input sequence \n"                                                  \
     "\t-i - use inverse transformation \n"                                                         \
     "\t-S - use scalar functions for evalate. \n"                                                  \
     "\t-s - use shift functionality \n"                                                            \
