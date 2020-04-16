@@ -1,11 +1,9 @@
 #pragma once
 
-#ifndef KFFT_USE_SYSMATH
-    #define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
-#else
+#ifdef KFFT_USE_SYSMATH
     #include <math.h>
-    #define KFFT_CONST_PI M_PI
 #endif
+#define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
 
 /*
   Explanation of macros dealing with complex math:

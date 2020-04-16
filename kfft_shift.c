@@ -3,7 +3,7 @@
 
 KFFT_API void
 kfft_shift_cpx(kfft_cpx* buf, const uint32_t size, const bool is_inverse) {
-    ssize_t k = 0;
+    int64_t k = 0;
     uint32_t c = (uint32_t)floor((kfft_scalar)size / 2);
     kfft_cpx tmp = {0, 0};
     if (size % 2 == 0) {
@@ -30,7 +30,7 @@ kfft_shift_cpx(kfft_cpx* buf, const uint32_t size, const bool is_inverse) {
 
 KFFT_API void
 kfft_shift_scalar(kfft_scalar* buf, const uint32_t size, const bool is_inverse) {
-    ssize_t k = 0;
+    int64_t k = 0;
     uint32_t c = (uint32_t)floor((kfft_scalar)size / 2);
     kfft_scalar tmp = 0;
     if (size % 2 == 0) {
