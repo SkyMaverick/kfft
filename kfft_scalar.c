@@ -31,7 +31,7 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
 #endif
     size_t subsize = 0;
 
-    if (kfft_config_cpx(nfft, flags, 0, NULL, &subsize) == KFFT_RET_SUCCESS) {
+    if (kfft_config_cpx(nfft, flags, NULL, &subsize) == KFFT_RET_SUCCESS) {
         ret += subsize;
         return ret;
     }
@@ -100,7 +100,7 @@ kfft_config_scalar(const uint32_t nfft, const uint32_t flags, const kfft_pool_t*
 
     st->object.mmgr = mmgr;
 
-    st->substate = kfft_config_cpx(nfft, flags | (!(KFFT_FLAG_RENEW)), 0, st->object.mmgr, NULL);
+    st->substate = kfft_config_cpx(nfft, flags | (!(KFFT_FLAG_RENEW)), st->object.mmgr, NULL);
     if (st->substate == NULL)
         goto bailout;
 

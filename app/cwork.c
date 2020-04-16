@@ -39,7 +39,7 @@ work_cpx_internal(kfft_cpx* buf, app_mode_t* M) {
         if ((M->flags & KFFT_FLAG_INVERSE) && (M->is_shift))
             kfft_shift_cpx(buf, M->len, true);
 
-        kfft_comp_t* plan = kfft_config_cpx(M->len, M->flags, 0, 0, NULL);
+        kfft_comp_t* plan = kfft_config_cpx(M->len, M->flags, 0, NULL);
         if (plan) {
             ret = kfft_eval_cpx(plan, buf, ftmp);
             kfft_free(plan);

@@ -5,6 +5,10 @@
 
 #ifdef KFFT_TRACE
 
+static kfft_comp_t*
+kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
+                   size_t* lenmem); /* forward declaration configure function */
+
 static void
 kfft_trace_plan(kfft_comp_t* P) {
     kfft_trace_core(P->level, "%s: %p", "Create KFFT complex plan", (void*)P);
@@ -243,10 +247,10 @@ kfft_kinit(kfft_comp_t* st) {
                     kfft_rader_idxs(sP->qidx, sP->q, sP->prime);
                     kfft_rader_idxs(sP->pidx, sP->p, sP->prime);
     #endif /* not KFFT_MEMLESS_MODE */
-                    sP->splan = kfft_config_cpx(len, (st->flags & (~KFFT_FLAG_INVERSE)),
-                                                st->level + 1, st->object.mmgr, NULL);
-                    sP->splani = kfft_config_cpx(len, ((st->flags | KFFT_FLAG_INVERSE)),
-                                                 st->level + 1, st->object.mmgr, NULL);
+                    sP->splan = kfft_config_lvlcpx(len, (st->flags & (~KFFT_FLAG_INVERSE)),
+                                                   st->level + 1, st->object.mmgr, NULL);
+                    sP->splani = kfft_config_lvlcpx(len, ((st->flags | KFFT_FLAG_INVERSE)),
+                                                    st->level + 1, st->object.mmgr, NULL);
 
                     sP->shuffle_twiddles =
                         kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * len);
@@ -297,7 +301,7 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
             size_t snfft = st->primes[i].prime - 1;
 
             size_t delta_mem = 0;
-            kfft_config_cpx(snfft, flags, level + 1, NULL, &delta_mem);
+            kfft_config_lvlcpx(snfft, flags, level + 1, NULL, &delta_mem);
             delta_mem *= 2; // splan and splani
 
             delta_mem += sizeof(uint32_t) * snfft * 2; // index table
@@ -317,9 +321,10 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
  * The return value is a contiguous block of memory, allocated with malloc.  As such,
  * It can be freed with free(), rather than a kfft-specific function.
  * */
-kfft_comp_t*
-kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
-                size_t* lenmem) {
+
+static kfft_comp_t*
+kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
+                   size_t* lenmem) {
     kfft_comp_t* st = NULL;
 
     kfft_comp_t tmp;
@@ -380,6 +385,11 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, 
 #endif
 
     return st;
+}
+
+kfft_comp_t*
+kfft_config_cpx(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem) {
+    return kfft_config_lvlcpx(nfft, flags, 0, A, lenmem);
 }
 
 kfft_return_t
