@@ -32,7 +32,7 @@ work_scalar_forward(kfft_scalar* buf, app_mode_t* M) {
         if (ret == KFFT_RET_SUCCESS) {
             if (M->is_shift)
                 kfft_shift_cpx(ftmp, M->len, false);
-            
+
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");
         }
@@ -49,7 +49,7 @@ work_scalar_inverse(kfft_cpx* buf, app_mode_t* M) {
     if (buf && ftmp) {
         if (M->is_shift)
             kfft_shift_cpx(buf, M->len, true);
-        
+
         kfft_sclr_t* plan = kfft_config_scalar(M->len, M->flags, 0, NULL);
         if (plan) {
             ret = kfft_evali_scalar(plan, buf, ftmp);

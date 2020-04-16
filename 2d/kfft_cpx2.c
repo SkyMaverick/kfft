@@ -168,4 +168,27 @@ kfft_eval2_cpx(kfft_comp2_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     return ret;
 }
 
+KFFT_API void
+kfft_shift2_cpx(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_t sz_y,
+                const bool is_inverse) {
+    kfft_trace_2d("%s\n", "X-axes shift transform");
+#pragma omp for schedule(static)
+    for (uint32_t i = 0; i < sz_y; i++) {
+        uint64_t bp = sz_x * i;
+        kfft_shift_cpx(&(buf[bp]), sz_x, is_inverse);
+    }
+
+    kfft_trace_2d("%s\n", "Transposition matrix");
+    kfft_math_transpose_cpx(buf, ftmp, sz_x, sz_y);
+
+    kfft_trace_2d("%s\n", "Y-axes shift transform");
+#pragma omp for schedule(static)
+    for (uint32_t i = 0; i < sz_x; i++) {
+        uint64_t bp = sz_y * i;
+        kfft_shift_cpx(&(ftmp[bp]), sz_y, is_inverse);
+    }
+    kfft_trace_2d("%s\n", "Transposition matrix");
+    kfft_math_transpose_cpx(ftmp, buf, sz_y, sz_x);
+}
+
 #undef kfft_trace_2d
