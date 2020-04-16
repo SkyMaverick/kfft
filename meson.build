@@ -157,12 +157,7 @@ if not (get_option('buildtype') == 'debug')
 endif
 
 if get_option('enable_2d')
-    kfft_src += '''
-        2d/kfft_cpx2.c
-    '''.split()
-    kfft_headers += '''
-        2d/kfft_cpx2.h
-    '''.split()
+    subdir('2d')
 endif
 
 kfft_inc = include_directories (kfft_idirs)
