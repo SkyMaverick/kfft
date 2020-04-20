@@ -100,7 +100,7 @@ kfft_config_scalar(const uint32_t nfft, const uint32_t flags, const kfft_pool_t*
 
     st->object.mmgr = mmgr;
 
-    st->substate = kfft_config_cpx(nfft, flags | (!(KFFT_FLAG_RENEW)), st->object.mmgr, NULL);
+    st->substate = kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags), st->object.mmgr, NULL);
     if (st->substate == NULL)
         goto bailout;
 

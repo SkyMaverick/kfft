@@ -82,6 +82,10 @@ typedef unsigned kfft_return_t;
 
 #define kfft_free(X) kfft_cleanup((uintptr_t)(X))
 
+
+/* Protecting nested plans from destructive operations */
+#define KFFT_CHECK_FLAGS(X) ((X) & (~KFFT_FLAG_RENEW))
+
 #ifdef __cplusplus
 }
 #endif

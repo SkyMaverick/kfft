@@ -28,10 +28,11 @@ kfft_trace_plan(kfft_sclr2_t* P) {
 static inline kfft_return_t
 kfft_init(kfft_sclr2_t* st) {
 
-    st->plan_x = kfft_config_scalar(st->x, st->flags, st->object.mmgr, NULL);
+    st->plan_x = kfft_config_scalar(st->x, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
     if (st->plan_x) {
         if (st->x != st->y) {
-            st->plan_y = kfft_config_scalar(st->y, st->flags, st->object.mmgr, NULL);
+            st->plan_y =
+                kfft_config_scalar(st->y, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
         } else {
             st->plan_y = st->plan_x;
         }
@@ -45,11 +46,11 @@ kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
     size_t ret = sizeof(kfft_sclr2_t);
     size_t delta = 0;
 
-    kfft_config_scalar(szx, flags, NULL, &delta);
+    kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags), NULL, &delta);
     ret += delta;
 
     if ((szy != szx) || (szy > 1)) {
-        kfft_config_scalar(szy, flags, NULL, &delta);
+        kfft_config_scalar(szy, KFFT_CHECK_FLAGS(flags), NULL, &delta);
         ret += delta;
     }
 

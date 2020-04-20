@@ -247,10 +247,12 @@ kfft_kinit(kfft_comp_t* st) {
                     kfft_rader_idxs(sP->qidx, sP->q, sP->prime);
                     kfft_rader_idxs(sP->pidx, sP->p, sP->prime);
     #endif /* not KFFT_MEMLESS_MODE */
-                    sP->splan = kfft_config_lvlcpx(len, (st->flags & (~KFFT_FLAG_INVERSE)),
-                                                   st->level + 1, st->object.mmgr, NULL);
-                    sP->splani = kfft_config_lvlcpx(len, ((st->flags | KFFT_FLAG_INVERSE)),
-                                                    st->level + 1, st->object.mmgr, NULL);
+                    sP->splan =
+                        kfft_config_lvlcpx(len, KFFT_CHECK_FLAGS(st->flags & (~KFFT_FLAG_INVERSE)),
+                                           st->level + 1, st->object.mmgr, NULL);
+                    sP->splani =
+                        kfft_config_lvlcpx(len, (KFFT_CHECK_FLAGS(st->flags | KFFT_FLAG_INVERSE)),
+                                           st->level + 1, st->object.mmgr, NULL);
 
                     sP->shuffle_twiddles =
                         kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * len);
