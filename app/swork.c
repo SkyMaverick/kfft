@@ -3,13 +3,49 @@
 static kfft_return_t
 work_scalar2_forward(kfft_scalar* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
-    // TODO
+
+    kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
+    if (buf && ftmp) {
+        kfft_sclr2_t* plan = kfft_config2_scalar(M->x, M->y, M->flags, 0, NULL);
+        if (plan) {
+            ret = kfft_eval2_scalar(plan, buf, ftmp);
+            kfft_free(plan);
+        } else {
+            ret = KFFT_RET_ALLOC_FAIL;
+        }
+        if (ret == KFFT_RET_SUCCESS) {
+            //            if ((!(M->flags & KFFT_FLAG_INVERSE)) && (M->is_shift))
+            //                kfft_shift2_cpx(ftmp, buf, M->x, M->y, false);
+            //
+            write_stdout((kfft_scalar*)ftmp, M->len * 2);
+            fprintf(stdout, "%s\n", "");
+        }
+        free(ftmp);
+    }
     return ret;
 }
 static kfft_return_t
 work_scalar2_inverse(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
-    // TODO
+
+    kfft_scalar* ftmp = calloc(M->len, sizeof(kfft_scalar));
+    if (buf && ftmp) {
+        kfft_sclr2_t* plan = kfft_config2_scalar(M->x, M->y, M->flags, 0, NULL);
+        if (plan) {
+            ret = kfft_evali2_scalar(plan, buf, ftmp);
+            kfft_free(plan);
+        } else {
+            ret = KFFT_RET_ALLOC_FAIL;
+        }
+        if (ret == KFFT_RET_SUCCESS) {
+            //            if ((!(M->flags & KFFT_FLAG_INVERSE)) && (M->is_shift))
+            //                kfft_shift2_cpx(ftmp, buf, M->x, M->y, false);
+            //
+            write_stdout((kfft_scalar*)ftmp, M->len);
+            fprintf(stdout, "%s\n", "");
+        }
+        free(ftmp);
+    }
     return ret;
 }
 #endif /* KFFT_2D_ENABLE */
