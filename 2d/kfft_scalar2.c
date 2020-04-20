@@ -119,13 +119,14 @@ static inline kfft_return_t
 kfft_2transform(kfft_sclr2_t* st, const kfft_scalar* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_cpx* ftmp = KFFT_TMP_ALLOC(st->nfft * sizeof(kfft_cpx));
+    kfft_cpx *fbuf, *ftmp;
+    ftmp = KFFT_TMP_ALLOC(2 * st->nfft * sizeof(kfft_cpx));
     if (ftmp) {
+        fbuf = ftmp + st->nfft;
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-#pragma omp for schedule(static)
         for (uint32_t i = 0; i < st->y; i++) {
             uint64_t bp = st->x * i;
-            ret = kfft_eval_scalar(st->plan_x, &(fin[bp]), &(ftmp[bp]));
+            ret = kfft_eval_scalar_internal(st->plan_x, &(fin[bp]), &(ftmp[bp]), fbuf);
         }
 
         kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
@@ -157,11 +158,12 @@ static inline kfft_return_t
 kfft_2transform_inverse(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scalar* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_cpx* ftps = NULL;
-    kfft_cpx* ftmp = KFFT_TMP_ALLOC(2 * st->nfft * sizeof(kfft_cpx));
+    kfft_cpx *ftps, *fbuf, *ftmp;
+    ftmp = KFFT_TMP_ALLOC(3 * st->nfft * sizeof(kfft_cpx));
 
     if (ftmp) {
         ftps = ftmp + st->nfft;
+        fbuf = ftps + st->nfft;
 
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
 #pragma omp for schedule(static)
@@ -174,10 +176,11 @@ kfft_2transform_inverse(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scalar* fout
         kfft_math_transpose_cpx(ftmp, ftps, st->x, st->y);
 
         kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
-#pragma omp for schedule(static)
+
         for (uint32_t i = 0; i < st->x; i++) {
             uint64_t bp = st->y * i;
-            ret = kfft_evali_scalar(st->plan_y, &(ftps[bp]), (&(((kfft_scalar*)ftmp)[bp])));
+            ret = kfft_evali_scalar_internal(st->plan_y, &(ftps[bp]), (&(((kfft_scalar*)ftmp)[bp])),
+                                             fbuf);
         }
         kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
         kfft_math_transpose_scalar((kfft_scalar*)ftmp, fout, st->y, st->x);
