@@ -193,10 +193,10 @@ kfft_evali2_scalar(kfft_sclr2_t* cfg, const kfft_cpx* fin, kfft_scalar* fout) {
     return (cfg->flags & KFFT_FLAG_INVERSE) ? kfft_2transform_inverse(cfg, fin, fout)
                                             : KFFT_RET_IMPROPER_PLAN;
 }
-KFFT_API void
-kfft_shift2_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const uint32_t sz_y,
-                   const bool is_inverse) {
 
+void
+shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const uint32_t sz_y,
+               const bool is_inverse) {
     kfft_trace_2d("%s\n", "X-axes shift transform");
 #pragma omp for schedule(static)
     for (uint32_t i = 0; i < sz_y; i++) {
@@ -215,5 +215,19 @@ kfft_shift2_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, con
     }
     kfft_trace_2d("%s\n", "Transposition matrix");
     kfft_math_transpose_scalar(ftmp, buf, sz_y, sz_x);
+}
+
+KFFT_API void
+kfft_shift2_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const uint32_t sz_y,
+                   const bool is_inverse) {
+    if (ftmp == NULL) {
+        kfft_scalar* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * sz_x * sz_y);
+        if (tbuf) {
+            shift_internal(buf, tbuf, sz_x, sz_y, is_inverse);
+            KFFT_TMP_FREE(tbuf);
+        }
+    } else {
+        shift_internal(buf, ftmp, sz_x, sz_y, is_inverse);
+    }
 }
 #undef kfft_trace_2d
