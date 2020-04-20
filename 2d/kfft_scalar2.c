@@ -195,5 +195,25 @@ kfft_evali2_scalar(kfft_sclr2_t* cfg, const kfft_cpx* fin, kfft_scalar* fout) {
 }
 KFFT_API void
 kfft_shift2_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const uint32_t sz_y,
-                   const bool is_inverse) {}
+                   const bool is_inverse) {
+
+    kfft_trace_2d("%s\n", "X-axes shift transform");
+#pragma omp for schedule(static)
+    for (uint32_t i = 0; i < sz_y; i++) {
+        uint64_t bp = sz_x * i;
+        kfft_shift_scalar(&(buf[bp]), sz_x, is_inverse);
+    }
+
+    kfft_trace_2d("%s\n", "Transposition matrix");
+    kfft_math_transpose_scalar(buf, ftmp, sz_x, sz_y);
+
+    kfft_trace_2d("%s\n", "Y-axes shift transform");
+#pragma omp for schedule(static)
+    for (uint32_t i = 0; i < sz_x; i++) {
+        uint64_t bp = sz_y * i;
+        kfft_shift_scalar(&(ftmp[bp]), sz_y, is_inverse);
+    }
+    kfft_trace_2d("%s\n", "Transposition matrix");
+    kfft_math_transpose_scalar(ftmp, buf, sz_y, sz_x);
+}
 #undef kfft_trace_2d
