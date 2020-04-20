@@ -101,70 +101,15 @@ kfft_rader_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
 
 #endif /* KFFT_RADER_ALGO */
 
-#include "kfft_conv.c"
-#include "kfft_bfly.c"
-#include "kfft_generic.c"
+/*
+    Inline needed source modules for transformation .
+    Select SIMD files HERE //TODO
+ */
 
-static kfft_return_t
-kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_stride,
-        uint32_t* factors, const kfft_comp_t* st) {
-
-    kfft_return_t ret = KFFT_RET_SUCCESS;
-
-    kfft_cpx* Fout_beg = Fout;
-    if (st->flags & KFFT_FLAG_GENERIC_ONLY) {
-        ret = kf_bfly_generic(Fout, 1, st, 1, st->nfft);
-    } else {
-        const uint32_t p = *factors++; /* the radix  */
-        const uint32_t m = *factors++; /* stage's fft length/p */
-        const kfft_cpx* Fout_end = Fout + p * m;
-
-        kfft_trace_core(st->level, "Work: p - %u | m - %u\n", p, m);
-
-        if (m == 1) {
-            do {
-                *Fout = *f;
-                f += fstride * in_stride;
-            } while (++Fout != Fout_end);
-        } else {
-            do {
-                // recursive call:
-                // DFT of size m*p performed by doing
-                // p instances of smaller DFTs of size m,
-                // each one takes a decimated version of the input
-                ret = kf_work(Fout, f, fstride * p, in_stride, factors, st);
-
-                if (ret != KFFT_RET_SUCCESS)
-                    goto bailout;
-
-                f += fstride * in_stride;
-            } while ((Fout += m) != Fout_end);
-        }
-
-        Fout = Fout_beg;
-
-        // recombine the p smaller DFTs
-        switch (p) {
-        case 2:
-            kf_bfly2(Fout, fstride, st, m);
-            break;
-        case 3:
-            kf_bfly3(Fout, fstride, st, m);
-            break;
-        case 4:
-            kf_bfly4(Fout, fstride, st, m);
-            break;
-        case 5:
-            kf_bfly5(Fout, fstride, st, m);
-            break;
-        default:
-            ret = kf_bfly_generic(Fout, fstride, st, m, p);
-            break;
-        }
-    }
-bailout:
-    return ret;
-}
+#include "kfft_conv.c"    /* Complex sequenses convolution */
+#include "kfft_bfly.c"    /* Butterfly transformations (Cooley - Tukey)*/
+#include "kfft_generic.c" /* Generic or Rader algorithm for prime-size lengt sequences*/
+#include "kfft_work.c"    /* Main work recursive procedure */
 
 /*  facbuf is populated by p1,m1,p2,m2, ...
     where
@@ -172,9 +117,7 @@ bailout:
     m0 = n                  */
 static inline void
 kf_factor(kfft_comp_t* st) {
-    uint32_t p = 4;
-    uint32_t n = st->nfft;
-    uint32_t* facbuf = st->factors;
+    uint32_t p = 4, n = st->nfft, *facbuf = st->factors;
 #if defined(KFFT_RADER_ALGO)
     kfft_splan_t* pbuf = st->primes;
 #endif /* KFFT_RADER_ALGO */
