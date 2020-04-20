@@ -145,12 +145,13 @@ kfft_2transform_normal(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
     return ret;
 }
 
+#if defined(KFFT_MEMLESS_MODE)
 static inline kfft_return_t
 kfft_2transform_memless(kfft_comp2_t* st, kfft_cpx* fin) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-#pragma omp for schedule(static)
+    #pragma omp for schedule(static)
     for (uint32_t i = 0; i < st->y; i++) {
         uint64_t bp = st->x * i;
         ret = kfft_eval_cpx(st->plan_x, &(fin[bp]), &(fin[bp]));
@@ -160,7 +161,7 @@ kfft_2transform_memless(kfft_comp2_t* st, kfft_cpx* fin) {
     kfft_math_transpose_ip_cpx(fin, st->x, st->y);
 
     kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
-#pragma omp for schedule(static)
+    #pragma omp for schedule(static)
     for (uint32_t i = 0; i < st->x; i++) {
         uint64_t bp = st->y * i;
         ret = kfft_eval_cpx(st->plan_y, &(fin[bp]), &(fin[bp]));
@@ -170,6 +171,7 @@ kfft_2transform_memless(kfft_comp2_t* st, kfft_cpx* fin) {
 
     return ret;
 }
+#endif /* KFFT_MEMLESS_MODE */
 
 KFFT_API kfft_return_t
 kfft_eval2_cpx(kfft_comp2_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
@@ -182,7 +184,7 @@ kfft_eval2_cpx(kfft_comp2_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
             memcpy(fout, fin, memneeded);
         ret = kfft_2transform_memless(cfg, fout);
     } else {
-#endif /* memless mode */
+#endif /* KFFT_MEMLESS_MODE */
         if (fin == fout) {
             kfft_cpx* Fbuf = KFFT_TMP_ALLOC(memneeded);
             if (Fbuf) {
