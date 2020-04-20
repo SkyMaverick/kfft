@@ -3,11 +3,11 @@
 #include "kfft_trace.h"
 #include "kfft_math.h"
 
-#ifdef KFFT_TRACE
-
 static kfft_comp_t*
 kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
                    size_t* lenmem); /* forward declaration configure function */
+
+#ifdef KFFT_TRACE
 
 static void
 kfft_trace_plan(kfft_comp_t* P) {
