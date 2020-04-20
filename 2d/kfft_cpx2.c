@@ -113,8 +113,8 @@ kfft_config2_cpx(const uint32_t x_size, const uint32_t y_size, const uint32_t fl
     return st;
 }
 
-static kfft_return_t
-kfft_2transform(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
+static inline kfft_return_t
+kfft_2transform_normal(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_cpx* ftmp = KFFT_TMP_ALLOC(st->nfft * sizeof(kfft_cpx));
@@ -145,26 +145,61 @@ kfft_2transform(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
     return ret;
 }
 
+static inline kfft_return_t
+kfft_2transform_memless(kfft_comp2_t* st, kfft_cpx* fin) {
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+
+    kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
+#pragma omp for schedule(static)
+    for (uint32_t i = 0; i < st->y; i++) {
+        uint64_t bp = st->x * i;
+        ret = kfft_eval_cpx(st->plan_x, &(fin[bp]), &(fin[bp]));
+    }
+
+    kfft_trace_2d("%s: %p\n", "Transposition matrix plan (in-place)", (void*)st);
+    kfft_math_transpose_ip_cpx(fin, st->x, st->y);
+
+    kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
+#pragma omp for schedule(static)
+    for (uint32_t i = 0; i < st->x; i++) {
+        uint64_t bp = st->y * i;
+        ret = kfft_eval_cpx(st->plan_y, &(fin[bp]), &(fin[bp]));
+    }
+    kfft_trace_2d("%s: %p\n", "Transposition matrix plan (in-place)", (void*)st);
+    kfft_math_transpose_ip_cpx(fin, st->y, st->x);
+
+    return ret;
+}
+
 KFFT_API kfft_return_t
 kfft_eval2_cpx(kfft_comp2_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     size_t memneeded = cfg->nfft * sizeof(kfft_cpx);
-    if (fin == fout) {
-        kfft_cpx* Fbuf = KFFT_TMP_ALLOC(memneeded);
-        if (Fbuf) {
-            ret = kfft_2transform(cfg, fin, Fbuf);
-            if (ret == KFFT_RET_SUCCESS) {
-                memcpy(fout, Fbuf, memneeded);
-            }
-            KFFT_TMP_FREE(Fbuf);
-        } else {
-            ret = KFFT_RET_BUFFER_FAIL;
-        } /* Fbuf */
+#if defined(KFFT_MEMLESS_MODE)
+    if (cfg->flags & KFFT_FLAG_GENERIC_ONLY) {
+        if (fin != fout)
+            memcpy(fout, fin, memneeded);
+        ret = kfft_2transform_memless(cfg, fout);
     } else {
-        ret = kfft_2transform(cfg, fin, fout);
-    } /* fin == fout */
-
+#endif /* memless mode */
+        if (fin == fout) {
+            kfft_cpx* Fbuf = KFFT_TMP_ALLOC(memneeded);
+            if (Fbuf) {
+                ret = kfft_2transform_normal(cfg, fin, Fbuf);
+                if (ret == KFFT_RET_SUCCESS) {
+                    memcpy(fout, Fbuf, memneeded);
+                }
+                KFFT_TMP_FREE(Fbuf);
+            } else {
+                ret = KFFT_RET_BUFFER_FAIL;
+            } /* Fbuf */
+        } else {
+            ret = kfft_2transform_normal(cfg, fin, fout);
+        } /* fin == fout */
+#if defined(KFFT_MEMLESS_MODE)
+    }  /* KFFT_FLAG_GENERIC_ONLY */
+#endif /* memless mode */
     return ret;
 }
 
@@ -177,32 +212,46 @@ shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_
         uint64_t bp = sz_x * i;
         kfft_shift_cpx(&(buf[bp]), sz_x, is_inverse);
     }
+    if (ftmp != NULL) {
+        kfft_trace_2d("%s\n", "Transposition matrix");
+        kfft_math_transpose_cpx(buf, ftmp, sz_x, sz_y);
 
-    kfft_trace_2d("%s\n", "Transposition matrix");
-    kfft_math_transpose_cpx(buf, ftmp, sz_x, sz_y);
-
-    kfft_trace_2d("%s\n", "Y-axes shift transform");
+        kfft_trace_2d("%s\n", "Y-axes shift transform");
 #pragma omp for schedule(static)
-    for (uint32_t i = 0; i < sz_x; i++) {
-        uint64_t bp = sz_y * i;
-        kfft_shift_cpx(&(ftmp[bp]), sz_y, is_inverse);
-    }
-    kfft_trace_2d("%s\n", "Transposition matrix");
-    kfft_math_transpose_cpx(ftmp, buf, sz_y, sz_x);
+        for (uint32_t i = 0; i < sz_x; i++) {
+            uint64_t bp = sz_y * i;
+            kfft_shift_cpx(&(ftmp[bp]), sz_y, is_inverse);
+        }
+        kfft_trace_2d("%s\n", "Transposition matrix");
+        kfft_math_transpose_cpx(ftmp, buf, sz_y, sz_x);
+    } else { /* ftmp != NULL */
+        kfft_trace_2d("%s\n", "Transposition matrix (in-place)");
+        kfft_math_transpose_ip_cpx(buf, sz_x, sz_y);
+
+        kfft_trace_2d("%s\n", "Y-axes shift transform");
+#pragma omp for schedule(static)
+        for (uint32_t i = 0; i < sz_x; i++) {
+            uint64_t bp = sz_y * i;
+            kfft_shift_cpx(&(buf[bp]), sz_y, is_inverse);
+        }
+        kfft_trace_2d("%s\n", "Transposition matrix (in-place)");
+        kfft_math_transpose_ip_cpx(buf, sz_y, sz_x);
+    } /* ftmp != NULL */
 }
 
 KFFT_API void
 kfft_shift2_cpx(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_t sz_y,
                 const bool is_inverse) {
+#if !defined(KFFT_MEMLESS_MODE)
     if (ftmp == NULL) {
         kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * sz_x * sz_y);
         if (tbuf) {
             shift_internal(buf, tbuf, sz_x, sz_y, is_inverse);
             KFFT_TMP_FREE(tbuf);
         }
-    } else {
+    } else
+#endif /* KFFT_MEMLESS_MODE */
         shift_internal(buf, ftmp, sz_x, sz_y, is_inverse);
-    }
 }
 
 #undef kfft_trace_2d
