@@ -149,9 +149,26 @@ eval_forward_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
     return ret;
 }
 
-KFFT_API kfft_return_t
-kfft_eval_scalar(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
+static kfft_return_t
+eval_func(kfft_sclr_t* stu, kfft_cpx* tmpbuf, const kfft_scalar* timedata, kfft_cpx* freqdata) {
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+    uint32_t ncfft = stu->substate->nfft;
 
+    KFFT_TMP_ZEROMEM(tmpbuf, stu->substate->nfft * sizeof(kfft_cpx));
+    for (uint32_t i = 0; i < ncfft; i++) {
+        freqdata[i].r = timedata[i];
+    }
+    ret = kfft_eval_cpx(stu->substate, freqdata, tmpbuf);
+    if (ret == KFFT_RET_SUCCESS) {
+        ret = eval_forward_internal(stu, tmpbuf, freqdata);
+    }
+
+    return ret;
+}
+
+kfft_return_t
+kfft_eval_scalar_internal(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata,
+                          kfft_cpx* tmpbuf) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     /* input buffer timedata is stored row-wise */
     kfft_sclr_t* st = (kfft_sclr_t*)stu;
@@ -160,24 +177,25 @@ kfft_eval_scalar(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cpx* freqda
         return KFFT_RET_IMPROPER_PLAN;
     }
 
-    uint32_t ncfft = st->substate->nfft;
-
-    kfft_cpx* tmpbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft);
-    if (tmpbuf) {
-        KFFT_ALLOCA_CLEAR(tmpbuf, sizeof(kfft_cpx) * ncfft);
-
-        for (uint32_t i = 0; i < ncfft; i++) {
-            freqdata[i].r = timedata[i];
+    uint32_t ncfft = stu->substate->nfft;
+    if (tmpbuf == NULL) {
+        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft);
+        if (tbuf) {
+            ret = eval_func(stu, tbuf, timedata, freqdata);
+            KFFT_TMP_FREE(tbuf);
+        } else {
+            ret = KFFT_RET_BUFFER_FAIL;
         }
-        ret = kfft_eval_cpx(st->substate, freqdata, tmpbuf);
-        if (ret == KFFT_RET_SUCCESS) {
-            ret = eval_forward_internal(st, tmpbuf, freqdata);
-        }
-        KFFT_TMP_FREE(tmpbuf);
     } else {
-        ret = KFFT_RET_BUFFER_FAIL;
+        ret = eval_func(stu, tmpbuf, timedata, freqdata);
     }
+
     return ret;
+}
+
+KFFT_API kfft_return_t
+kfft_eval_scalar(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata) {
+    return kfft_eval_scalar_internal(stu, timedata, freqdata, NULL);
 }
 
 static inline kfft_return_t
@@ -209,9 +227,28 @@ eval_inverse_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
     return ret;
 }
 
-KFFT_API kfft_return_t
-kfft_evali_scalar(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
-    /* input buffer timedata is stored row-wise */
+static kfft_return_t
+evali_func(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata, kfft_cpx* tmpbuf) {
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+    uint32_t ncfft = stu->substate->nfft;
+
+    KFFT_TMP_ZEROMEM(tmpbuf, sizeof(kfft_cpx) * ncfft);
+
+    ret = eval_inverse_internal(stu, freqdata, tmpbuf);
+    if (ret == KFFT_RET_SUCCESS) {
+        ret = kfft_eval_cpx(stu->substate, tmpbuf, tmpbuf);
+        if (ret == KFFT_RET_SUCCESS) {
+            for (uint32_t i = 0; i < ncfft; i++) {
+                timedata[i] = tmpbuf[i].r / 2;
+            }
+        }
+    }
+    return ret;
+}
+
+kfft_return_t
+kfft_evali_scalar_internal(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata,
+                           kfft_cpx* tmpbuf) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     kfft_sclr_t* st = (kfft_sclr_t*)stu;
 
@@ -221,24 +258,24 @@ kfft_evali_scalar(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timed
 
     uint32_t ncfft = st->substate->nfft;
 
-    kfft_cpx* tmpbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft);
-    if (tmpbuf) {
-        KFFT_ALLOCA_CLEAR(tmpbuf, sizeof(kfft_cpx) * ncfft);
-
-        ret = eval_inverse_internal(st, freqdata, tmpbuf);
-        if (ret == KFFT_RET_SUCCESS) {
-            ret = kfft_eval_cpx(st->substate, tmpbuf, tmpbuf);
-            if (ret == KFFT_RET_SUCCESS) {
-                for (uint32_t i = 0; i < ncfft; i++) {
-                    timedata[i] = tmpbuf[i].r / 2;
-                }
-            }
+    if (tmpbuf == NULL) {
+        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft);
+        if (tbuf) {
+            ret = evali_func(stu, freqdata, timedata, tbuf);
+            KFFT_TMP_FREE(tbuf);
+        } else {
+            ret = KFFT_RET_BUFFER_FAIL;
         }
-        KFFT_TMP_FREE(tmpbuf);
     } else {
-        ret = KFFT_RET_BUFFER_FAIL;
+        ret = evali_func(stu, freqdata, timedata, tmpbuf);
     }
     return ret;
+}
+
+KFFT_API kfft_return_t
+kfft_evali_scalar(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata) {
+    /* input buffer timedata is stored row-wise */
+    return kfft_evali_scalar_internal(stu, freqdata, timedata, NULL);
 }
 /* ********************************************************************************
       TODO  Functionality

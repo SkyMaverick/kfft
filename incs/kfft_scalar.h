@@ -23,3 +23,11 @@ KFFT_API kfft_return_t
 kfft_evali_scalar(kfft_sclr_t* cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
 KFFT_API uint32_t
 kfft_next_fast_size(uint32_t n);
+
+/*Internal use functions (NOT provide KFFT_API) for optimize extensions */
+kfft_return_t
+kfft_eval_scalar_internal(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cpx* freqdata,
+                          kfft_cpx* tmpbuf);
+kfft_return_t
+kfft_evali_scalar_internal(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata,
+                           kfft_cpx* tmpbuf);
