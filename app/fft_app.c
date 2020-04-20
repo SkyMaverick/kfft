@@ -34,7 +34,7 @@ display_info(void) {
     kfft_info(&info);
 
     fprintf(stdout, "%s version: %d.%d.%d\n", APP_NAME, VER_MAJOR, VER_MINOR, VER_PATCH);
-    fprintf(stdout, "LibKFFT version : %d.%d.%d\n\n", info.vmajor, info.vminor, info.vpatch);
+    fprintf(stdout, "Uses libkfft version : %d.%d.%d\n\n", info.vmajor, info.vminor, info.vpatch);
 
     fprintf(stdout, "%s - %s\n", "Enable trace messages",
             (info.flags & KFFT_INFO_TRACE) ? "YES" : "NO");

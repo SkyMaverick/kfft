@@ -154,9 +154,8 @@ kfft_eval2_scalar(kfft_sclr2_t* cfg, const kfft_scalar* fin, kfft_cpx* fout) {
     return (cfg->flags & KFFT_FLAG_INVERSE) ? KFFT_RET_IMPROPER_PLAN
                                             : kfft_2transform(cfg, fin, fout);
 }
-
 static inline kfft_return_t
-kfft_2transform_inverse(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scalar* fout) {
+kfft_2transform_inverse_normal(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scalar* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_cpx *ftps, *fbuf, *ftmp;
@@ -191,6 +190,49 @@ kfft_2transform_inverse(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scalar* fout
     }
     return ret;
 }
+static inline kfft_return_t
+kfft_2transform_inverse_memless(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scalar* fout) {
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+
+    kfft_cpx *fbuf, *ftmp;
+    ftmp = KFFT_TMP_ALLOC(2 * st->nfft * sizeof(kfft_cpx));
+
+    if (ftmp) {
+        fbuf = ftmp + st->nfft;
+
+        kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
+#pragma omp for schedule(static)
+        for (uint32_t i = 0; i < st->y; i++) {
+            uint64_t bp = st->x * i;
+            ret = kfft_eval_cpx(CPXSP(st->plan_x), &(fin[bp]), &(ftmp[bp]));
+        }
+
+        kfft_trace_2d("%s: %p\n", "Transposition matrix plan (in-place)", (void*)st);
+        kfft_math_transpose_ip_cpx(ftmp, st->x, st->y);
+
+        kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
+
+        for (uint32_t i = 0; i < st->x; i++) {
+            uint64_t bp = st->y * i;
+            ret = kfft_evali_scalar_internal(st->plan_y, &(ftmp[bp]), (&(fout[bp])), fbuf);
+        }
+        kfft_trace_2d("%s: %p\n", "Transposition matrix plan (in-place)", (void*)st);
+        kfft_math_transpose_ip_scalar(fout, st->y, st->x);
+        KFFT_TMP_FREE(ftmp);
+    } else {
+        ret = KFFT_RET_BUFFER_FAIL;
+    }
+    return ret;
+}
+
+static inline kfft_return_t
+kfft_2transform_inverse(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scalar* fout) {
+#if defined(KFFT_MEMLESS_MODE)
+    return kfft_2transform_inverse_memless(st, fin, fout);
+#else
+    return kfft_2transform_inverse_normal(st, fin, fout);
+#endif /* KFFT_MEMLESS_MODE */
+}
 
 KFFT_API kfft_return_t
 kfft_evali2_scalar(kfft_sclr2_t* cfg, const kfft_cpx* fin, kfft_scalar* fout) {
@@ -207,31 +249,45 @@ shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const u
         uint64_t bp = sz_x * i;
         kfft_shift_scalar(&(buf[bp]), sz_x, is_inverse);
     }
+    if (ftmp != NULL) {
+        kfft_trace_2d("%s\n", "Transposition matrix");
+        kfft_math_transpose_scalar(buf, ftmp, sz_x, sz_y);
 
-    kfft_trace_2d("%s\n", "Transposition matrix");
-    kfft_math_transpose_scalar(buf, ftmp, sz_x, sz_y);
-
-    kfft_trace_2d("%s\n", "Y-axes shift transform");
+        kfft_trace_2d("%s\n", "Y-axes shift transform");
 #pragma omp for schedule(static)
-    for (uint32_t i = 0; i < sz_x; i++) {
-        uint64_t bp = sz_y * i;
-        kfft_shift_scalar(&(ftmp[bp]), sz_y, is_inverse);
-    }
-    kfft_trace_2d("%s\n", "Transposition matrix");
-    kfft_math_transpose_scalar(ftmp, buf, sz_y, sz_x);
+        for (uint32_t i = 0; i < sz_x; i++) {
+            uint64_t bp = sz_y * i;
+            kfft_shift_scalar(&(ftmp[bp]), sz_y, is_inverse);
+        }
+        kfft_trace_2d("%s\n", "Transposition matrix");
+        kfft_math_transpose_scalar(ftmp, buf, sz_y, sz_x);
+    } else { /* ftmp != NULL */
+        kfft_trace_2d("%s\n", "Transposition matrix (in-place)");
+        kfft_math_transpose_ip_scalar(buf, sz_x, sz_y);
+
+        kfft_trace_2d("%s\n", "Y-axes shift transform");
+#pragma omp for schedule(static)
+        for (uint32_t i = 0; i < sz_x; i++) {
+            uint64_t bp = sz_y * i;
+            kfft_shift_scalar(&(buf[bp]), sz_y, is_inverse);
+        }
+        kfft_trace_2d("%s\n", "Transposition matrix (in-place)");
+        kfft_math_transpose_ip_scalar(buf, sz_y, sz_x);
+    } /* ftmp != NULL */
 }
 
 KFFT_API void
 kfft_shift2_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const uint32_t sz_y,
                    const bool is_inverse) {
+#if !defined(KFFT_MEMLESS_MODE)
     if (ftmp == NULL) {
         kfft_scalar* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * sz_x * sz_y);
         if (tbuf) {
             shift_internal(buf, tbuf, sz_x, sz_y, is_inverse);
             KFFT_TMP_FREE(tbuf);
         }
-    } else {
+    } else
+#endif /* KFFT_MEMLESS_MODE */
         shift_internal(buf, ftmp, sz_x, sz_y, is_inverse);
-    }
 }
 #undef kfft_trace_2d

@@ -92,8 +92,8 @@ kfft_rader_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
 }
 
     #if defined(KFFT_MEMLESS_MODE)
-        #define RAD_PRIME_IDX(i, P) kfft_math_modpow ((P)->q, i, (P)->prime)
-        #define RAD_INVERSE_IDX(i, P) kfft_math_modpow ((P)->p, i, (P)->prime)
+        #define RAD_PRIME_IDX(i, P) kfft_math_modpow((P)->q, i, (P)->prime)
+        #define RAD_INVERSE_IDX(i, P) kfft_math_modpow((P)->p, i, (P)->prime)
     #else
         #define RAD_PRIME_IDX(i, P) (P)->qidx[i]
         #define RAD_INVERSE_IDX(i, P) (P)->pidx[i]
