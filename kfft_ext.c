@@ -28,7 +28,7 @@ kfft_info(kfft_info_t* info) {
 #if defined(KFFT_MEMLESS_MODE)
     info->flags |= KFFT_INFO_MEMLESS_MODE;
 #endif
-#if defined(KFFT_MEMLESS_MODE)
+#if defined(KFFT_INFO_HALF_SCALAR)
     info->flags |= KFFT_INFO_HALF_SCALAR;
 #endif
 }
