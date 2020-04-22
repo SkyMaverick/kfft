@@ -36,6 +36,11 @@ kfft_headers = '''
     incs/kfft_trace.h
 '''.split()
 
+kfft_incdirs='''
+    .
+    ./incs
+'''.split()
+
 cc = meson.get_compiler('c')
 ccid = cc.get_id()
 ccfam = target_machine.cpu_family()
@@ -52,7 +57,7 @@ kfft_defs    = '''
 
 kfft_deps = []
 
-kfft_cfg_data = {
+kfft_config = {
     'KFFT_MAJOR_VERSION': kfft_ver[0],
     'KFFT_MINOR_VERSION': kfft_ver[1],
     'KFFT_PATCH_VERSION': kfft_ver[2],
@@ -64,7 +69,6 @@ kfft_cfg_data = {
     'KFFT_RADER_ALGO'   : get_option('enable_extended')     ,
     'KFFT_MEMLESS_MODE' : get_option('enable_memless')      ,
     'KFFT_HALF_SCALAR'  : get_option('enable_half_scalar')  ,
-    'KFFT_2D_ENABLE'    : get_option('enable_2d')           ,
 
     'KFFT_RADER_LIMIT'  : get_option('limit_rader')         ,
     'KFFT_PLAN_LEVEL'   : get_option('level_plan_max')      ,
@@ -82,7 +86,7 @@ if get_option ('enable_simd')
 
 
     if ccfam.startswith('x86')
-        kfft_cfg_data += {'KFFT_ARCH_X86': true}
+        kfft_config += {'KFFT_ARCH_X86': true}
         
         # SSE2 check support
         sse2_example = cc.run('''
@@ -97,7 +101,7 @@ if get_option ('enable_simd')
                     return 0;
                 }''', name: 'SSE2 instructions')
         if sse2_example.compiled() and (sse2_example.returncode() == 0)
-            kfft_cfg_data += {'KFFT_HAVE_SSE': true}
+            kfft_config += {'KFFT_HAVE_SSE': true}
         endif
 
         # AVX check support
@@ -113,7 +117,7 @@ if get_option ('enable_simd')
                     return 0;
                 }''', args: '-mavx', name: 'AVX instructions')
         if avx_example.compiled() and (avx_example.returncode() == 0)
-            kfft_cfg_data += {'KFFT_HAVE_AVX': true}
+            kfft_config += {'KFFT_HAVE_AVX': true}
         endif
 
         # AVX2 check support
@@ -132,12 +136,12 @@ if get_option ('enable_simd')
                 }''', args: '-mavx2', name: 'AVX2 instructions')
 
         if avx2_example.compiled() and (avx2_example.returncode() == 0)
-            kfft_cfg_data += {'KFFT_HAVE_AVX2': true}
+            kfft_config += {'KFFT_HAVE_AVX2': true}
         endif
     endif # X86 architecture
 
     if (ccfam == 'aarch64') or (ccid == 'arm')
-        kfft_cfg_data += {'KFFT_ARCH_ARM': true}
+        kfft_config += {'KFFT_ARCH_ARM': true}
         #TODO arm NEON extensions
     endif
 
@@ -169,7 +173,7 @@ if get_option ('enable_openmp')
         kfft_deps += fomp
         kfft_cflags += '-fopenmp'
 
-        kfft_cfg_data += {'KFFT_USE_OPENMP': get_option('enable_openmp')}
+        kfft_config += {'KFFT_USE_OPENMP': get_option('enable_openmp')}
     endif
 endif
 if get_option ('build_with_native')
@@ -188,11 +192,13 @@ else
     message ('No defines API')
 endif
 
-# Define configuration file
+# Add all checked extensions
+subdir('ext')
 
+# Define configuration file
 kfft_cfg = configure_file (input: 'config.h.in',
                            output: 'kfft_config.h',
-                           configuration: configuration_data(kfft_cfg_data))
+                           configuration: configuration_data(kfft_config))
 
 # Apply all argments
 
@@ -211,11 +217,6 @@ foreach item : kfft_defs
     add_project_arguments (item, language: 'c')
 endforeach
 
-kfft_idirs='''
-    .
-    ./incs
-'''.split()
-
 optimize_opts = []
 if not (get_option('buildtype') == 'debug')
     optimize_opts += [
@@ -224,11 +225,7 @@ if not (get_option('buildtype') == 'debug')
         ]
 endif
 
-if get_option('enable_2d')
-    subdir('2d')
-endif
-
-kfft_inc = include_directories (kfft_idirs)
+kfft_inc = include_directories (kfft_incdirs)
 
 # build library
 libkfft = shared_library (meson.project_name(), kfft_src,

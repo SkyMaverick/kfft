@@ -9,7 +9,7 @@ option ('enable_tests', type: 'boolean', value: 'true',
         description: 'build with tests applications')
 option ('enable_app', type: 'boolean', value: 'true',
         description: 'build with demo applications')
-option ('enable_traces', type: 'boolean', value: 'true',
+option ('enable_traces', type: 'boolean', value: 'false',
         description: 'use stdio messages in kfft lib')
 option ('enable_simd', type: 'boolean', value: 'true',
         description: 'use SIMD optimized code')
@@ -25,11 +25,11 @@ option ('enable_memless', type: 'boolean', value: 'false',
         description: 'use memory less mode (very slow)')
 option ('enable_half_scalar', type: 'boolean', value: 'false',
         description: 'use float data type without double (by default)')
-option ('enable_2d', type: 'boolean', value: 'true',
-        description: 'enable 2d-operations and optimize plans')
 option ('enable_openmp', type: 'boolean', value: 'true',
         description: 'enable openmp parallel pragmas (uses 2d and more dimensions)')
 
+option ('list_extensions', type: 'array', value: ['2d'],
+        description: 'enable extensions')
 option ('build_library_api', type : 'combo', choices: ['export', 'import', 'none'], value: 'export',
         description: 'library API type')
 
@@ -37,6 +37,5 @@ option ('limit_rader', type: 'integer', value: '6',
         description: 'barier use rader or generic algorithm')
 option ('level_plan_max', type: 'integer', value: '3',
         description: 'max reqursive subplan level')
-
 option ('level_bfly_max', type: 'integer', value: '5',
         description: 'max butterfly level')
