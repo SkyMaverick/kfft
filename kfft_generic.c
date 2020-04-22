@@ -83,8 +83,7 @@ static kfft_return_t
 kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
                 uint32_t p) {
 
-    kfft_trace_core(st->level, "[Generic] m - %d | p - %d | stride - %zu\n", m, p,
-                    fstride);
+    kfft_trace_core(st->level, "[Generic] m - %d | p - %d | stride - %zu\n", m, p, fstride);
 
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
