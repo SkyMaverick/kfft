@@ -97,7 +97,7 @@ if get_option ('enable_simd')
                     return 0;
                 }''', name: 'SSE2 instructions')
         if sse2_example.compiled() and (sse2_example.returncode() == 0)
-            kfft_cfg_data += {'KFFT_HAVE_SSE2': true}
+            kfft_cfg_data += {'KFFT_HAVE_SSE': true}
         endif
 
         # AVX check support

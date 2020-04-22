@@ -18,7 +18,7 @@
 #mesondefine KFFT_PLAN_LEVEL
 #mesondefine KFFT_BFLY_LEVEL
 
-#mesondefine KFFT_HAVE_SSE2
+#mesondefine KFFT_HAVE_SSE
 #mesondefine KFFT_HAVE_AVX
 #mesondefine KFFT_HAVE_AVX2
 

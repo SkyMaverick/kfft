@@ -9,7 +9,8 @@
 #define MAX_ROOTS 32
 
 typedef struct {
-    kfft_pool_t* mmgr;
+    kfft_pool_t* mmgr;  // allocator for internal-plan fast memory allocations
+    kfft_simd_t accel;  // CPU info for run-time select accelerations
 } kfft_object_t;
 
 typedef struct {
