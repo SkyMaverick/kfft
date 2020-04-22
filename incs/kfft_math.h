@@ -76,9 +76,9 @@
 //     #define KFFT_SIN(phase) _mm_set1_ps(sin(phase))
 //     #define HALF_OF(x) ((x)*_mm_set1_ps(.5))
 // #else
-    #define KFFT_COS(phase) (kfft_scalar) cos(phase)
-    #define KFFT_SIN(phase) (kfft_scalar) sin(phase)
-    #define HALF_OF(x) ((x)*.5)
+#define KFFT_COS(phase) (kfft_scalar) cos(phase)
+#define KFFT_SIN(phase) (kfft_scalar) sin(phase)
+#define HALF_OF(x) ((x)*.5)
 // #endif
 
 #define kf_cexp(x, phase)                                                                          \

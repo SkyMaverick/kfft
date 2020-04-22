@@ -41,21 +41,23 @@ xgetbv(unsigned int index) {
     #endif /* Win32 */
 
 static inline bool
-protect_avx(int info) {
-    return (((info & (1 << 27)) != 0) &&                           /* XSAVE && XSTORE */
-            ((info & (1 << 28)) != 0))                             /* AVX support */
+protect_avx() {
+    int info[4];
+    cpuid(info, 1);
+
+    return (((info[2] & (1 << 27)) != 0) &&                        /* XSAVE && XSTORE */
+            ((info[2] & (1 << 28)) != 0))                          /* AVX support */
                ? (xgetbv(_XCR_XFEATURE_ENABLED_MASK) & 0x6) == 0x6 /* OS support check */
                : false;
 }
 
 static inline bool
 protect_avx512(void) {
-    // WARNING!!! Check AVX/XSAVE/XSTORE support before it
-    return (xgetbv(_XCR_XFEATURE_ENABLED_MASK) & 0xe6) == 0xe6;
+    return protect_avx() ? (xgetbv(_XCR_XFEATURE_ENABLED_MASK) & 0xe6) == 0xe6 : false;
 }
 
 static uint32_t
-x86_analize(void) {
+x86_exts(void) {
     uint32_t ret = 0;
 
     int info[4];
@@ -79,16 +81,14 @@ x86_analize(void) {
         ret |= (info[2] & ((int)1 << 20)) ? HW_SSE42 : 0;
         ret |= (info[2] & ((int)1 << 25)) ? HW_AES : 0;
 
-        ret |= (info[2] & ((int)1 << 28)) ? HW_AVX : 0;
+        ret |= ((info[2] & ((int)1 << 28)) && (protect_avx())) ? HW_AVX : 0;
         ret |= (info[2] & ((int)1 << 12)) ? HW_FMA3 : 0;
 
         ret |= (info[2] & ((int)1 << 30)) ? HW_RDRAND : 0;
     }
     if (nIds >= 0x00000007) {
-        bool p_avx512 = (ret & HW_AVX) && protect_avx512();
-
         cpuid(info, 0x00000007);
-        ret |= (info[1] & ((int)1 << 5)) ? HW_AVX2 : 0;
+        ret |= ((info[1] & ((int)1 << 5)) && (protect_avx())) ? HW_AVX2 : 0;
 
         ret |= (info[1] & ((int)1 << 3)) ? HW_BMI1 : 0;
         ret |= (info[1] & ((int)1 << 8)) ? HW_BMI2 : 0;
@@ -97,15 +97,15 @@ x86_analize(void) {
         ret |= (info[1] & ((int)1 << 29)) ? HW_SHA : 0;
         ret |= (info[2] & ((int)1 << 0)) ? HW_PREFETCHWT1 : 0;
 
-        ret |= (info[1] & ((int)1 << 16)) ? HW_AVX512_F : 0;
-        ret |= (info[1] & ((int)1 << 28)) ? HW_AVX512_CD : 0;
-        ret |= (info[1] & ((int)1 << 26)) ? HW_AVX512_PF : 0;
-        ret |= (info[1] & ((int)1 << 27)) ? HW_AVX512_ER : 0;
-        ret |= (info[1] & ((int)1 << 31)) ? HW_AVX512_VL : 0;
-        ret |= (info[1] & ((int)1 << 30)) ? HW_AVX512_BW : 0;
-        ret |= (info[1] & ((int)1 << 17)) ? HW_AVX512_DQ : 0;
-        ret |= (info[1] & ((int)1 << 21)) ? HW_AVX512_IFMA : 0;
-        ret |= (info[2] & ((int)1 << 1)) ? HW_AVX512_VBMI : 0;
+        ret |= (info[1] & ((int)1 << 16)) && (protect_avx512()) ? HW_AVX512_F : 0;
+        ret |= (info[1] & ((int)1 << 28)) && (protect_avx512()) ? HW_AVX512_CD : 0;
+        ret |= (info[1] & ((int)1 << 26)) && (protect_avx512()) ? HW_AVX512_PF : 0;
+        ret |= (info[1] & ((int)1 << 27)) && (protect_avx512()) ? HW_AVX512_ER : 0;
+        ret |= (info[1] & ((int)1 << 31)) && (protect_avx512()) ? HW_AVX512_VL : 0;
+        ret |= (info[1] & ((int)1 << 30)) && (protect_avx512()) ? HW_AVX512_BW : 0;
+        ret |= (info[1] & ((int)1 << 17)) && (protect_avx512()) ? HW_AVX512_DQ : 0;
+        ret |= (info[1] & ((int)1 << 21)) && (protect_avx512()) ? HW_AVX512_IFMA : 0;
+        ret |= (info[2] & ((int)1 << 1)) && (protect_avx512()) ? HW_AVX512_VBMI : 0;
     }
     if (nExIds >= 0x80000001) {
         cpuid(info, 0x80000001);
@@ -118,15 +118,31 @@ x86_analize(void) {
     }
     return ret;
 }
+
+static uint8_t
+x86_arch(void) {
+    uint8_t ret = 0;
+    return ret;
+}
 #endif /*KFFT_ARCH_X86*/
+
+/******************************************************************************/
+
 #if defined(KFFT_ARCH_ARM)
 // TODO
-#endif
+#endif /* KFFT_ARCH_ARM */
 
 KFFT_API kfft_simd_t
 kfft_simd_analize(void) {
     kfft_simd_t S = {
-        .ext = x86_analize(),
+#if defined(KFFT_ARCH_X86)
+        .arch = x86_arch(),
+        .ext = x86_exts(),
+#elif defined(KFFT_ARCH_ARM)
+        .arch = HW_ARCH_ARM,
+#else
+        .arch = HW_ARCH_UKNW,
+#endif
     };
     return S;
 }
