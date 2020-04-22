@@ -65,6 +65,10 @@ typedef unsigned kfft_return_t;
 #include "incs/kfft_trace.h"
 #include "incs/kfft_system.h"
 
+#if defined(KFFT_USE_SIMD)
+    #include "incs/kfft_simd.h"
+#endif
+
 #include "incs/kfft_math.h"
 #include "incs/kfft_alloc.h"
 #include "incs/kfft_ext.h"

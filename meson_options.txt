@@ -11,7 +11,7 @@ option ('enable_app', type: 'boolean', value: 'true',
         description: 'build with demo applications')
 option ('enable_traces', type: 'boolean', value: 'true',
         description: 'use stdio messages in kfft lib')
-option ('enable_simd', type: 'boolean', value: 'false',
+option ('enable_simd', type: 'boolean', value: 'true',
         description: 'use SIMD optimized code')
 option ('enable_alloca', type: 'boolean', value: 'false',
         description: 'use alloca for temporary buffers (dangerouse)')

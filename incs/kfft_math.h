@@ -71,15 +71,15 @@
         (res).i -= (a).i;                                                                          \
     } while (0)
 
-#if defined(KFFT_USE_SIMD)
-    #define KFFT_COS(phase) _mm_set1_ps(cos(phase))
-    #define KFFT_SIN(phase) _mm_set1_ps(sin(phase))
-    #define HALF_OF(x) ((x)*_mm_set1_ps(.5))
-#else
+// #if defined(KFFT_USE_SIMD)
+//     #define KFFT_COS(phase) _mm_set1_ps(cos(phase))
+//     #define KFFT_SIN(phase) _mm_set1_ps(sin(phase))
+//     #define HALF_OF(x) ((x)*_mm_set1_ps(.5))
+// #else
     #define KFFT_COS(phase) (kfft_scalar) cos(phase)
     #define KFFT_SIN(phase) (kfft_scalar) sin(phase)
     #define HALF_OF(x) ((x)*.5)
-#endif
+// #endif
 
 #define kf_cexp(x, phase)                                                                          \
     do {                                                                                           \

@@ -218,11 +218,11 @@ eval_inverse_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
         C_MUL(fok, tmp, SUPER_TWIDDLE(k - 1, st) /* st->super_twiddles[k - 1] */);
         C_ADD(Fout[k], fek, fok);
         C_SUB(Fout[ncfft - k], fek, fok);
-#ifdef KFFT_USE_SIMD
-        Fout[ncfft - k].i *= _mm_set1_ps(-1.0);
-#else
+        // #ifdef KFFT_USE_SIMD
+        //         Fout[ncfft - k].i *= _mm_set1_ps(-1.0);
+        // #else
         Fout[ncfft - k].i *= -1;
-#endif
+        // #endif
     }
     return ret;
 }

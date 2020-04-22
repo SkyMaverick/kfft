@@ -1,9 +1,9 @@
 #pragma once
 
 // clang-format off
-#if defined (KFFT_USE_SIMD) && defined (NOT_XMMINTRIN_H)
-    #include <xmmintrin.h>
-    #define kfft_scalar __m128
+#if defined (KFFT_USE_SIMD)
+    #include <immintrin.h>
+//    #define kfft_scalar __m128
     
     #define KFFT_MALLOC(nbytes) _mm_malloc(nbytes, 16)
     #define KFFT_FREE _mm_free

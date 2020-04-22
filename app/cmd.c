@@ -1,3 +1,5 @@
+#include "info.c"
+
 #if defined(KFFT_2D_ENABLE)
 static int
 prepare_2d(app_mode_t* M) {

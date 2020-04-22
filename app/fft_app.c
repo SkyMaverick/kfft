@@ -28,37 +28,6 @@ typedef struct {
     uint32_t flags;
 } app_mode_t;
 
-static void
-display_info(void) {
-    kfft_info_t info;
-    kfft_info(&info);
-
-    fprintf(stdout, "%s version: %d.%d.%d\n", APP_NAME, VER_MAJOR, VER_MINOR, VER_PATCH);
-    fprintf(stdout, "Uses libkfft version : %d.%d.%d\n\n", info.vmajor, info.vminor, info.vpatch);
-
-    fprintf(stdout, "%s - %s\n", "Enable trace messages",
-            (info.flags & KFFT_INFO_TRACE) ? "YES" : "NO");
-    fprintf(stdout, "%s - %s\n", "Enable use SIMD instructions",
-            (info.flags & KFFT_INFO_USE_SIMD) ? "YES" : "NO");
-    fprintf(stdout, "%s - %s\n", "Enable use alloca() function",
-            (info.flags & KFFT_INFO_USE_ALLOCA) ? "YES" : "NO");
-    fprintf(stdout, "%s - %s\n", "Enable use system math functions",
-            (info.flags & KFFT_INFO_USE_SYSMATH) ? "YES" : "NO");
-    fprintf(stdout, "%s - %s\n", "Enable use OpenMP functions",
-            (info.flags & KFFT_INFO_USE_OPENMP) ? "YES" : "NO");
-    fprintf(stdout, "%s - %s\n", "Enable use Rader algoritm",
-            (info.flags & KFFT_INFO_RADER_ALGO) ? "YES" : "NO");
-    fprintf(stdout, "%s - %s\n", "Enable lesser memory mode",
-            (info.flags & KFFT_INFO_MEMLESS_MODE) ? "YES" : "NO");
-    fprintf(stdout, "%s - %s\n", "Enable half scalar mode",
-            (info.flags & KFFT_INFO_HALF_SCALAR) ? "YES" : "NO");
-}
-
-static void
-display_help(void) {
-    fprintf(stdout, "%s", help_msg);
-}
-
 static size_t
 parse_buffer(void** out, char* buf, bool as_cpx) {
     char* args = buf;
