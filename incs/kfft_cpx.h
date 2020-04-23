@@ -10,7 +10,9 @@
 
 typedef struct {
     kfft_pool_t* mmgr; // allocator for internal-plan fast memory allocations
+#if defined(KFFT_USE_SIMD)
     kfft_simd_t accel; // CPU info for run-time select accelerations
+#endif
 } kfft_object_t;
 
 typedef struct {

@@ -3,8 +3,8 @@
 #if defined(KFFT_RADER_ALGO)
 
 static inline kfft_return_t
-rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
-                  uint32_t u, uint32_t m, uint32_t p) {
+FUNC_SSE(rader_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride,
+                            const kfft_comp_t* st, uint32_t u, uint32_t m, uint32_t p) {
 
     //    (void)fstride; // disable unused parameter
     kfft_return_t ret = KFFT_RET_SUCCESS;
@@ -51,8 +51,8 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
 #endif /* KFFT_RADER_ALGO */
 
 static inline int
-std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
-                uint32_t u, uint32_t m, uint32_t p) {
+FUNC_SSE(std_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride,
+                          const kfft_comp_t* st, uint32_t u, uint32_t m, uint32_t p) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     //
     //    uint32_t k = u, q1, q;
@@ -80,12 +80,12 @@ std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft
 }
 
 static kfft_return_t
-kf_bfly_generic_sse(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
-                    uint32_t p) {
+FUNC_SSE(kf_bfly_generic)(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
+                          uint32_t p) {
 
     kfft_trace_core(st->level, "[Generic (SSE)] m - %d | p - %d | stride - %zu\n", m, p, fstride);
 
-    //    kfft_return_t ret = KFFT_RET_SUCCESS;
+    kfft_return_t ret = KFFT_RET_SUCCESS;
     //
     //    kfft_cpx* scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * p);
     //    if (scratch) {

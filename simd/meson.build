@@ -74,6 +74,18 @@ if (ccfam == 'aarch64') or (ccid == 'arm')
     #TODO arm NEON extensions
 endif
 
-kfft_src += 'simd/kfft_simd.c'
-kfft_headers += 'simd/kfft_simd.h'
-kfft_incdirs += './simd'
+kfft_src += '''
+    simd/kfft_simd.c
+    simd/kfft_simd_check.c
+'''.split()
+
+kfft_headers += '''
+    simd/kfft_simd.h
+    simd/kfft_simd_check.h
+'''.split()
+kfft_incdirs += '''
+    ./simd
+    ./simd/sse
+    ./simd/avx
+    ./simd/avx2
+'''.split()

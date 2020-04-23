@@ -1,9 +1,7 @@
-#include "kfft.h"
-
 #if defined(KFFT_RADER_ALGO)
 // WARNING in kfft num - always prime. Don't check this
 uint32_t
-kfft_math_prmn(uint32_t num) {
+FUNC_SSE(kfft_math_prmn)(uint32_t num) {
     uint32_t phi = num - 1;
     uint32_t n = phi;
 
@@ -23,7 +21,7 @@ kfft_math_prmn(uint32_t num) {
     for (uint32_t res = 2; res <= num; ++res) {
         bool ok = true;
         for (uint32_t i = 0; count > i && ok; ++i) {
-            if (kfft_math_modpow(res, phi / primes[i], num) == 1)
+            if (FUNC_SSE(kfft_math_modpow)(res, phi / primes[i], num) == 1)
                 ok = false;
         }
         if (ok)
@@ -33,14 +31,14 @@ kfft_math_prmn(uint32_t num) {
 }
 
 uint32_t
-kfft_math_prmni(uint32_t a, uint32_t m) {
-    return (kfft_math_gcd(a, m) != 1) ? 0 : kfft_math_modpow(a, m - 2, m);
+FUNC_SSE(kfft_math_prmni)(uint32_t a, uint32_t m) {
+    return (FUNC_SSE(kfft_math_gcd)(a, m) != 1) ? 0 : FUNC_SSE(kfft_math_modpow)(a, m - 2, m);
 }
 
 #endif /* KFFT_RADER_ALGO */
 
 void
-kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
+FUNC_SSE(kfft_math_adamar_cpx)(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
     // FIXME Now primitive algorithm
     kfft_cpx tmp;
     for (uint32_t i = 0; i < size; i++) {
@@ -50,7 +48,8 @@ kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
 }
 
 void
-kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, const uint32_t y) {
+FUNC_SSE(kfft_math_transpose_cpx)(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x,
+                                  const uint32_t y) {
     for (uint64_t n = 0; n < x * y; n++) {
         uint32_t i = n / y;
         uint32_t j = n % y;
@@ -58,8 +57,8 @@ kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, c
     }
 }
 void
-kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint32_t x,
-                           const uint32_t y) {
+FUNC_SSE(kfft_math_transpose_scalar)(const kfft_scalar* Fin, kfft_scalar* Fout, const uint32_t x,
+                                     const uint32_t y) {
     for (uint64_t n = 0; n < x * y; n++) {
         uint32_t i = n / y;
         uint32_t j = n % y;
@@ -68,7 +67,7 @@ kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint
 }
 
 void
-kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y) {
+FUNC_SSE(kfft_math_transpose_ip_cpx)(kfft_cpx* Fin, const uint32_t x, const uint32_t y) {
     uint32_t r = y;
     uint32_t c = x;
 
@@ -90,7 +89,7 @@ kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y) {
     }
 }
 void
-kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t y) {
+FUNC_SSE(kfft_math_transpose_ip_scalar)(kfft_scalar* Fin, const uint32_t x, const uint32_t y) {
     uint32_t c = x, r = y;
 
     if (r <= 1 || c <= 1)

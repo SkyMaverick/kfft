@@ -1,7 +1,5 @@
-#include "kfft_sse_defs.h"
-
 static inline void
-__FNSSE(kf_bfly2, (kfft_cpx * Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m)) {
+FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY2 (SSE)] fstride - %u | m - %u\n", fstride, m);
     //    kfft_cpx* Fout2;
     //    uint32_t twidx = 0;
@@ -18,7 +16,8 @@ __FNSSE(kf_bfly2, (kfft_cpx * Fout, const uint32_t fstride, const kfft_comp_t* s
 }
 
 static inline void
-kf_bfly4_sse(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, const uint32_t m) {
+FUNC_SSE(kf_bfly4)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st,
+                   const uint32_t m) {
     kfft_trace_core(st->level, "[BFLY4 (SSE)] fstride - %u | m - %u\n", fstride, m);
     //    uint32_t tw1, tw2, tw3;
     //    kfft_cpx scratch[6];
@@ -55,13 +54,11 @@ kf_bfly4_sse(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, cons
     //            Fout[m3].i = scratch[5].i + scratch[4].r;
     //        }
     //        ++Fout;
-}
-while (--k)
-    ;
+    //  } while (--k);
 }
 
 static inline void
-kf_bfly3_sse(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
+FUNC_SSE(kf_bfly3)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY3 (SSE)] fstride - %u | m - %u\n", fstride, m);
     //    uint32_t k = m;
     //    const uint32_t m2 = 2 * m;
@@ -99,7 +96,7 @@ kf_bfly3_sse(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint
 }
 
 static inline void
-kf_bfly5_sse(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
+FUNC_SSE(kf_bfly5)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY5 (SSE)] fstride - %u | m - %u\n", fstride, m);
     //    kfft_cpx *Fout0, *Fout1, *Fout2, *Fout3, *Fout4;
     //    uint32_t u;
@@ -152,5 +149,5 @@ kf_bfly5_sse(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint
     //        ++Fout2;
     //        ++Fout3;
     //        ++Fout4;
-}
+    //  }
 }
