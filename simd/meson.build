@@ -9,54 +9,62 @@ endif
 if ccfam.startswith('x86')
     kfft_config += {'KFFT_ARCH_X86': true}
     
-    # SSE2 check support
-    sse2_example = cc.run('''
+# SSE check support
+    if cc.compiles('''
             #include <immintrin.h>
             int main () {
-                double a[1],b[1],x;
-                __m128d *av,*bv,xr;
-
-                av = (__m128d*)a;
-                bv = (__m128d*)b;
-                xr = _mm_set1_pd(x);
+                float x; __m128 xr;
+                xr = _mm_set1_ps(x);
                 return 0;
-            }''', name: 'SSE2 instructions')
-    if sse2_example.compiled() and (sse2_example.returncode() == 0)
+            }''', name: 'SSE instructions')
+
         kfft_config += {'KFFT_HAVE_SSE': true}
     endif
 
-    # AVX check support
-    avx_example = cc.run('''
+# SSE2 check support
+    if cc.compiles('''
             #include <immintrin.h>
             int main () {
-                double a[1],b[1],x;
-                __m256d *av,*bv,xr;
+                double x; __m128d xr;
+                xr = _mm_set1_pd(x);
+                return 0;
+            }''', name: 'SSE2 instructions')
+        kfft_config += {'KFFT_HAVE_SSE2': true}
+    endif
 
-                av = (__m256d*)a;
-                bv = (__m256d*)b;
+# SSE3 check support
+    if cc.compiles('''
+            #include <immintrin.h>
+            int main () {
+                double x = 1; __m128d xr;
+                xr = _mm_loaddup_pd(&x);
+                return 0;
+            }''', args: '-msse3', name: 'SSE3 instructions')
+        kfft_config += {'KFFT_HAVE_SSE3': true}
+    endif
+
+# AVX check support
+    if cc.compiles('''
+            #include <immintrin.h>
+            int main () {
+                double x; __m256d xr;
                 xr = _mm256_set1_pd(x);
                 return 0;
             }''', args: '-mavx', name: 'AVX instructions')
-    if avx_example.compiled() and (avx_example.returncode() == 0)
         kfft_config += {'KFFT_HAVE_AVX': true}
     endif
 
-    # AVX2 check support
-    avx2_example = cc.run('''
+# AVX2 check support
+    if cc.compiles('''
             #include <immintrin.h>
-            #include <inttypes.h>
-
             int main () {
-                unsigned a = 1, b = 1;
+                unsigned a = 1,b = 1;
                 __m256i av,bv,xr;
-
                 av = _mm256_set1_epi32(a);
                 bv = _mm256_set1_epi32(b);
                 xr = _mm256_xor_si256(av, bv);
                 return 0;
             }''', args: '-mavx2', name: 'AVX2 instructions')
-
-    if avx2_example.compiled() and (avx2_example.returncode() == 0)
         kfft_config += {'KFFT_HAVE_AVX2': true}
     endif
 endif # X86 architecture
