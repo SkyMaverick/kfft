@@ -30,6 +30,9 @@ option ('enable_openmp', type: 'boolean', value: 'true',
 
 option ('list_extensions', type: 'array', value: ['2d'],
         description: 'enable extensions')
+option ('list_vex86', type: 'array', choices: ['sse2', 'avx', 'avx2'], value: ['sse2'],
+        description: 'enable vector extensioins support')
+
 option ('build_library_api', type : 'combo', choices: ['export', 'import', 'none'], value: 'export',
         description: 'library API type')
 

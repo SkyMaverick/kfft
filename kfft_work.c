@@ -6,7 +6,7 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
 
     kfft_cpx* Fout_beg = Fout;
     if (st->flags & KFFT_FLAG_GENERIC_ONLY) {
-        ret = kf_bfly_generic(Fout, 1, st, 1, st->nfft);
+        ret = VEXFUNC(st, kf_bfly_generic, Fout, 1, st, 1, st->nfft);
     } else {
         const uint32_t p = *factors++; /* the radix  */
         const uint32_t m = *factors++; /* stage's fft length/p */

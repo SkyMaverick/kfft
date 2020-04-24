@@ -27,14 +27,12 @@
 
 #mesondefine KFFT_HAVE_AVX
 #if defined (KFFT_HAVE_AVX)
-//TODO Temporary disable for SSE testing
-//    #define KFFT_SIMD_AVX_SUPPORT
+    #define KFFT_SIMD_AVX_SUPPORT
 #endif
 
 #mesondefine KFFT_HAVE_AVX2
 #if defined (KFFT_HAVE_AVX2)
-//TODO Temporary disable for SSE testing
-//    #define KFFT_SIMD_AVX2_SUPPORT
+    #define KFFT_SIMD_AVX2_SUPPORT
 #endif
 
 #mesondefine KFFT_ARCH_X86

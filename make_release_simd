@@ -8,4 +8,10 @@ if [ -d ${BUILD_DIR} ]; then
         ninja -C ${BUILD_DIR} && exit 
     fi
 fi
-meson . ${BUILD_DIR} -Dbuildtype=release -Denable_simd=true && ninja -C ${BUILD_DIR}
+meson . ${BUILD_DIR} \
+    -Dbuildtype=release \
+    -Dbuild_with_lto=true \
+    -Dbuild_with_pgo=true \
+    -Denable_traces=false \
+    -Denable_simd=true \
+&& ninja -C ${BUILD_DIR}
