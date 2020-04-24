@@ -6,7 +6,14 @@ static inline kfft_return_t
 FUNC_SSE(rader_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride,
                             const kfft_comp_t* st, uint32_t u, uint32_t m, uint32_t p) {
 
-    //    (void)fstride; // disable unused parameter
+    KFFT_UNUSED_VAR(Fout);
+    KFFT_UNUSED_VAR(Ftmp);
+    KFFT_UNUSED_VAR(fstride);
+    KFFT_UNUSED_VAR(st);
+    KFFT_UNUSED_VAR(u);
+    KFFT_UNUSED_VAR(m);
+    KFFT_UNUSED_VAR(p);
+
     kfft_return_t ret = KFFT_RET_SUCCESS;
     //
     //    uint32_t k = u, q1, idx;
@@ -53,6 +60,14 @@ FUNC_SSE(rader_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride
 static inline int
 FUNC_SSE(std_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride,
                           const kfft_comp_t* st, uint32_t u, uint32_t m, uint32_t p) {
+    KFFT_UNUSED_VAR(Fout);
+    KFFT_UNUSED_VAR(Ftmp);
+    KFFT_UNUSED_VAR(fstride);
+    KFFT_UNUSED_VAR(st);
+    KFFT_UNUSED_VAR(u);
+    KFFT_UNUSED_VAR(m);
+    KFFT_UNUSED_VAR(p);
+
     kfft_return_t ret = KFFT_RET_SUCCESS;
     //
     //    uint32_t k = u, q1, q;
@@ -84,6 +99,12 @@ FUNC_SSE(kf_bfly_generic)(kfft_cpx* Fout, const size_t fstride, const kfft_comp_
                           uint32_t p) {
 
     kfft_trace_core(st->level, "[Generic (SSE)] m - %d | p - %d | stride - %zu\n", m, p, fstride);
+
+    KFFT_UNUSED_VAR(Fout);
+    KFFT_UNUSED_VAR(fstride);
+    KFFT_UNUSED_VAR(st);
+    KFFT_UNUSED_VAR(m);
+    KFFT_UNUSED_VAR(p);
 
     kfft_return_t ret = KFFT_RET_SUCCESS;
     //

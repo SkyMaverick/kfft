@@ -136,3 +136,5 @@
 #else
     #define KFFT_API
 #endif
+
+#define KFFT_UNUSED_VAR(X) (void)(X)

@@ -1,18 +1,24 @@
 #pragma once
 
-// clang-format off
-#if defined (KFFT_USE_SIMD)
+#if defined(KFFT_USE_SIMD)
     #include <immintrin.h>
-//    #define kfft_scalar __m128
-    
-    #define KFFT_MALLOC(nbytes) _mm_malloc(nbytes, 16)
-    #define KFFT_FREE _mm_free
+    #if (defined(KFFT_SIMD_AVX2) || defined(KFFT_SIMD_AVX))
+        #define KFFT_MEMALIGN_SIZE 32
+    #else
+        #define KFFT_MEMALIGN_SIZE 16
+    #endif
+    #if defined(_WIN32)
+        #define KFFT_MALLOC(X) _aligned_alloc(KFFT_MEMALIGN_SIZE, (X))
+        #define KFFT_FREE(X) _aligned_free(X)
+    #else
+        #define KFFT_MALLOC(X) aligned_alloc(KFFT_MEMALIGN_SIZE, (X))
+        #define KFFT_FREE(X) free(X)
+    #endif
 #else
-    #define KFFT_MALLOC(X) calloc(1,(X))
+    #define KFFT_MALLOC(X) calloc(1, (X))
     #define KFFT_FREE(X) free(X)
 #endif
-#define KFFT_ZEROMEM(M,X)  memset((M),0,(X))
-// clang-format on
+#define KFFT_ZEROMEM(M, X) memset((M), 0, (X))
 
 #define KFFT_FREE_NULL(X)                                                                          \
     do {                                                                                           \
