@@ -75,7 +75,6 @@ if (ccfam == 'aarch64') or (ccid == 'arm')
 endif
 
 kfft_src += '''
-    simd/kfft_simd.c
     simd/kfft_simd_check.c
 '''.split()
 

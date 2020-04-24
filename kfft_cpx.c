@@ -105,11 +105,15 @@ kfft_rader_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
     Inline needed source modules for transformation .
     Select SIMD files HERE //TODO
  */
+#if defined(KFFT_USE_SIMD)
+    #include "kfft_simd.c"
+#endif
 
 #include "kfft_conv.c"    /* Complex sequenses convolution */
 #include "kfft_bfly.c"    /* Butterfly transformations (Cooley - Tukey)*/
 #include "kfft_generic.c" /* Generic or Rader algorithm for prime-size lengt sequences*/
-#include "kfft_work.c"    /* Main work recursive procedure */
+
+#include "kfft_work.c" /* Main work recursive procedure */
 
 /*  facbuf is populated by p1,m1,p2,m2, ...
     where
@@ -315,6 +319,9 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
     memcpy(st, &tmp, sizeof(kfft_comp_t));
 
     st->object.mmgr = mmgr;
+#if defined(KFFT_USE_SIMD)
+    st->object.accel = kfft_simd_analize();
+#endif
 
 #if !defined(KFFT_MEMLESS_MODE)
     st->twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);

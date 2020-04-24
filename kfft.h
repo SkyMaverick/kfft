@@ -67,6 +67,32 @@ typedef unsigned kfft_return_t;
 
 #if defined(KFFT_USE_SIMD)
     #include "kfft_simd.h"
+
+    #define __ACCST(S) ((kfft_object_t*)(S))->accel.ext
+// clang-format off
+    #if defined(KFFT_SIMD_AVX2_SUPPORT)
+        #define ACCELIT(S, F, ...)                                             \
+            (__ACCST((S)) & HW_AVX2) ? FUNC_AVX2(F)(__VA_ARGS__) :             \
+            (__ACCST((S)) & HW_AVX)  ? FUNC_AVX(F)(__VA_ARGS__)  :             \
+            (__ACCST((S)) & (HW_SSE | HW_SSE2)) ? FUNC_SSE(F)(__VA_ARGS__) :   \
+            F(__VA_ARGS__)
+    #elif defined(KFFT_SIMD_AVX_SUPPORT)
+        #define ACCELIT(S, F, ...)                                             \
+            (__ACCST((S)) & HW_AVX)  ? FUNC_AVX(F)(__VA_ARGS__)  :             \
+            (__ACCST((S)) & (HW_SSE | HW_SSE2)) ? FUNC_SSE(F)(__VA_ARGS__) :   \
+            F(__VA_ARGS__)
+    #elif defined(KFFT_SIMD_SSE_SUPPORT)
+        #define ACCELIT(S, F, ...)                                             \
+            (__ACCST((S)) & (HW_SSE | HW_SSE2)) ? FUNC_SSE(F)(__VA_ARGS__) :   \
+            F(__VA_ARGS__)
+    #else
+        #define ACCELIT(S, F, ...)                                             \
+            F(__VA_ARGS__)
+    #endif
+// clang-format on
+
+#else
+    #define ACCELIT(S, F, ...) F(__VA_ARGS__)
 #endif
 
 #include "incs/kfft_math.h"
