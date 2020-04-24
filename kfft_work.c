@@ -39,19 +39,19 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
         // recombine the p smaller DFTs
         switch (p) {
         case 2:
-            ACCELIT(st, kf_bfly2, Fout, fstride, st, m);
+            VEXFUNC(st, kf_bfly2, Fout, fstride, st, m);
             break;
         case 3:
-            ACCELIT(st, kf_bfly3, Fout, fstride, st, m);
+            VEXFUNC(st, kf_bfly3, Fout, fstride, st, m);
             break;
         case 4:
-            ACCELIT(st, kf_bfly4, Fout, fstride, st, m);
+            VEXFUNC(st, kf_bfly4, Fout, fstride, st, m);
             break;
         case 5:
-            ACCELIT(st, kf_bfly5, Fout, fstride, st, m);
+            VEXFUNC(st, kf_bfly5, Fout, fstride, st, m);
             break;
         default:
-            ret = ACCELIT(st, kf_bfly_generic, Fout, fstride, st, m, p);
+            ret = VEXFUNC(st, kf_bfly_generic, Fout, fstride, st, m, p);
             break;
         }
     }

@@ -320,7 +320,7 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
 
     st->object.mmgr = mmgr;
 #if defined(KFFT_USE_SIMD)
-    st->object.accel = kfft_simd_analize();
+    st->object.vex = kfft_simd_analize();
 #endif
 
 #if !defined(KFFT_MEMLESS_MODE)
