@@ -1,19 +1,29 @@
 static inline void
 FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY2 (SSE)] fstride - %u | m - %u\n", fstride, m);
-    KFFT_UNUSED_VAR(Fout);
-    KFFT_UNUSED_VAR(fstride);
-    KFFT_UNUSED_VAR(st);
-    KFFT_UNUSED_VAR(m);
-    //    kfft_cpx* Fout2;
-    //    uint32_t twidx = 0;
-    //    kfft_cpx t;
-    //    Fout2 = Fout + m;
+
+    kfft_cpx* Fout2;
+    uint32_t twidx = 0;
+    kfft_cpx t;
+    Fout2 = Fout + m;
+    do {
+#if defined(KFFT_HALF_SCALAR)
+        // if scalar - FLOAT
+        kfft_cpx tw = TWIDDLE(twidx, st);
+
+        __m128 f = __mm_load_ps(*Fout2.r, *Fout2.i, tw.r, tw.i);
+#else
+        // if scalar - DOUBLE
+#endif
+        twidx += fstride;
+        ++Fout2;
+        ++Fout;
+    } while (--m);
     //    do {
     //        C_MUL(t, *Fout2, TWIDDLE(twidx, st));
-    //        twidx += fstride;
     //        C_SUB(*Fout2, *Fout, t);
     //        C_ADDTO(*Fout, t);
+    //        twidx += fstride;
     //        ++Fout2;
     //        ++Fout;
     //    } while (--m);
