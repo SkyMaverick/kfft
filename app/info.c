@@ -60,10 +60,31 @@ display_simd(void) {
     if (kfft_simd_check(s_info, HW_AVX512_IFMA)) fprintf (stdout, " | %s", "AVX512_IFMA");
     if (kfft_simd_check(s_info, HW_AVX512_VBMI)) fprintf (stdout, " | %s", "AVX512_VBMI");
     // clang-format on
-    fprintf(stdout, "%s\n", "");
     #elif defined(KFFT_ARCH_ARM)
         // TODO
     #endif /* ARCH_X86 */
+    fprintf(stdout, "\n%s:\n", "Build with CPU extensions");
+    fprintf(stdout, "%s - %s\n", "Enable SSE support",
+    #if defined(KFFT_SIMD_SSE_SUPPORT)
+            "YES"
+    #else
+            "NO"
+    #endif
+    );
+    fprintf(stdout, "%s - %s\n", "Enable AVX support",
+    #if defined(KFFT_SIMD_AVX_SUPPORT)
+            "YES"
+    #else
+            "NO"
+    #endif
+    );
+    fprintf(stdout, "%s - %s\n", "Enable AVX2 support",
+    #if defined(KFFT_SIMD_AVX2_SUPPORT)
+            "YES"
+    #else
+            "NO"
+    #endif
+    );
 }
 #endif /* KFFT_USE_SIMD */
 
