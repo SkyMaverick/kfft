@@ -68,25 +68,25 @@ typedef unsigned kfft_return_t;
 #if defined(KFFT_USE_SIMD)
     #include "kfft_simd.h"
 
-    #define __VEXST(S) ((kfft_object_t*)(S))->vex.ext
+    #define __VEXST(S) ((kfft_object_t*)(S))->vex
 // clang-format off
     #if defined(KFFT_SIMD_AVX2_SUPPORT)
-        #define VEXFUNC(S, F, ...)                                             \
-            (__VEXST((S)) & HW_AVX2) ? FUNC_AVX2(F)(__VA_ARGS__) :             \
-            (__VEXST((S)) & HW_AVX)  ? FUNC_AVX(F)(__VA_ARGS__)  :             \
-            (__VEXST((S)) & (HW_SSE | HW_SSE2)) ? FUNC_SSE(F)(__VA_ARGS__) :   \
+        #define VEXFUNC(S, F, ...)                                                              \
+            ( kfft_simd_check(__VEXST((S)),HW_AVX2) )            ? FUNC_AVX2(F)(__VA_ARGS__) :  \
+            ( kfft_simd_check(__VEXST((S)),HW_AVX) )             ? FUNC_AVX (F)(__VA_ARGS__) :  \
+            ( kfft_simd_check(__VEXST((S)),(HW_SSE | HW_SSE2)) ) ? FUNC_SSE (F)(__VA_ARGS__) :  \
             F(__VA_ARGS__)
     #elif defined(KFFT_SIMD_AVX_SUPPORT)
-        #define VEXFUNC(S, F, ...)                                             \
-            (__VEXST((S)) & HW_AVX)  ? FUNC_AVX(F)(__VA_ARGS__)  :             \
-            (__VEXST((S)) & (HW_SSE | HW_SSE2)) ? FUNC_SSE(F)(__VA_ARGS__) :   \
+        #define VEXFUNC(S, F, ...)                                                              \
+            ( kfft_simd_check(__VEXST((S)),HW_AVX) )             ? FUNC_AVX (F)(__VA_ARGS__) :  \
+            ( kfft_simd_check(__VEXST((S)),(HW_SSE | HW_SSE2)) ) ? FUNC_SSE (F)(__VA_ARGS__) :  \
             F(__VA_ARGS__)
     #elif defined(KFFT_SIMD_SSE_SUPPORT)
-        #define VEXFUNC(S, F, ...)                                             \
-            (__VEXST((S)) & (HW_SSE | HW_SSE2)) ? FUNC_SSE(F)(__VA_ARGS__) :   \
+        #define VEXFUNC(S, F, ...)                                                              \
+            ( kfft_simd_check(__VEXST((S)),(HW_SSE | HW_SSE2)) ) ? FUNC_SSE (F)(__VA_ARGS__) :  \
             F(__VA_ARGS__)
     #else
-        #define VEXFUNC(S, F, ...)                                             \
+        #define VEXFUNC(S, F, ...)                                                              \
             F(__VA_ARGS__)
     #endif
 // clang-format on
