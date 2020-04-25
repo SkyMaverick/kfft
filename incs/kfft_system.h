@@ -7,7 +7,7 @@
     #else
         #define KFFT_MEMALIGN_SIZE 16
     #endif
-    #if defined(_WIN32)
+    #if defined(KFFT_OS_WINDOWS)
         #define KFFT_MALLOC(X) _aligned_alloc(KFFT_MEMALIGN_SIZE, (X))
         #define KFFT_FREE(X) _aligned_free(X)
     #else

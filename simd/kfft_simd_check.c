@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 #if defined(KFFT_ARCH_X86)
-    #ifdef _WIN32
+    #ifdef KFFT_OS_WINDOWS
         #define cpuid(info, x) __cpuidex(info, x, 0)
 static inline __int64
 xgetbv(unsigned int x) {
