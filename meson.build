@@ -62,7 +62,8 @@ kfft_config = {
     'KFFT_PATCH_VERSION': kfft_ver[2],
 
     'KFFT_TRACE'        : get_option('enable_traces')       ,
-    'KFFT_USE_SIMD'     : get_option('enable_simd')         ,
+    'KFFT_USE_SIMD'     : get_option('enable_simd') and
+                          (not get_option('enable_half_scalar')),
     'KFFT_USE_ALLOCA'   : get_option('enable_alloca')       ,
     'KFFT_USE_SYSMATH'  : get_option('enable_sysmath')      ,
     'KFFT_RADER_ALGO'   : get_option('enable_extended')     ,
@@ -75,7 +76,7 @@ kfft_config = {
 }
 
 # Validate system depends
-if get_option ('enable_simd')
+if get_option('enable_simd') and (not get_option('enable_half_scalar'))
     subdir('simd')
 endif # Enable SIMD
 if get_option ('enable_sysmath')

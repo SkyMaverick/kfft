@@ -10,18 +10,6 @@ if ccfam.startswith('x86')
     kfft_config += {'KFFT_ARCH_X86': true}
     
     if get_option('list_vex86').contains('sse2')
-    # SSE check support
-        if cc.compiles('''
-                #include <immintrin.h>
-                int main () {
-                    float x; __m128 xr;
-                    xr = _mm_set1_ps(x);
-                    return 0;
-                }''', name: 'SSE instructions')
-
-            kfft_config += {'KFFT_HAVE_SSE': true}
-        endif
-
     # SSE2 check support
         if cc.compiles('''
                 #include <immintrin.h>
