@@ -9,13 +9,19 @@ FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
     uint32_t twidx = 0;
     do {
         __m128d t;
-        kfft_cpx tw = TWIDDLE(twidx, st);
-
-        __m128d mtw = _mm_load_pd((double*)&tw);
         __m128d mf = _mm_load_pd((double*)Fout);
         __m128d mf2 = _mm_load_pd((double*)Fout2);
 
+        kfft_cpx tw = TWIDDLE(twidx, st);
+#if defined(KFFT_HAVE_SSE3)
+        __m128d mtw = _mm_loaddup_pd(&(tw.r));
+        t = _mm_loaddup_pd(&(tw.i));
+        C_MULDUP_SSE(t, mf2, mtw);
+#else
+        __m128d mtw = _mm_load_pd((double*)&tw);
         C_MUL_SSE(t, mf2, mtw);
+#endif /* HAVE_SSE3 */
+
         C_SUB_SSE(mf2, mf, t);
         C_ADD_SSE(mf, mf, t);
 
