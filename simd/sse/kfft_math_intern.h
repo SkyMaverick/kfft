@@ -1,7 +1,5 @@
 #pragma once
 
-#include "kfft_math_sse.h"
-
 #ifdef KFFT_USE_SYSMATH
     #include <math.h>
 #endif
@@ -14,8 +12,44 @@
    C_SUBFROM( res , a)  : res -= a
    C_ADDTO( res , a)    : res += a
  * */
-#if defined(KFFT_HALF_SCALAR)
-// TODO
-#else
-// TODO
-#endif
+#define C_ADD_SSE(M, A, B) M = _mm_add_pd(A, B)
+#define C_SUB_SSE(M, A, B) M = _mm_sub_pd(A, B)
+
+/* Split optional SSE3 functionality */
+
+#if defined(KFFT_HAVE_SSE3)
+    /* C_MULDUP_SSE use for A,B loaded with _mm_loaddup_pd() func */
+    #define C_MULDUP_SSE(M, A, B)                                                                  \
+        do {                                                                                       \
+            __m128d Tmds = _mm_move_sd(B, B);                                                      \
+            Tmds = _mm_mul_pd(Tmds, A);                                                            \
+            M = _mm_mul_pd(M, A);                                                                  \
+            M = _mm_shuffle_pd(M, M, 0x1);                                                         \
+            M = _mm_addsub_pd(Tmds, M);                                                            \
+        } while (0)
+
+    #define C_MUL_SSE(M, A, B)                                                                     \
+        do {                                                                                       \
+            __m128d Tms = _mm_move_sd(B, B);                                                       \
+            M = _mm_move_sd(B, B);                                                                 \
+            Tms = _mm_unpacklo_pd(Tms, Tms);                                                       \
+            M = _mm_unpackhi_pd(M, M);                                                             \
+            C_MULDUP_SSE(M, A, Tms);                                                               \
+        } while (0)
+
+#else /* KFFT_HAVE_SSE3 */
+    #define C_MUL_SSE(M, A, B)                                                                     \
+        do {                                                                                       \
+            __m128d INVms = {1, -1};                                                               \
+            __m128d Tms = _mm_move_sd(B, B);                                                       \
+            M = _mm_move_sd(B, B);                                                                 \
+            Tms = _mm_unpacklo_pd(Tms, Tms);                                                       \
+            M = _mm_unpackhi_pd(M, M);                                                             \
+            Tms = _mm_mul_pd(Tms, A);                                                              \
+            M = _mm_mul_pd(M, A);                                                                  \
+            M = _mm_mul_pd(M, INVms);                                                              \
+            M = _mm_shuffle_pd(M, M, 0x1);                                                         \
+            M = _mm_add_pd(M, Tms);                                                                \
+        } while (0)
+
+#endif /* KFFT_HAVE_SSE3 */

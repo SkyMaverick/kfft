@@ -1,3 +1,6 @@
+#include "kfft_simd.h"
+#include "kfft_math_intern.h"
+
 static inline void
 FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY2 (SSE)] fstride - %u | m - %u\n", fstride, m);
@@ -5,25 +8,24 @@ FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
     kfft_cpx* Fout2 = Fout + m;
     uint32_t twidx = 0;
     do {
-        // if scalar - FLOAT
+        __m128d t;
         kfft_cpx tw = TWIDDLE(twidx, st);
-        __m128 fi = _mm_set_ps(Fout->r, Fout->i, Fout->r, Fout->i);
-        __m128 ft = _mm_mul_ps( _mm_set_ps(Fout2->r, Fout2->i, tw.r, tw.i),
-                                _mm_set_ps(tw.r, tw.i, Fout2->i, Fout2->r));
-//        __m128 ftmp = _mm_add_ps
+
+        __m128d mtw = _mm_load_pd((double*)&tw);
+        __m128d mf = _mm_load_pd((double*)Fout);
+        __m128d mf2 = _mm_load_pd((double*)Fout2);
+
+        C_MUL_SSE(t, mf2, mtw);
+        C_SUB_SSE(mf2, mf, t);
+        C_ADD_SSE(mf, mf, t);
+
+        _mm_store_pd((double*)Fout2, mf2);
+        _mm_store_pd((double*)Fout, mf);
 
         twidx += fstride;
         ++Fout2;
         ++Fout;
     } while (--m);
-    //    do {
-    //        C_MUL(t, *Fout2, TWIDDLE(twidx, st));
-    //        C_SUB(*Fout2, *Fout, t);
-    //        C_ADDTO(*Fout, t);
-    //        twidx += fstride;
-    //        ++Fout2;
-    //        ++Fout;
-    //    } while (--m);
 }
 
 static inline void

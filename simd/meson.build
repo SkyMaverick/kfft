@@ -9,7 +9,7 @@ endif
 if ccfam.startswith('x86')
     kfft_config += {'KFFT_ARCH_X86': true}
     
-    if get_option('list_vex86').contains('sse2')
+    if get_option('list_vex86').contains('sse')
     # SSE2 check support
         if cc.compiles('''
                 #include <immintrin.h>
@@ -22,14 +22,16 @@ if ccfam.startswith('x86')
         endif
 
     # SSE3 check support
-        if cc.compiles('''
-                #include <immintrin.h>
-                int main () {
-                    double x = 1; __m128d xr;
-                    xr = _mm_loaddup_pd(&x);
-                    return 0;
-                }''', args: '-msse3', name: 'SSE3 instructions')
-            kfft_config += {'KFFT_HAVE_SSE3': true}
+        if (get_option('enable_sse3'))
+            if cc.compiles('''
+                    #include <immintrin.h>
+                    int main () {
+                        double x = 1; __m128d xr;
+                        xr = _mm_loaddup_pd(&x);
+                        return 0;
+                    }''', args: '-msse3', name: 'SSE3 instructions')
+                kfft_config += {'KFFT_HAVE_SSE3': true}
+            endif
         endif
     endif
 
