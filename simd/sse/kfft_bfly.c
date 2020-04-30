@@ -38,46 +38,79 @@ static inline void
 FUNC_SSE(kf_bfly4)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st,
                    const uint32_t m) {
     kfft_trace_core(st->level, "[BFLY4 (SSE)] fstride - %u | m - %u\n", fstride, m);
-    KFFT_UNUSED_VAR(Fout);
-    KFFT_UNUSED_VAR(fstride);
-    KFFT_UNUSED_VAR(st);
-    KFFT_UNUSED_VAR(m);
-    //    uint32_t tw1, tw2, tw3;
-    //    kfft_cpx scratch[6];
-    //    uint32_t k = m;
-    //    const uint32_t m2 = 2 * m;
-    //    const uint32_t m3 = 3 * m;
-    //
-    //    tw1 = tw2 = tw3 = 0;
-    //
-    //    do {
-    //        C_MUL(scratch[0], Fout[m], TWIDDLE(tw1, st));
-    //        C_MUL(scratch[1], Fout[m2], TWIDDLE(tw2, st));
-    //        C_MUL(scratch[2], Fout[m3], TWIDDLE(tw3, st));
-    //
-    //        C_SUB(scratch[5], *Fout, scratch[1]);
-    //        C_ADDTO(*Fout, scratch[1]);
-    //        C_ADD(scratch[3], scratch[0], scratch[2]);
-    //        C_SUB(scratch[4], scratch[0], scratch[2]);
-    //        C_SUB(Fout[m2], *Fout, scratch[3]);
-    //        tw1 += fstride;
-    //        tw2 += fstride * 2;
-    //        tw3 += fstride * 3;
-    //        C_ADDTO(*Fout, scratch[3]);
-    //
-    //        if (st->flags & KFFT_FLAG_INVERSE) {
-    //            Fout[m].r = scratch[5].r - scratch[4].i;
-    //            Fout[m].i = scratch[5].i + scratch[4].r;
-    //            Fout[m3].r = scratch[5].r + scratch[4].i;
-    //            Fout[m3].i = scratch[5].i - scratch[4].r;
-    //        } else {
-    //            Fout[m].r = scratch[5].r + scratch[4].i;
-    //            Fout[m].i = scratch[5].i - scratch[4].r;
-    //            Fout[m3].r = scratch[5].r - scratch[4].i;
-    //            Fout[m3].i = scratch[5].i + scratch[4].r;
-    //        }
-    //        ++Fout;
-    //  } while (--k);
+
+    uint32_t tw1, tw2, tw3;
+    tw1 = tw2 = tw3 = 0;
+
+    uint32_t k = m;
+    const uint32_t m2 = 2 * m;
+    const uint32_t m3 = 3 * m;
+
+    __m128d T0, T1, T2, T3, T4, T5;
+    do {
+        kfft_cpx ctw0 = TWIDDLE(tw1, st);
+        kfft_cpx ctw1 = TWIDDLE(tw2, st);
+        kfft_cpx ctw2 = TWIDDLE(tw3, st);
+
+        __m128d F0, F1, F2;
+        __m128d mfout = _mm_load_pd((double*)(Fout));
+        F0 = _mm_load_pd((double*)(&Fout[m]));
+        F1 = _mm_load_pd((double*)(&Fout[m2]));
+        F2 = _mm_load_pd((double*)(&Fout[m3]));
+#if defined(KFFT_HAVE_SSE3)
+        T0 = _mm_loaddup_pd(&(ctw0.i));
+        T1 = _mm_loaddup_pd(&(ctw1.i));
+        T2 = _mm_loaddup_pd(&(ctw2.i));
+
+        C_MULDUP_SSE(T0, F0, _mm_loaddup_pd(&(ctw0.r)));
+        C_MULDUP_SSE(T1, F1, _mm_loaddup_pd(&(ctw1.r)));
+        C_MULDUP_SSE(T2, F2, _mm_loaddup_pd(&(ctw2.r)));
+#else  /* KFFT_HAVE_SSE3 */
+        C_MUL_SSE(T0, F0, _mm_load_pd((double*)&ctw0));
+        C_MUL_SSE(T1, F1, _mm_load_pd((double*)&ctw1));
+        C_MUL_SSE(T2, F2, _mm_load_pd((double*)&ctw2));
+#endif /* KFFT_HAVE_SSE3 */
+        C_SUB_SSE(T5, mfout, T1);
+        C_ADD_SSE(T3, T0, T2);
+        C_ADD_SSE(mfout, mfout, T1);
+        C_SUB_SSE(T4, T0, T2);
+        C_SUB_SSE(F1, mfout, T3);
+        C_ADD_SSE(mfout, mfout, T3);
+#if defined(KFFT_HAVE_SSE3)
+        if (st->flags & KFFT_FLAG_INVERSE) {
+            F0 = _mm_addsub_pd(T5, _mm_shuffle_pd(T4, T4, 0x1));
+            F2 = _mm_addsub_pd(_mm_shuffle_pd(T5, T5, 0x1), T4);
+            F2 = _mm_shuffle_pd(F2, F2, 0x1);
+        } else {
+            F0 = _mm_addsub_pd(_mm_shuffle_pd(T5, T5, 0x1), T4);
+            F0 = _mm_shuffle_pd(F0, F0, 0x1);
+            F2 = _mm_addsub_pd(T5, _mm_shuffle_pd(T4, T4, 0x1));
+        } /* KFFT_FLAG_INVERSE */
+#else     /* KFFT_HAVE_SSE3 */
+        __m128d T4i, invi = {1, -1}, invr = {-1, 1};
+        if (st->flags & KFFT_FLAG_INVERSE) {
+            T4i = _mm_mul_pd(T4, invi);
+            F0 = _mm_add_pd(T5, _mm_shuffle_pd(T4i, T4i, 0x1));
+            F2 = _mm_add_pd(_mm_shuffle_pd(T5, T5, 0x1), _mm_mul_pd(T4, invr));
+            F2 = _mm_shuffle_pd(F2, F2, 0x1);
+        } else {
+            F0 = _mm_add_pd(_mm_shuffle_pd(T5, T5, 0x1), _mm_mul_pd(T4, invr));
+            F0 = _mm_shuffle_pd(F0, F0, 0x1);
+            T4i = _mm_mul_pd(T4, invi);
+            F2 = _mm_add_pd(T5, _mm_shuffle_pd(T4i, T4i, 0x1));
+        } /* KFFT_FLAG_INVERSE */
+#endif    /* KFFT_HAVE_SSE3 */
+        _mm_store_pd((double*)Fout, mfout);
+        _mm_store_pd((double*)(&Fout[m]), F0);
+        _mm_store_pd((double*)(&Fout[m2]), F1);
+        _mm_store_pd((double*)(&Fout[m3]), F2);
+
+        tw1 += fstride;
+        tw2 += fstride * 2;
+        tw3 += fstride * 3;
+
+        ++Fout;
+    } while (--k);
 }
 
 static inline void

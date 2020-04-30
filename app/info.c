@@ -65,7 +65,13 @@ display_simd(void) {
     #endif /* ARCH_X86 */
 
     fprintf(stdout, "\n%s:\n", "Build with CPU extensions");
-    fprintf(stdout, "%s - %s\n", "Enable SSE support",
+    fprintf(stdout, "%s%s - %s\n", "Enable SSE support",
+    #if defined(KFFT_HAVE_SSE3)
+            " (with SSE3)"
+    #else
+            ""
+    #endif
+            ,
     #if defined(KFFT_SIMD_SSE_SUPPORT)
             "YES"
     #else
