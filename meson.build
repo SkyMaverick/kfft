@@ -33,6 +33,7 @@ kfft_headers = '''
     incs/kfft_shift.h
     incs/kfft_system.h
     incs/kfft_trace.h
+    incs/kfft_types.h
 '''.split()
 
 kfft_incdirs='''

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kfft.h"
+#include "kfft_types.h"
 
 static inline uint32_t
 FUNC_SSE(kfft_math_modpow)(uint32_t x, uint32_t y, uint32_t m) {

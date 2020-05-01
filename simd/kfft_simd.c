@@ -1,4 +1,4 @@
-#include "kfft.h"
+#include "kfft_simd.h"
 
 #if defined(KFFT_SIMD_SSE_SUPPORT)
     #include "sse/kfft_bfly.c"
