@@ -1,4 +1,5 @@
 /* perform the butterfly for one stage of a mixed radix FFT */
+#include "kfft_generic.h"
 
 #if defined(KFFT_RADER_ALGO)
 

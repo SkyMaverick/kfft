@@ -1,3 +1,6 @@
+#include "kfft_simd_compat.h"
+#include "kfft_simd.h"
+
 #if defined(KFFT_RADER_ALGO)
 // WARNING in kfft num - always prime. Don't check this
 uint32_t
