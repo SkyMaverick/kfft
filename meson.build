@@ -133,20 +133,6 @@ else
     message ('No defines API')
 endif
 
-# Validate system depends
-kfft_vex = []
-if get_option('enable_simd') and (not get_option('enable_half_scalar'))
-    subdir('simd')
-endif # Enable SIMD
-
-# Add all checked extensions
-subdir('ext')
-
-# Define configuration file
-kfft_cfg = configure_file (input: 'config.h.in',
-                           output: 'kfft_config.h',
-                           configuration: configuration_data(kfft_config))
-
 # Apply all argments
 
 foreach item : kfft_cflags
@@ -164,6 +150,20 @@ foreach item : kfft_defs
     add_project_arguments (item, language: 'c')
 endforeach
 
+# Validate system depends
+kfft_vex = []
+if get_option('enable_simd') and (not get_option('enable_half_scalar'))
+    subdir('simd')
+endif # Enable SIMD
+
+# Add all checked extensions
+subdir('ext')
+
+# Define configuration file
+kfft_cfg = configure_file (input: 'config.h.in',
+                           output: 'kfft_config.h',
+                           configuration: configuration_data(kfft_config))
+
 optimize_opts = []
 if not (get_option('buildtype') == 'debug')
     optimize_opts += [
@@ -179,6 +179,7 @@ foreach vex : kfft_vex
     kfft_link += static_library (vex.get('name'), vex.get('src'),
                     include_directories: kfft_inc,
                     c_args: vex.get('cargs'),
+                    gnu_symbol_visibility: 'hidden',
                     install: false)
 endforeach
 # build library
