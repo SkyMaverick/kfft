@@ -18,19 +18,7 @@ if ccfam.startswith('x86')
     endif
 
     if get_option('list_vex86').contains('avx2')
-    # AVX2 check support
-        if cc.compiles('''
-                #include <immintrin.h>
-                int main () {
-                    unsigned a = 1,b = 1;
-                    __m256i av,bv,xr;
-                    av = _mm256_set1_epi32(a);
-                    bv = _mm256_set1_epi32(b);
-                    xr = _mm256_xor_si256(av, bv);
-                    return 0;
-                }''', args: '-mavx2', name: 'AVX2 instructions')
-            kfft_config += {'KFFT_HAVE_AVX2': true}
-        endif
+        subdir('avx2')
     endif
 endif # X86 architecture
 
