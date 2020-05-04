@@ -2,7 +2,7 @@ option ('build_with_lto', type: 'boolean', value: 'false',
         description: 'build with link time optimization')
 option ('build_with_pgo', type: 'boolean', value: 'false',
         description: 'build with profile optimization')
-option ('build_with_native', type: 'boolean', value: 'true',
+option ('build_with_native', type: 'boolean', value: 'false',
         description: 'build with native CPU instructions')
 
 option ('enable_tests', type: 'boolean', value: 'true',

@@ -98,10 +98,8 @@ endif
 if get_option ('enable_openmp')
     fomp = dependency ('openmp', language: 'c')
     if fomp.found()
-        kfft_deps += fomp
-        kfft_cflags += '-fopenmp'
-
         kfft_config += {'KFFT_USE_OPENMP': get_option('enable_openmp')}
+        kfft_deps += fomp
     endif
 endif
 if get_option ('build_with_native')
@@ -109,6 +107,21 @@ if get_option ('build_with_native')
         kfft_cflags += '''
             -march=native
         '''.split()
+    endif
+else
+    if (ccid == 'gcc') or (ccid == 'clang')
+        if (ccfam == 'x86')
+            kfft_cflags += '''
+                -march=i686
+                -mtune=generic
+            '''.split()
+        endif
+        if (ccfam == 'x86_64')
+            kfft_cflags += '''
+                -march=x86-64
+                -mtune=generic
+            '''.split()
+        endif
     endif
 endif
 build_type = get_option('build_library_api')
