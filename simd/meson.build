@@ -10,29 +10,7 @@ if ccfam.startswith('x86')
     kfft_config += {'KFFT_ARCH_X86': true}
     
     if get_option('list_vex86').contains('sse')
-    # SSE2 check support
-        if cc.compiles('''
-                #include <immintrin.h>
-                int main () {
-                    double x; __m128d xr;
-                    xr = _mm_set1_pd(x);
-                    return 0;
-                }''', name: 'SSE2 instructions')
-            kfft_config += {'KFFT_HAVE_SSE2': true}
-        endif
-
-    # SSE3 check support
-        if (get_option('enable_sse3'))
-            if cc.compiles('''
-                    #include <immintrin.h>
-                    int main () {
-                        double x = 1; __m128d xr;
-                        xr = _mm_loaddup_pd(&x);
-                        return 0;
-                    }''', args: '-msse3', name: 'SSE3 instructions')
-                kfft_config += {'KFFT_HAVE_SSE3': true}
-            endif
-        endif
+        subdir('sse')
     endif
 
     if get_option('list_vex86').contains('avx')
@@ -70,14 +48,15 @@ if (ccfam == 'aarch64') or (ccid == 'arm')
     #TODO arm NEON extensions
 endif
 
-kfft_src += '''
-    simd/kfft_simd_check.c
-'''.split()
+kfft_src += files('''
+    kfft_simd_check.c
+'''.split())
 
-kfft_headers += '''
-    simd/kfft_simd.h
-    simd/kfft_simd_check.h
-'''.split()
+kfft_headers += files('''
+    kfft_simd.h
+    kfft_simd_check.h
+'''.split())
+
 kfft_incdirs += '''
     ./simd
     ./simd/sse

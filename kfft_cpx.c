@@ -1,8 +1,5 @@
 #include "kfft.h"
 
-#include "kfft_trace.h"
-#include "kfft_math.h"
-
 static kfft_comp_t*
 kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
                    size_t* lenmem); /* forward declaration configure function */
@@ -87,10 +84,10 @@ kfft_rader_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
     Inline needed source modules for transformation .
     Select SIMD files HERE //TODO
  */
-#if defined(KFFT_USE_SIMD)
-    #include "kfft_simd.c"
-#endif
-
+//#if defined(KFFT_USE_SIMD)
+//    #include "kfft_simd.c"
+//#endif
+//
 #include "kfft_conv.c"    /* Complex sequenses convolution */
 #include "kfft_bfly.c"    /* Butterfly transformations (Cooley - Tukey)*/
 #include "kfft_generic.c" /* Generic or Rader algorithm for prime-size lengt sequences*/

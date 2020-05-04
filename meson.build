@@ -13,7 +13,7 @@ message ('Build configuration - @0@'.format(get_option('buildtype')))
 
 kfft_ver = meson.project_version().split('.')
 
-kfft_src = '''
+kfft_src = files('''
     kfft.h
     kfft_alloc.c
     kfft_cpx.c
@@ -21,9 +21,9 @@ kfft_src = '''
     kfft_ext.c
     kfft_math.c
     kfft_shift.c
-'''.split()
+'''.split())
 
-kfft_headers = '''
+kfft_headers = files('''
     incs/kfft_alloc.h
     incs/kfft_cpx.h
     incs/kfft_ext.h
@@ -34,7 +34,7 @@ kfft_headers = '''
     incs/kfft_system.h
     incs/kfft_trace.h
     incs/kfft_types.h
-'''.split()
+'''.split())
 
 kfft_incdirs='''
     .
@@ -76,10 +76,6 @@ kfft_config = {
     'KFFT_BFLY_LEVEL'   : get_option('level_bfly_max')      ,
 }
 
-# Validate system depends
-if get_option('enable_simd') and (not get_option('enable_half_scalar'))
-    subdir('simd')
-endif # Enable SIMD
 if get_option ('enable_sysmath')
     if not (osid == 'windows')
         kfft_deps += cc.find_library('m', required: true)
@@ -124,6 +120,12 @@ else
     message ('No defines API')
 endif
 
+# Validate system depends
+kfft_vex = []
+if get_option('enable_simd') and (not get_option('enable_half_scalar'))
+    subdir('simd')
+endif # Enable SIMD
+
 # Add all checked extensions
 subdir('ext')
 
@@ -159,12 +161,20 @@ endif
 
 kfft_inc = include_directories (kfft_incdirs)
 
+kfft_link = []
+foreach vex : kfft_vex
+    kfft_link += static_library (vex.get('name'), vex.get('src'),
+                    include_directories: kfft_inc,
+                    c_args: vex.get('cargs'),
+                    install: false)
+endforeach
 # build library
 libkfft = shared_library (meson.project_name(), kfft_src,
                           dependencies: kfft_deps,
                           gnu_symbol_visibility: 'hidden',
                           override_options : optimize_opts,
                           include_directories: kfft_inc,
+                          link_with: kfft_link,
                           install: true)
 
 install_headers('kfft.h', subdir: 'kfft')
