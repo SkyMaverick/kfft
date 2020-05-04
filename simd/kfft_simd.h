@@ -2,17 +2,12 @@
 
 #include "kfft_config.h"
 
-#include <inttypes.h>
-#include <stdbool.h>
-
-typedef struct {
-    uint8_t arch; // Architecture ID
-    uint32_t ext; // HW extensions extensionse (with operation system correct)
-} kfft_simd_t;
-
 #if defined(KFFT_SIMD_SSE_SUPPORT)
     #define FUNC_SSE(X) X##_sse
+
     #include "sse/kfft_math_sse.h"
+    #include "sse/kfft_bfly.h"
+    #include "sse/kfft_generic.h"
 #endif
 #if defined(KFFT_SIMD_AVX_SUPPORT)
     #define FUNC_AVX(X) X##_avx

@@ -2,7 +2,7 @@
 
 #if defined(KFFT_RADER_ALGO)
 
-static inline kfft_return_t
+kfft_return_t
 FUNC_SSE(rader_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride,
                             const kfft_comp_t* st, uint32_t u, uint32_t m, uint32_t p) {
 
@@ -57,7 +57,7 @@ FUNC_SSE(rader_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride
 
 #endif /* KFFT_RADER_ALGO */
 
-static inline int
+int
 FUNC_SSE(std_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride,
                           const kfft_comp_t* st, uint32_t u, uint32_t m, uint32_t p) {
     KFFT_UNUSED_VAR(Fout);
@@ -94,7 +94,7 @@ FUNC_SSE(std_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride,
     return ret;
 }
 
-static kfft_return_t
+kfft_return_t
 FUNC_SSE(kf_bfly_generic)(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
                           uint32_t p) {
 

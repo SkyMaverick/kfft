@@ -105,6 +105,24 @@ kfft_math_gcd(uint32_t a, uint32_t b) {
     return kfft_math_gcd(b % a, a);
 }
 
+static inline kfft_cpx
+kfft_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
+    kfft_cpx ret = {0, 0};
+
+    kfft_scalar phase = -2 * KFFT_CONST_PI * i / size;
+    if (is_inverse)
+        phase *= -1;
+
+    kf_cexp(&ret, phase);
+    return ret;
+}
+
+#if defined(KFFT_MEMLESS_MODE)
+    #define TWIDDLE(i, P) kfft_kernel_twiddle(i, (P)->nfft, ((P)->flags & KFFT_FLAG_INVERSE))
+#else
+    #define TWIDDLE(i, P) (P)->twiddles[i]
+#endif
+
 #if defined(KFFT_RADER_ALGO)
 uint32_t
 kfft_math_prmn(uint32_t num);

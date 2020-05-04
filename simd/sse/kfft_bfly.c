@@ -1,7 +1,7 @@
 #include "kfft_simd.h"
 #include "kfft_math_intern.h"
 
-static inline void
+void
 FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY2 (SSE)] fstride - %u | m - %u\n", fstride, m);
 
@@ -34,7 +34,7 @@ FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
     } while (--m);
 }
 
-static inline void
+void
 FUNC_SSE(kf_bfly4)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st,
                    const uint32_t m) {
     kfft_trace_core(st->level, "[BFLY4 (SSE)] fstride - %u | m - %u\n", fstride, m);
@@ -113,7 +113,7 @@ FUNC_SSE(kf_bfly4)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
     } while (--k);
 }
 
-static inline void
+void
 FUNC_SSE(kf_bfly3)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY3 (SSE)] fstride - %u | m - %u\n", fstride, m);
     KFFT_UNUSED_VAR(Fout);
@@ -155,7 +155,7 @@ FUNC_SSE(kf_bfly3)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
     //    } while (--k);
 }
 
-static inline void
+void
 FUNC_SSE(kf_bfly5)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY5 (SSE)] fstride - %u | m - %u\n", fstride, m);
     KFFT_UNUSED_VAR(Fout);

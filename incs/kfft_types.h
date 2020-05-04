@@ -1,5 +1,7 @@
 #pragma once
 
+#include <inttypes.h>
+
 #if defined(KFFT_HALF_SCALAR)
 typedef float kfft_scalar;
 #else
@@ -47,3 +49,8 @@ enum {
     KFFT_RET_BADARGUMENTS = 0x0005
 };
 typedef unsigned kfft_return_t;
+
+typedef struct {
+    uint8_t arch; // Architecture ID
+    uint32_t ext; // HW extensions extensionse (with operation system correct)
+} kfft_simd_t;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kfft_simd.h"
+#include <stdbool.h>
 
 enum {
     HW_ARCH_UKNW = 0,

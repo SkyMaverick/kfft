@@ -65,24 +65,6 @@ kfft_trace_plan(kfft_comp_t* P) {
 
 #endif /* KFFT_TRACE */
 
-static inline kfft_cpx
-kfft_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
-    kfft_cpx ret = {0, 0};
-
-    kfft_scalar phase = -2 * KFFT_CONST_PI * i / size;
-    if (is_inverse)
-        phase *= -1;
-
-    kf_cexp(&ret, phase);
-    return ret;
-}
-
-#if defined(KFFT_MEMLESS_MODE)
-    #define TWIDDLE(i, P) kfft_kernel_twiddle(i, (P)->nfft, ((P)->flags & KFFT_FLAG_INVERSE))
-#else
-    #define TWIDDLE(i, P) (P)->twiddles[i]
-#endif
-
 #if defined(KFFT_RADER_ALGO)
 static inline void
 kfft_rader_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
