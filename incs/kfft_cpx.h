@@ -32,7 +32,7 @@ typedef struct kfft_kstate {
 
     uint32_t nfft;
 
-    uint32_t level;
+    uint8_t level;
     uint32_t flags;
 
     uint8_t fac_count;                 // factors count

@@ -31,11 +31,8 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
 #endif
     size_t subsize = 0;
 
-    if (kfft_config_cpx(nfft, flags, NULL, &subsize) == KFFT_RET_SUCCESS) {
-        ret += subsize;
-        return ret;
-    }
-    return 0;
+    kfft_config_cpx(nfft, flags, NULL, &subsize);
+    return ret + subsize;
 }
 
 #ifdef KFFT_TRACE

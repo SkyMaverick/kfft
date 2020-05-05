@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
+#include "kfft.h"
 #if defined(KFFT_OS_WINDOWS)
     #include "getopt_win.h"
 #else
+    #include <unistd.h>
     #include <getopt.h>
 #endif
 
-#include "kfft.h"
 #include "const.h"
 #include "config.h"
 

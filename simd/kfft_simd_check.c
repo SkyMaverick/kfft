@@ -135,15 +135,14 @@ x86_arch(void) {
 
 KFFT_API kfft_simd_t
 kfft_simd_analize(void) {
-    kfft_simd_t S = {
+    kfft_simd_t S = {0, 0};
 #if defined(KFFT_ARCH_X86)
-        .arch = x86_arch(),
-        .ext = x86_exts(),
+    S.arch = x86_arch();
+    S.ext = x86_exts();
 #elif defined(KFFT_ARCH_ARM)
-        .arch = HW_ARCH_ARM,
+    S.arch = HW_ARCH_ARM;
 #else
-        .arch = HW_ARCH_UKNW,
+    S.arch = HW_ARCH_UKNW;
 #endif
-    };
     return S;
 }
