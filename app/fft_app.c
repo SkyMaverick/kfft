@@ -65,6 +65,12 @@ stdin_check(void) {
 
     return (ret > 0);
 }
+#else
+int
+stdin_check(void) {
+    return 1;
+}
+#endif /* not KFFT_OS_WINDOWS */
 
 static char*
 read_stdin(void) {
@@ -119,15 +125,16 @@ write_stdout(kfft_scalar* in, size_t sz) {
         free(out);
     } /* out allocated */
 }
-#else
-// TODO Windows
-static char*
-read_stdin(void) {
-    return 0;
-}
-static void
-write_stdout(kfft_scalar* in, size_t sz) {}
-#endif /* not KFFT_OS_WINDOWS */
+// #else
+// // TODO Windows
+// static char*
+// read_stdin(void) {
+//     return 0;
+// }
+// static void
+// write_stdout(kfft_scalar* in, size_t sz) {
+// }
+// #endif /* not KFFT_OS_WINDOWS */
 
 #include "cmd.c"
 #include "cwork.c"
