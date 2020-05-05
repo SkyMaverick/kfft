@@ -9,7 +9,7 @@
     #endif
     #if defined(KFFT_OS_WINDOWS)
         #include <malloc.h>
-        #define KFFT_MALLOC(X) _aligned_malloc(KFFT_MEMALIGN_SIZE, (X))
+        #define KFFT_MALLOC(X) _aligned_malloc((X), KFFT_MEMALIGN_SIZE)
         #define KFFT_FREE(X) _aligned_free(X)
     #else
         #define KFFT_MALLOC(X) aligned_alloc(KFFT_MEMALIGN_SIZE, (X))
