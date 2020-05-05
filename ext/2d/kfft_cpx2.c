@@ -120,7 +120,9 @@ kfft_2transform_normal(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_cpx* ftmp = KFFT_TMP_ALLOC(st->nfft * sizeof(kfft_cpx));
     if (ftmp) {
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-#pragma omp for schedule(static)
+#if !defined(KFFT_OS_WINDOWS)
+    #pragma omp parallel for schedule(static)
+#endif
         for (uint32_t i = 0; i < st->y; i++) {
             uint64_t bp = st->x * i;
             ret = kfft_eval_cpx(st->plan_x, &(fin[bp]), &(ftmp[bp]));
@@ -130,7 +132,9 @@ kfft_2transform_normal(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
         kfft_math_transpose_cpx(ftmp, fout, st->x, st->y);
 
         kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
-#pragma omp for schedule(static)
+#if !defined(KFFT_OS_WINDOWS)
+    #pragma omp parallel for schedule(static)
+#endif
         for (uint32_t i = 0; i < st->x; i++) {
             uint64_t bp = st->y * i;
             ret = kfft_eval_cpx(st->plan_y, &(fout[bp]), &(ftmp[bp]));
@@ -151,7 +155,9 @@ kfft_2transform_memless(kfft_comp2_t* st, kfft_cpx* fin) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-    #pragma omp for schedule(static)
+    #if !defined(KFFT_OS_WINDOWS)
+        #pragma omp parallel for schedule(static)
+    #endif
     for (uint32_t i = 0; i < st->y; i++) {
         uint64_t bp = st->x * i;
         ret = kfft_eval_cpx(st->plan_x, &(fin[bp]), &(fin[bp]));
@@ -161,7 +167,9 @@ kfft_2transform_memless(kfft_comp2_t* st, kfft_cpx* fin) {
     kfft_math_transpose_ip_cpx(fin, st->x, st->y);
 
     kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
-    #pragma omp for schedule(static)
+    #if !defined(KFFT_OS_WINDOWS)
+        #pragma omp parallel for schedule(static)
+    #endif
     for (uint32_t i = 0; i < st->x; i++) {
         uint64_t bp = st->y * i;
         ret = kfft_eval_cpx(st->plan_y, &(fin[bp]), &(fin[bp]));
@@ -209,7 +217,9 @@ static void
 shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_t sz_y,
                const bool is_inverse) {
     kfft_trace_2d("%s\n", "X-axes shift transform");
-#pragma omp for schedule(static)
+#if !defined(KFFT_OS_WINDOWS)
+    #pragma omp parallel for schedule(static)
+#endif
     for (uint32_t i = 0; i < sz_y; i++) {
         uint64_t bp = sz_x * i;
         kfft_shift_cpx(&(buf[bp]), sz_x, is_inverse);
@@ -219,7 +229,9 @@ shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_
         kfft_math_transpose_cpx(buf, ftmp, sz_x, sz_y);
 
         kfft_trace_2d("%s\n", "Y-axes shift transform");
-#pragma omp for schedule(static)
+#if !defined(KFFT_OS_WINDOWS)
+    #pragma omp parallel for schedule(static)
+#endif
         for (uint32_t i = 0; i < sz_x; i++) {
             uint64_t bp = sz_y * i;
             kfft_shift_cpx(&(ftmp[bp]), sz_y, is_inverse);
@@ -231,7 +243,9 @@ shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_
         kfft_math_transpose_ip_cpx(buf, sz_x, sz_y);
 
         kfft_trace_2d("%s\n", "Y-axes shift transform");
-#pragma omp for schedule(static)
+#if !defined(KFFT_OS_WINDOWS)
+    #pragma omp parallel for schedule(static)
+#endif
         for (uint32_t i = 0; i < sz_x; i++) {
             uint64_t bp = sz_y * i;
             kfft_shift_cpx(&(buf[bp]), sz_y, is_inverse);
