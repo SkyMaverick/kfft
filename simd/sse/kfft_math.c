@@ -54,8 +54,8 @@ void
 FUNC_SSE(kfft_math_transpose_cpx)(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x,
                                   const uint32_t y) {
     for (uint64_t n = 0; n < x * y; n++) {
-        uint32_t i = n / y;
-        uint32_t j = n % y;
+        uint64_t i = n / y;
+        uint64_t j = n % y;
         C_CPY(Fout[n], Fin[x * j + i]);
     }
 }
@@ -63,8 +63,8 @@ void
 FUNC_SSE(kfft_math_transpose_scalar)(const kfft_scalar* Fin, kfft_scalar* Fout, const uint32_t x,
                                      const uint32_t y) {
     for (uint64_t n = 0; n < x * y; n++) {
-        uint32_t i = n / y;
-        uint32_t j = n % y;
+        uint64_t i = n / y;
+        uint64_t j = n % y;
         Fout[n] = Fin[x * j + i];
     }
 }

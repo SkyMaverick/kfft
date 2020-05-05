@@ -2,6 +2,11 @@
 
 #include <inttypes.h>
 
+#if defined(KFFT_OS_WINDOWS)
+    #include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #if defined(KFFT_HALF_SCALAR)
 typedef float kfft_scalar;
 #else

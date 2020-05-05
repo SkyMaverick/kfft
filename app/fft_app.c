@@ -120,14 +120,13 @@ write_stdout(kfft_scalar* in, size_t sz) {
     } /* out allocated */
 }
 #else
-//TODO Windows
-    static char*
-    read_stdin(void) {
-        return 0;
-    }
-    static void
-    write_stdout(kfft_scalar* in, size_t sz) {
-    }
+// TODO Windows
+static char*
+read_stdin(void) {
+    return 0;
+}
+static void
+write_stdout(kfft_scalar* in, size_t sz) {}
 #endif /* not KFFT_OS_WINDOWS */
 
 #include "cmd.c"
