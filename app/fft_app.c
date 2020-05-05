@@ -52,7 +52,7 @@ parse_buffer(void** out, char* buf, bool as_cpx) {
     *out = tmp;
     return (as_cpx) ? ((len % 2) ? ((len + 1) / 2) : (len / 2)) : len;
 }
-
+#if !defined(KFFT_OS_WINDOWS)
 int
 stdin_check(void) {
     fd_set rd;
@@ -119,6 +119,16 @@ write_stdout(kfft_scalar* in, size_t sz) {
         free(out);
     } /* out allocated */
 }
+#else
+//TODO Windows
+    static char*
+    read_stdin(void) {
+        return 0;
+    }
+    static void
+    write_stdout(kfft_scalar* in, size_t sz) {
+    }
+#endif /* not KFFT_OS_WINDOWS */
 
 #include "cmd.c"
 #include "cwork.c"
