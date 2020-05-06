@@ -116,43 +116,61 @@ FUNC_SSE(kf_bfly4)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
 void
 FUNC_SSE(kf_bfly3)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY3 (SSE)] fstride - %u | m - %u\n", fstride, m);
-    KFFT_UNUSED_VAR(Fout);
-    KFFT_UNUSED_VAR(fstride);
-    KFFT_UNUSED_VAR(st);
-    KFFT_UNUSED_VAR(m);
-    //    uint32_t k = m;
-    //    const uint32_t m2 = 2 * m;
-    //    uint32_t tw1, tw2;
-    //    kfft_cpx scratch[5];
-    //    kfft_cpx epi3;
-    //    epi3 = TWIDDLE(fstride * m, st);
-    //
-    //    tw1 = tw2 = 0;
-    //
-    //    do {
-    //        C_MUL(scratch[1], Fout[m], TWIDDLE(tw1, st));
-    //        C_MUL(scratch[2], Fout[m2], TWIDDLE(tw2, st));
-    //
-    //        C_ADD(scratch[3], scratch[1], scratch[2]);
-    //        C_SUB(scratch[0], scratch[1], scratch[2]);
-    //        tw1 += fstride;
-    //        tw2 += fstride * 2;
-    //
-    //        Fout[m].r = Fout->r - HALF_OF(scratch[3].r);
-    //        Fout[m].i = Fout->i - HALF_OF(scratch[3].i);
-    //
-    //        C_MULBYSCALAR(scratch[0], epi3.i);
-    //
-    //        C_ADDTO(*Fout, scratch[3]);
-    //
-    //        Fout[m2].r = Fout[m].r + scratch[0].i;
-    //        Fout[m2].i = Fout[m].i - scratch[0].r;
-    //
-    //        Fout[m].r -= scratch[0].i;
-    //        Fout[m].i += scratch[0].r;
-    //
-    //        ++Fout;
-    //    } while (--k);
+
+    uint32_t k = m;
+    const uint32_t m2 = 2 * m;
+    uint32_t tw1, tw2;
+    tw1 = tw2 = 0;
+
+    kfft_cpx epi3 = TWIDDLE(fstride * m, st);
+    __m128d mepi3 = _mm_set1_pd(epi3.i);
+
+    __m128d T0, T1, T2, T3;
+    do {
+        kfft_cpx ctw0 = TWIDDLE(tw1, st);
+        kfft_cpx ctw1 = TWIDDLE(tw2, st);
+
+        __m128d F0, F1;
+        __m128d mfout = _mm_load_pd((double*)(Fout));
+        F0 = _mm_load_pd((double*)(&Fout[m]));
+        F1 = _mm_load_pd((double*)(&Fout[m2]));
+#if defined(KFFT_HAVE_SSE3)
+        T1 = _mm_loaddup_pd(&(ctw0.i));
+        T2 = _mm_loaddup_pd(&(ctw1.i));
+
+        C_MULDUP_SSE(T1, F0, _mm_loaddup_pd(&(ctw0.r)));
+        C_MULDUP_SSE(T2, F1, _mm_loaddup_pd(&(ctw1.r)));
+#else  /* KFFT_HAVE_SSE3 */
+        C_MUL_SSE(T1, F0, _mm_load_pd((double*)&ctw0));
+        C_MUL_SSE(T2, F1, _mm_load_pd((double*)&ctw1));
+#endif /* KFFT_HAVE_SSE3 */
+        C_ADD_SSE(T3, T1, T2);
+        C_SUB_SSE(T0, T1, T2);
+
+        C_SUB_SSE(F0, mfout, _mm_mul_pd(T3, _mm_set1_pd(0.5)));
+        T0 = _mm_mul_pd(T0, mepi3);
+        C_ADD_SSE(mfout, mfout, T3);
+
+#if defined(KFFT_HAVE_SSE3)
+        F1 = _mm_addsub_pd(_mm_shuffle_pd(F0, F0, 0x1), T0);
+        F1 = _mm_shuffle_pd(F1, F1, 0x1);
+
+        F0 = _mm_addsub_pd(F0, _mm_shuffle_pd(T0, T0, 0x1));
+#else  /* KFFT_HAVE_SSE3 */
+        __m128d tmp = _mm_mul_pd(T0, _mm_set_pd(1, -1));
+        F1 = _mm_add_pd(F0, _mm_shuffle_pd(tmp, tmp, 0x1));
+
+        tmp = _mm_mul_pd(T0, _mm_set_pd(-1, 1));
+        F0 = _mm_add_pd(F0, _mm_shuffle_pd(tmp, tmp, 0x1));
+#endif /* KFFT_HAVE_SSE3 */
+        _mm_store_pd((double*)Fout, mfout);
+        _mm_store_pd((double*)(&Fout[m]), F0);
+        _mm_store_pd((double*)(&Fout[m2]), F1);
+
+        tw1 += fstride;
+        tw2 += fstride * 2;
+        ++Fout;
+    } while (--k);
 }
 
 void
