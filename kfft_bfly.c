@@ -1,4 +1,4 @@
-static inline void
+static void
 kf_bfly2(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY2] fstride - %u | m - %u\n", fstride, m);
     kfft_cpx* Fout2;
@@ -15,7 +15,7 @@ kf_bfly2(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t
     } while (--m);
 }
 
-static inline void
+static void
 kf_bfly4(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, const uint32_t m) {
     kfft_trace_core(st->level, "[BFLY4] fstride - %u | m - %u\n", fstride, m);
     uint32_t tw1, tw2, tw3;
@@ -56,7 +56,7 @@ kf_bfly4(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, const ui
     } while (--k);
 }
 
-static inline void
+static void
 kf_bfly3(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY3] fstride - %u | m - %u\n", fstride, m);
     uint32_t k = m;
@@ -94,7 +94,7 @@ kf_bfly3(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t
     } while (--k);
 }
 
-static inline void
+static void
 kf_bfly5(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY5] fstride - %u | m - %u\n", fstride, m);
     kfft_cpx *Fout0, *Fout1, *Fout2, *Fout3, *Fout4;
