@@ -50,7 +50,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
 
 #endif /* KFFT_RADER_ALGO */
 
-static inline int
+static inline kfft_return_t
 std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                 uint32_t u, uint32_t m, uint32_t p) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
@@ -107,7 +107,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
 #endif /* KFFT_RADER_ALGO */
 
                 kfft_trace_core(st->level, "%s: %u\n", "Use standart algorithm for resolve", p);
-                ret = std_method_eval(Fout, scratch, fstride, st, u, m, p);
+                ret = VEXFUNC(st, std_method_eval, Fout, scratch, fstride, st, u, m, p);
 
                 if (ret != KFFT_RET_SUCCESS) {
                     break;
