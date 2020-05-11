@@ -92,7 +92,7 @@ static inline uint32_t
 kfft_math_modpow(uint32_t x, uint32_t y, uint32_t m) {
     if (y == 0)
         return 1;
-    uint64_t p = kfft_math_modpow(x, y / 2, m) % m;
+    uint64_t p = kfft_math_modpow(x, y >> 2, m) % m;
     p = (p * p) % m;
 
     return (y % 2 == 0) ? (uint32_t)p : (uint32_t)((x * p) % m);
