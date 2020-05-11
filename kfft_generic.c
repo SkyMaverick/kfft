@@ -19,6 +19,9 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
 
     // Create suffled buffers
     C_CPY(x0, Fout[k]);
+    // MSVC non-zero alloc workaround
+    Ftmp[0].r = 0;
+    Ftmp[0].i = 0;
     for (q1 = 1, idx = 0; q1 < p; ++q1) {
         idx = RAD_PRIME_IDX(q1 - 1, sP);
 

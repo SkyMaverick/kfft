@@ -12,6 +12,8 @@
    C_SUBFROM( res , a)  : res -= a
    C_ADDTO( res , a)    : res += a
  * */
+#define S_MOD_SSE(A, B) _mm_sub_pd(A, _mm_mul_pd(_mm_div_pd(A, B), B));
+
 #define C_ADD_SSE(M, A, B) M = _mm_add_pd(A, B)
 #define C_SUB_SSE(M, A, B) M = _mm_sub_pd(A, B)
 
