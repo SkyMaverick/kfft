@@ -23,20 +23,32 @@ extern "C" {
 
     #define __VEXST(S) ((kfft_object_t*)(S))->vex
 // clang-format off
+    #define VEX_CHECK_AVX2(S) \
+        kfft_simd_check(__VEXST((S)),HW_AVX2)
+    #define VEX_CHECK_AVX(S) \
+       kfft_simd_check(__VEXST((S)),HW_AVX)
+    #if defined(KFFT_HAVE_SSE3)
+        #define VEX_CHECK_SSE(S) \
+            kfft_simd_check(__VEXST((S)),(HW_SSE2 | HW_SSE3))
+    #else
+        #define VEX_CHECK_SSE(S) \
+           kfft_simd_check(__VEXST((S)),(HW_SSE2))
+    #endif
+
     #if defined(KFFT_SIMD_AVX2_SUPPORT)
         #define VEXFUNC(S, F, ...)                                                              \
-            ( kfft_simd_check(__VEXST((S)),HW_AVX2) )            ? FUNC_AVX2(F)(__VA_ARGS__) :  \
-            ( kfft_simd_check(__VEXST((S)),HW_AVX) )             ? FUNC_AVX (F)(__VA_ARGS__) :  \
-            ( kfft_simd_check(__VEXST((S)),(HW_SSE | HW_SSE2)) ) ? FUNC_SSE (F)(__VA_ARGS__) :  \
+            ( VEX_CHECK_AVX2(S) ) ? FUNC_AVX2(F)(__VA_ARGS__) :  \
+            ( VEX_CHECK_AVX(S)  ) ? FUNC_AVX (F)(__VA_ARGS__) :  \
+            ( VEX_CHECK_SSE(S)  ) ? FUNC_SSE (F)(__VA_ARGS__) :  \
             F(__VA_ARGS__)
     #elif defined(KFFT_SIMD_AVX_SUPPORT)
         #define VEXFUNC(S, F, ...)                                                              \
-            ( kfft_simd_check(__VEXST((S)),HW_AVX) )             ? FUNC_AVX (F)(__VA_ARGS__) :  \
-            ( kfft_simd_check(__VEXST((S)),(HW_SSE | HW_SSE2)) ) ? FUNC_SSE (F)(__VA_ARGS__) :  \
+            ( VEX_CHECK_AVX(S) ) ? FUNC_AVX (F)(__VA_ARGS__) :  \
+            ( VEX_CHECK_SSE(S) ) ? FUNC_SSE (F)(__VA_ARGS__) :  \
             F(__VA_ARGS__)
     #elif defined(KFFT_SIMD_SSE_SUPPORT)
         #define VEXFUNC(S, F, ...)                                                              \
-            ( kfft_simd_check(__VEXST((S)),(HW_SSE | HW_SSE2)) ) ? FUNC_SSE (F)(__VA_ARGS__) :  \
+            ( VEX_CHECK_SSE(S) ) ? FUNC_SSE (F)(__VA_ARGS__) :  \
             F(__VA_ARGS__)
     #else
         #define VEXFUNC(S, F, ...)                                                              \

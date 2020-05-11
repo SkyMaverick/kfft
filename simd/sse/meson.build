@@ -8,10 +8,12 @@ if cc.compiles('''
         }''', name: 'SSE2 instructions')
     kfft_config += {'KFFT_HAVE_SSE2': true}
 
-    sse_args = (not (ccid == 'msvc')) ? '''
+    sse_args = (ccid == 'msvc') ? '''
+                    /ARCH:SSE2
+                '''.split() : '''
                     -msse
                     -msse2
-                '''.split() : []
+                '''.split()
 
     # SSE3 check support
     if (get_option('enable_sse3'))
@@ -25,7 +27,11 @@ if cc.compiles('''
             kfft_config += {'KFFT_HAVE_SSE3': true}
         endif
 
-        sse_args += (not (ccid == 'msvc')) ? '-msse3' : []
+    sse_args += (ccid == 'msvc') ? '''
+                    /ARCH:SSE3
+                '''.split() : '''
+                    -msse3
+                '''.split()
     endif
 
     kfft_vex += {
