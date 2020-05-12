@@ -5,9 +5,8 @@
     #include "sse/kfft_generic.c"
 #endif
 #if defined(KFFT_SIMD_AVX_SUPPORT)
-// TODO
-//    #include "avx/kfft_bfly.c"
-//    #include "avx/kfft_generic.c"
+    #include "avx/kfft_bfly.c"
+    #include "avx/kfft_generic.c"
 #endif
 #if defined(KFFT_SIMD_AVX2_SUPPORT)
 // TODO

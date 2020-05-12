@@ -6,8 +6,7 @@
 
     #if defined(KFFT_OS_WINDOWS)
         #include <malloc.h>
-        #define KFFT_MALLOC(X, A)                                                                  \
-            (((A) > 0) ? _aligned_malloc((X), (A)) : KFFT_MALLOC_UNALIGN((X)))
+        #define KFFT_MALLOC(X, A) (((A) > 0) ? _aligned_malloc((X), (A)) : KFFT_MALLOC_UNALIGN((X)))
         #define KFFT_FREE(X, A) (((A) > 0) ? _aligned_free(X) : free(X))
     #else
         #define KFFT_MALLOC(X, A) (((A) > 0) ? aligned_alloc((A), (X)) : KFFT_MALLOC_UNALIGN((X)))

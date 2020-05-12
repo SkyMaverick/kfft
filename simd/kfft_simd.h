@@ -11,6 +11,10 @@
 #endif
 #if defined(KFFT_SIMD_AVX_SUPPORT)
     #define FUNC_AVX(X) X##_avx
+
+    #include "avx/kfft_math_avx.h"
+    #include "avx/kfft_bfly.h"
+    #include "avx/kfft_generic.h"
 #endif
 #if defined(KFFT_SIMD_AVX2_SUPPORT)
     #define FUNC_AVX2(X) X##_avx2
