@@ -120,11 +120,6 @@ x86_exts(void) {
     return ret;
 }
 
-static uint8_t
-x86_arch(void) {
-    uint8_t ret = 0;
-    return ret;
-}
 #endif /*KFFT_ARCH_X86*/
 
 /******************************************************************************/
@@ -137,7 +132,10 @@ KFFT_API kfft_simd_t
 kfft_simd_analize(void) {
     kfft_simd_t S = {0, 0, 0};
 #if defined(KFFT_ARCH_X86)
-    S.arch = x86_arch();
+    S.arch = HW_ARCH_X86;
+    S.ext = x86_exts();
+#elif defined(KFFT_ARCH_X64)
+    S.arch = HW_ARCH_X64;
     S.ext = x86_exts();
 #elif defined(KFFT_ARCH_ARM)
     S.arch = HW_ARCH_ARM;

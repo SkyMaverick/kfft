@@ -2,9 +2,9 @@
 #include "kfft_math.h"
 
 KFFT_API void
-kfft_shift_cpx(kfft_comp_t* st, kfft_cpx* buf, const uint32_t size, const bool is_inverse) {
+kfft_shift_cpx(kfft_cpx* buf, const uint32_t size, const bool is_inverse, kfft_pool_t* mmgr) {
 
-    KFFT_UNUSED_VAR(st);
+    KFFT_UNUSED_VAR(mmgr);
 
     int64_t k = 0;
     uint32_t c = (uint32_t)floor((kfft_scalar)size / 2);
@@ -32,9 +32,9 @@ kfft_shift_cpx(kfft_comp_t* st, kfft_cpx* buf, const uint32_t size, const bool i
 }
 
 KFFT_API void
-kfft_shift_scalar(kfft_sclr_t* st, kfft_scalar* buf, const uint32_t size, const bool is_inverse) {
+kfft_shift_scalar(kfft_scalar* buf, const uint32_t size, const bool is_inverse, kfft_pool_t* mmgr) {
 
-    KFFT_UNUSED_VAR(st);
+    KFFT_UNUSED_VAR(mmgr);
 
     int64_t k = 0;
     uint32_t c = (uint32_t)floor((kfft_scalar)size / 2);

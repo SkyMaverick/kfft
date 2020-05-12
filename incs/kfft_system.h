@@ -43,7 +43,8 @@
 static inline void*
 __trace_malloc_aligned(size_t nmem, uint8_t align) {
     void* ret = KFFT_MALLOC(nmem, align);
-    kfft_trace("[SYS] %s - %zu: %p\n", "Allocate aligned temporary buffer", nmem, ret);
+    kfft_trace("[SYS] %s (%s %d) - %zu : %p\n", "Allocate temporary buffer", "aligned", align, nmem,
+               ret);
     return ret;
 }
 static inline void*

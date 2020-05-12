@@ -36,10 +36,10 @@ extern "C" {
     #include "2d/kfft_scalar2.h"
 #endif
 
-#define KFFT_PLAN_ALLOCATOR(X) (*((kfft_pool_t**)(X)))
+#define KFFT_PLAN_MMGR(X) (*((kfft_pool_t**)(X)))
 
-#define KFFT_PLAN_ALIGN(X) KFFT_PLAN_ALLOCATOR((X))->align
-#define KFFT_PLAN_VEX(X) KFFT_PLAN_ALLOCATOR((X))->vex
+#define KFFT_PLAN_ALIGN(X) KFFT_PLAN_MMGR((X))->align
+#define KFFT_PLAN_VEX(X) KFFT_PLAN_MMGR((X))->vex
 
 #define kfft_free(X) kfft_cleanup((uintptr_t)(X))
 

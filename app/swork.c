@@ -9,14 +9,15 @@ work_scalar2_forward(kfft_scalar* buf, app_mode_t* M) {
         kfft_sclr2_t* plan = kfft_config2_scalar(M->x, M->y, M->flags, 0, NULL);
         if (plan) {
             ret = kfft_eval2_scalar(plan, buf, ftmp);
+            if (ret == KFFT_RET_SUCCESS) {
+                if (M->is_shift)
+                    kfft_shift2_cpx(ftmp, NULL, M->x, M->y, false, KFFT_PLAN_MMGR(plan));
+            }
             kfft_free(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         }
         if (ret == KFFT_RET_SUCCESS) {
-            if (M->is_shift)
-                kfft_shift2_cpx(ftmp, NULL, M->x, M->y, false);
-
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");
         }
@@ -31,11 +32,11 @@ work_scalar2_inverse(kfft_cpx* buf, app_mode_t* M) {
     kfft_scalar* ftmp = calloc(M->len, sizeof(kfft_scalar));
     if (buf && ftmp) {
 
-        if (M->is_shift)
-            kfft_shift2_cpx(buf, NULL, M->x, M->y, true);
-
         kfft_sclr2_t* plan = kfft_config2_scalar(M->x, M->y, M->flags, 0, NULL);
         if (plan) {
+            if (M->is_shift)
+                kfft_shift2_cpx(buf, NULL, M->x, M->y, true, KFFT_PLAN_MMGR(plan));
+
             ret = kfft_evali2_scalar(plan, buf, ftmp);
             kfft_free(plan);
         } else {
@@ -61,15 +62,16 @@ work_scalar_forward(kfft_scalar* buf, app_mode_t* M) {
         kfft_sclr_t* plan = kfft_config_scalar(M->len, M->flags, 0, NULL);
         if (plan) {
             ret = kfft_eval_scalar(plan, buf, ftmp);
+            if (ret == KFFT_RET_SUCCESS) {
+                if (M->is_shift)
+                    kfft_shift_cpx(ftmp, M->len, false, KFFT_PLAN_MMGR(plan));
+            }
             kfft_free(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */
 
         if (ret == KFFT_RET_SUCCESS) {
-            if (M->is_shift)
-                kfft_shift_cpx(ftmp, M->len, false);
-
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");
         }
@@ -84,11 +86,11 @@ work_scalar_inverse(kfft_cpx* buf, app_mode_t* M) {
 
     kfft_scalar* ftmp = calloc(M->len, sizeof(kfft_scalar));
     if (buf && ftmp) {
-        if (M->is_shift)
-            kfft_shift_cpx(buf, M->len, true);
-
         kfft_sclr_t* plan = kfft_config_scalar(M->len, M->flags, 0, NULL);
         if (plan) {
+            if (M->is_shift)
+                kfft_shift_cpx(buf, M->len, true, KFFT_PLAN_MMGR(plan));
+
             ret = kfft_evali_scalar(plan, buf, ftmp);
             kfft_free(plan);
         } else {
