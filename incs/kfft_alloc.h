@@ -18,9 +18,6 @@ typedef struct {
 kfft_pool_t*
 kfft_allocator_create(const size_t size);
 
-// kfft_pool_t*
-// kfft_allocator_init(void* mem, const size_t nmem, uint64_t vex, uint8_t align);
-//
 void*
 kfft_internal_alloc(kfft_pool_t* A, const size_t nmem);
 

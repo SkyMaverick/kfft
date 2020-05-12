@@ -119,7 +119,6 @@ x86_exts(void) {
     }
     return ret;
 }
-
 #endif /*KFFT_ARCH_X86*/
 
 /******************************************************************************/
@@ -130,7 +129,7 @@ x86_exts(void) {
 
 KFFT_API kfft_simd_t
 kfft_simd_analize(void) {
-    kfft_simd_t S = {0, 0, 0};
+    kfft_simd_t S = {0, 0};
 #if defined(KFFT_ARCH_X86)
     S.arch = HW_ARCH_X86;
     S.ext = x86_exts();

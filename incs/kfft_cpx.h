@@ -10,8 +10,6 @@
 
 typedef struct {
     kfft_pool_t* mmgr; // allocator for internal-plan fast memory allocations
-    //    kfft_simd_t vex; // CPU info for run-time select accelerations
-    //    uint8_t align; // Memory align info
 } kfft_object_t;
 
 typedef struct {

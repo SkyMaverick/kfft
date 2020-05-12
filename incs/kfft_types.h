@@ -58,5 +58,4 @@ typedef unsigned kfft_return_t;
 typedef struct {
     uint8_t arch; // Architecture ID
     uint32_t ext; // HW extensions extensionse (with operation system correct)
-    uint16_t pad; // Paddung for uint64_t type size
 } kfft_simd_t;

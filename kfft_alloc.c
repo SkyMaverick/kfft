@@ -6,7 +6,7 @@
     kfft_trace("[KIA]"" " fmt,__VA_ARGS__)
 // clang-format on
 
-static kfft_pool_t*
+static inline kfft_pool_t*
 kfft_allocator_init(void* mem, const size_t nmem, kfft_simd_t vex, uint8_t align) {
     kfft_pool_t* ret = (kfft_pool_t*)mem;
     if (mem && (nmem > sizeof(kfft_pool_t))) {
