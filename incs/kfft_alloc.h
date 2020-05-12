@@ -5,10 +5,12 @@
 
 typedef struct {
     size_t allocated; // area size
-    uint8_t* head;    // current head address
-    uint8_t* tail;    // current tail address
+    uint8_t align;    // memory align in allocator
+    kfft_simd_t vex;  // system extensions info
 
-    uint8_t* cur; // cursor pointer
+    uint8_t* head; // current head address
+    uint8_t* tail; // current tail address
+    uint8_t* cur;  // cursor pointer
 
     uint8_t area[1];
 } kfft_pool_t;
@@ -16,9 +18,9 @@ typedef struct {
 kfft_pool_t*
 kfft_allocator_create(const size_t size);
 
-kfft_pool_t*
-kfft_allocator_init(void* mem, const size_t nmem);
-
+// kfft_pool_t*
+// kfft_allocator_init(void* mem, const size_t nmem, uint64_t vex, uint8_t align);
+//
 void*
 kfft_internal_alloc(kfft_pool_t* A, const size_t nmem);
 

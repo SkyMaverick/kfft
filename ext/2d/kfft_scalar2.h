@@ -18,5 +18,5 @@ kfft_eval2_scalar(kfft_sclr2_t* cfg, const kfft_scalar* fin, kfft_cpx* fout);
 KFFT_API kfft_return_t
 kfft_evali2_scalar(kfft_sclr2_t* cfg, const kfft_cpx* fin, kfft_scalar* fout);
 KFFT_API void
-kfft_shift2_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const uint32_t sz_y,
-                   const bool is_inverse);
+kfft_shift2_scalar(kfft_sclr2_t* st, kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x,
+                   const uint32_t sz_y, const bool is_inverse);

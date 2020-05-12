@@ -60,7 +60,7 @@ kfft_simd_check(const kfft_simd_t S, uint32_t flag) {
 }
 
 static inline uint8_t
-simd_align_size(const kfft_simd_t S) {
+kfft_simd_align(const kfft_simd_t S) {
     switch (S.arch) {
     case HW_ARCH_X86:
     case HW_ARCH_X64: {
@@ -86,6 +86,8 @@ simd_align_size(const kfft_simd_t S) {
         return HW_ALIGN_ARM_NEON;
 #endif
     }
-    case HW_ARCH_UKNW: return 0;
+    case HW_ARCH_UKNW:
+        return 0;
     }
+    return 0;
 }

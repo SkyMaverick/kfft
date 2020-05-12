@@ -20,8 +20,34 @@ extern "C" {
 #include "incs/kfft_types.h"
 #if defined(KFFT_USE_SIMD)
     #include "kfft_simd.h"
+#endif
 
-    #define __VEXST(S) ((kfft_object_t*)(S))->vex
+#include "incs/kfft_math.h"
+#include "incs/kfft_alloc.h"
+#include "incs/kfft_ext.h"
+
+#include "incs/kfft_cpx.h"
+#include "incs/kfft_scalar.h"
+
+#include "incs/kfft_shift.h"
+
+#if defined(KFFT_2D_ENABLE)
+    #include "2d/kfft_cpx2.h"
+    #include "2d/kfft_scalar2.h"
+#endif
+
+#define KFFT_PLAN_ALLOCATOR(X) (*((kfft_pool_t**)(X)))
+
+#define KFFT_PLAN_ALIGN(X) KFFT_PLAN_ALLOCATOR((X))->align
+#define KFFT_PLAN_VEX(X) KFFT_PLAN_ALLOCATOR((X))->vex
+
+#define kfft_free(X) kfft_cleanup((uintptr_t)(X))
+
+/* Protecting nested plans from destructive operations */
+#define KFFT_CHECK_FLAGS(X) ((X) & (~KFFT_FLAG_RENEW))
+
+#if defined(KFFT_USE_SIMD)
+    #define __VEXST(S) KFFT_PLAN_VEX((S))
 // clang-format off
     #define VEX_CHECK_AVX2(S) \
         kfft_simd_check(__VEXST((S)),HW_AVX2)
@@ -56,30 +82,9 @@ extern "C" {
     #endif
 // clang-format on
 
-#else
+#else /* KFFT_USE_SIMD */
     #define VEXFUNC(S, F, ...) F(__VA_ARGS__)
 #endif
-
-#include "incs/kfft_math.h"
-#include "incs/kfft_alloc.h"
-#include "incs/kfft_ext.h"
-#include "incs/kfft_shift.h"
-
-#include "incs/kfft_cpx.h"
-#include "incs/kfft_scalar.h"
-
-#if defined(KFFT_2D_ENABLE)
-    #include "2d/kfft_cpx2.h"
-    #include "2d/kfft_scalar2.h"
-#endif
-
-#define KFFT_PLAN_ALLOCATOR(X) (*((kfft_pool_t**)(X)))
-
-#define kfft_free(X) kfft_cleanup((uintptr_t)(X))
-
-/* Protecting nested plans from destructive operations */
-#define KFFT_CHECK_FLAGS(X) ((X) & (~KFFT_FLAG_RENEW))
-
 #ifdef __cplusplus
 }
 #endif

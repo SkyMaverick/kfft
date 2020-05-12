@@ -6,11 +6,14 @@
     kfft_trace("[KIA]"" " fmt,__VA_ARGS__)
 // clang-format on
 
-kfft_pool_t*
-kfft_allocator_init(void* mem, const size_t nmem) {
+static kfft_pool_t*
+kfft_allocator_init(void* mem, const size_t nmem, kfft_simd_t vex, uint8_t align) {
     kfft_pool_t* ret = (kfft_pool_t*)mem;
     if (mem && (nmem > sizeof(kfft_pool_t))) {
+
         ret->allocated = nmem;
+        ret->vex = vex;
+        ret->align = align;
 
         ret->head = ret->area;
         ret->tail = (uint8_t*)ret + nmem;
@@ -28,9 +31,19 @@ kfft_allocator_create(const size_t size) {
     kfft_trace_kia("%s: %zu byte\n", "Allocator capacity", size);
 
     size_t memneed = sizeof(kfft_pool_t) + size;
-    kfft_pool_t* ret = KFFT_MALLOC(memneed);
+    kfft_simd_t vex = {0};
+    uint8_t align = 0;
 
-    return kfft_allocator_init(ret, memneed);
+#if defined(KFFT_USE_SIMD)
+    vex = kfft_simd_analize();
+    align = kfft_simd_align(vex);
+
+    kfft_pool_t* ret = KFFT_MALLOC(memneed, align);
+#else
+    kfft_pool_t* ret = KFFT_MALLOC(memneed, 0);
+#endif /* KFFT_USE_SIMD */
+
+    return kfft_allocator_init(ret, memneed, vex, align);
 }
 
 void*
@@ -66,7 +79,7 @@ kfft_allocator_clear(kfft_pool_t* A) {
 void
 kfft_allocator_free(kfft_pool_t* A) {
     if (A) {
-        KFFT_FREE(A);
+        KFFT_FREE(A, A->align);
     }
 }
 

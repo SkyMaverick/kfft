@@ -90,7 +90,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
 
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_cpx* scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * p);
+    kfft_cpx* scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * p, KFFT_PLAN_ALIGN(st));
     if (scratch) {
         KFFT_ALLOCA_CLEAR(scratch, sizeof(kfft_cpx) * p);
 
@@ -119,7 +119,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
             }
 #endif /* KFFT_RADER_ALGO */
         }
-        KFFT_TMP_FREE(scratch);
+        KFFT_TMP_FREE(scratch, KFFT_PLAN_ALIGN(st));
     } else {
         ret = KFFT_RET_BUFFER_FAIL;
     }

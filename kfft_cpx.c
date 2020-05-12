@@ -298,10 +298,6 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
     memcpy(st, &tmp, sizeof(kfft_comp_t));
 
     st->object.mmgr = mmgr;
-#if defined(KFFT_USE_SIMD)
-    st->object.vex = kfft_simd_analize();
-#endif
-
 #if !defined(KFFT_MEMLESS_MODE)
     st->twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);
     if (st->twiddles == NULL)
@@ -335,7 +331,8 @@ kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
         if (fin == fout) {
             // NOTE: this is not really an in-place FFT algorithm.
             // It just performs an out-of-place FFT into a temp buffer
-            kfft_cpx* tmpbuf = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * cfg->nfft);
+            kfft_cpx* tmpbuf =
+                (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * cfg->nfft, KFFT_PLAN_ALIGN(cfg));
             if (tmpbuf) {
                 KFFT_ALLOCA_CLEAR(tmpbuf, sizeof(kfft_cpx) * cfg->nfft);
 
@@ -344,7 +341,7 @@ kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
                 if (ret == KFFT_RET_SUCCESS)
                     memcpy(fout, tmpbuf, sizeof(kfft_cpx) * cfg->nfft);
 
-                KFFT_TMP_FREE(tmpbuf);
+                KFFT_TMP_FREE(tmpbuf, KFFT_PLAN_ALIGN(cfg));
             } else {
                 ret = KFFT_RET_BUFFER_FAIL;
             }

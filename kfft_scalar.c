@@ -176,10 +176,10 @@ kfft_eval_scalar_internal(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cp
 
     uint32_t ncfft = stu->substate->nfft;
     if (tmpbuf == NULL) {
-        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft);
+        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft, KFFT_PLAN_ALIGN(stu));
         if (tbuf) {
             ret = eval_func(stu, tbuf, timedata, freqdata);
-            KFFT_TMP_FREE(tbuf);
+            KFFT_TMP_FREE(tbuf, KFFT_PLAN_ALIGN(stu));
         } else {
             ret = KFFT_RET_BUFFER_FAIL;
         }
@@ -256,10 +256,10 @@ kfft_evali_scalar_internal(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scal
     uint32_t ncfft = st->substate->nfft;
 
     if (tmpbuf == NULL) {
-        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft);
+        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft, KFFT_PLAN_ALIGN(stu));
         if (tbuf) {
             ret = evali_func(stu, freqdata, timedata, tbuf);
-            KFFT_TMP_FREE(tbuf);
+            KFFT_TMP_FREE(tbuf, KFFT_PLAN_ALIGN(stu));
         } else {
             ret = KFFT_RET_BUFFER_FAIL;
         }

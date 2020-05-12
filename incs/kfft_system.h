@@ -1,32 +1,34 @@
 #pragma once
 
+#define KFFT_MALLOC_UNALIGN(X) calloc(1, (X))
 #if defined(KFFT_USE_SIMD)
     #include <immintrin.h>
 
     #if defined(KFFT_OS_WINDOWS)
         #include <malloc.h>
-        #define KFFT_MALLOC(X, A) _aligned_malloc((X), (A))
-        #define KFFT_FREE(X) _aligned_free(X)
+        #define KFFT_MALLOC(X, A)                                                                  \
+            (((A) > 0) ? _aligned_malloc((X), (A)) : KFFT_MALLLOC_UNALIGN((X)))
+        #define KFFT_FREE(X, A) (((A) > 0) ? _aligned_free(X) : free(X))
     #else
-        #define KFFT_MALLOC(X, A) aligned_alloc((A), (X))
-        #define KFFT_FREE(X) free(X)
+        #define KFFT_MALLOC(X, A) (((A) > 0) ? aligned_alloc((A), (X)) : KFFT_MALLOC_UNALIGN((X)))
+        #define KFFT_FREE(X, A) free(X)
     #endif
 #else
-    #define KFFT_MALLOC(X) calloc(1, (X))
-    #define KFFT_FREE(X) free(X)
+    #define KFFT_MALLOC(X, A) KFFT_MALLOC_UNALIGN(X)
+    #define KFFT_FREE(X, A) free(X)
 #endif
 #define KFFT_ZEROMEM(M, X) memset((M), 0, (X))
 
-#define KFFT_FREE_NULL(X)                                                                          \
+#define KFFT_FREE_NULL(X, A)                                                                       \
     do {                                                                                           \
-        KFFT_FREE(X);                                                                              \
+        KFFT_FREE((X), (A));                                                                       \
         X = NULL;                                                                                  \
     } while (0)
 
 #if (defined(KFFT_USE_ALLOCA)) && (!defined(KFFT_USE_SIMD))
     #include <alloca.h>
-    #define KFFT_TMP_ALLOC(X) alloca((X))
-    #define KFFT_TMP_FREE(X)
+    #define KFFT_TMP_ALLOC(X, A) alloca((X))
+    #define KFFT_TMP_FREE(X, A)
 
     #define KFFT_TMP_ZEROMEM(M, X)                                                                 \
         do {                                                                                       \
@@ -38,41 +40,42 @@
     #if defined(KFFT_USE_ALLOCA)
         #pragma message WARN("SIMD functions need aligned memory. Disable alloca functionality")
     #endif /* KFFT_USE_ALLOCA */
-    #if defined(KFFT_USE_SIMD)
-        #if defined(KFFT_TRACE)
 static inline void*
 __trace_malloc_aligned(size_t nmem, uint8_t align) {
     void* ret = KFFT_MALLOC(nmem, align);
+    kfft_trace("[SYS] %s - %zu: %p\n", "Allocate aligned temporary buffer", nmem, ret);
+    return ret;
+}
+static inline void*
+__trace_malloc(size_t nmem) {
+    void* ret = KFFT_MALLOC_UNALIGN(nmem);
     kfft_trace("[SYS] %s - %zu: %p\n", "Allocate temporary buffer", nmem, ret);
     return ret;
 }
-            #define KFFT_TMP_ALLOC(X, A) __trace_malloc_aligned((X), (A))
-            #define KFFT_TMP_FREE(X)                                                               \
+    #if defined(KFFT_USE_SIMD)
+        #if defined(KFFT_TRACE)
+            #define KFFT_TMP_ALLOC(X, A)                                                           \
+                (((A) > 0) ? __trace_malloc_aligned((X), (A)) : __trace_malloc((X)))
+            #define KFFT_TMP_FREE(X, A)                                                            \
                 do {                                                                               \
                     kfft_trace("[SYS] %s: %p\n", "Free temporary buffer", (void*)(X));             \
-                    KFFT_FREE((X));                                                                \
+                    KFFT_FREE((X), (A));                                                           \
                 } while (0)
         #else
             #define KFFT_TMP_ALLOC(X, A) KFFT_MALLOC((X), (A))
-            #define KFFT_TMP_FREE(X) KFFT_FREE((X))
+            #define KFFT_TMP_FREE(X, A) KFFT_FREE((X), (A))
         #endif /* KFFT_TRACE */
     #else      /* KFFT_USE_SIMD */
         #if defined(KFFT_TRACE)
-static inline void*
-__trace_malloc(size_t nmem) {
-    void* ret = KFFT_MALLOC(nmem);
-    kfft_trace("[SYS] %s - %zu: %p\n", "Allocate temporary buffer", nmem, ret);
-    return ret;
-}
-            #define KFFT_TMP_ALLOC(X) __trace_malloc((X))
-            #define KFFT_TMP_FREE(X)                                                               \
+            #define KFFT_TMP_ALLOC(X, A) __trace_malloc((X))
+            #define KFFT_TMP_FREE(X, A)                                                            \
                 do {                                                                               \
                     kfft_trace("[SYS] %s: %p\n", "Free temporary buffer", (void*)(X));             \
-                    KFFT_FREE((X));                                                                \
+                    KFFT_FREE((X), (A));                                                           \
                 } while (0)
         #else
-            #define KFFT_TMP_ALLOC(X) KFFT_MALLOC((X))
-            #define KFFT_TMP_FREE(X) KFFT_FREE((X))
+            #define KFFT_TMP_ALLOC(X, A) KFFT_MALLOC((X), (A))
+            #define KFFT_TMP_FREE(X, A) KFFT_FREE((X), (A))
         #endif /* KFFT_TRACE */
     #endif     /* KFFT_USE_SIMD */
 
@@ -81,8 +84,8 @@ __trace_malloc(size_t nmem) {
 
 #endif /* KFFT_USE_ALLOCA */
 
-#define KFFT_TMP_FREE_NULL(X)                                                                      \
+#define KFFT_TMP_FREE_NULL(X, A)                                                                   \
     do {                                                                                           \
-        KFFT_TMP_FREE(X);                                                                          \
+        KFFT_TMP_FREE((X), (A));                                                                   \
         X = NULL;                                                                                  \
     } while (0)

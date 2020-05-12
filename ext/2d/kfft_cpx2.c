@@ -117,7 +117,7 @@ static inline kfft_return_t
 kfft_2transform_normal(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_cpx* ftmp = KFFT_TMP_ALLOC(st->nfft * sizeof(kfft_cpx));
+    kfft_cpx* ftmp = KFFT_TMP_ALLOC(st->nfft * sizeof(kfft_cpx), KFFT_PLAN_ALIGN(st));
     if (ftmp) {
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
 #if !defined(KFFT_OS_WINDOWS)
@@ -142,7 +142,7 @@ kfft_2transform_normal(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
         kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
         kfft_math_transpose_cpx(ftmp, fout, st->y, st->x);
 
-        KFFT_TMP_FREE(ftmp);
+        KFFT_TMP_FREE(ftmp, KFFT_PLAN_ALIGN(st));
     } else {
         ret = KFFT_RET_BUFFER_FAIL;
     }
@@ -194,13 +194,13 @@ kfft_eval2_cpx(kfft_comp2_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     } else {
 #endif /* KFFT_MEMLESS_MODE */
         if (fin == fout) {
-            kfft_cpx* Fbuf = KFFT_TMP_ALLOC(memneeded);
+            kfft_cpx* Fbuf = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(cfg));
             if (Fbuf) {
                 ret = kfft_2transform_normal(cfg, fin, Fbuf);
                 if (ret == KFFT_RET_SUCCESS) {
                     memcpy(fout, Fbuf, memneeded);
                 }
-                KFFT_TMP_FREE(Fbuf);
+                KFFT_TMP_FREE(Fbuf, KFFT_PLAN_ALIGN(cfg));
             } else {
                 ret = KFFT_RET_BUFFER_FAIL;
             } /* Fbuf */
@@ -214,15 +214,15 @@ kfft_eval2_cpx(kfft_comp2_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
 }
 
 static void
-shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_t sz_y,
-               const bool is_inverse) {
+shift_internal(kfft_comp2_t* st, kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x,
+               const uint32_t sz_y, const bool is_inverse) {
     kfft_trace_2d("%s\n", "X-axes shift transform");
 #if !defined(KFFT_OS_WINDOWS)
     #pragma omp parallel for schedule(static)
 #endif
     for (uint32_t i = 0; i < sz_y; i++) {
         uint64_t bp = sz_x * i;
-        kfft_shift_cpx(&(buf[bp]), sz_x, is_inverse);
+        kfft_shift_cpx(st->plan_x, &(buf[bp]), sz_x, is_inverse);
     }
     if (ftmp != NULL) {
         kfft_trace_2d("%s\n", "Transposition matrix");
@@ -234,7 +234,7 @@ shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_
 #endif
         for (uint32_t i = 0; i < sz_x; i++) {
             uint64_t bp = sz_y * i;
-            kfft_shift_cpx(&(ftmp[bp]), sz_y, is_inverse);
+            kfft_shift_cpx(st->plan_y, &(ftmp[bp]), sz_y, is_inverse);
         }
         kfft_trace_2d("%s\n", "Transposition matrix");
         kfft_math_transpose_cpx(ftmp, buf, sz_y, sz_x);
@@ -248,7 +248,7 @@ shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_
 #endif
         for (uint32_t i = 0; i < sz_x; i++) {
             uint64_t bp = sz_y * i;
-            kfft_shift_cpx(&(buf[bp]), sz_y, is_inverse);
+            kfft_shift_cpx(st->plan_y, &(buf[bp]), sz_y, is_inverse);
         }
         kfft_trace_2d("%s\n", "Transposition matrix (in-place)");
         kfft_math_transpose_ip_cpx(buf, sz_y, sz_x);
@@ -256,18 +256,18 @@ shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_
 }
 
 KFFT_API void
-kfft_shift2_cpx(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_t sz_y,
-                const bool is_inverse) {
+kfft_shift2_cpx(kfft_comp2_t* st, kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x,
+                const uint32_t sz_y, const bool is_inverse) {
 #if !defined(KFFT_MEMLESS_MODE)
     if (ftmp == NULL) {
-        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * sz_x * sz_y);
+        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * sz_x * sz_y, KFFT_PLAN_ALIGN(st));
         if (tbuf) {
-            shift_internal(buf, tbuf, sz_x, sz_y, is_inverse);
-            KFFT_TMP_FREE(tbuf);
+            shift_internal(st, buf, tbuf, sz_x, sz_y, is_inverse);
+            KFFT_TMP_FREE(tbuf, KFFT_PLAN_ALIGN(st));
         }
     } else
 #endif /* KFFT_MEMLESS_MODE */
-        shift_internal(buf, ftmp, sz_x, sz_y, is_inverse);
+        shift_internal(st, buf, ftmp, sz_x, sz_y, is_inverse);
 }
 
 #undef kfft_trace_2d
