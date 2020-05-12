@@ -2,6 +2,10 @@
 
 #include <stdbool.h>
 
+#define HW_ALIGN_X8664_SSE 16
+#define HW_ALIGN_X8664_AVX 32
+#define HW_ALIGN_ARM_NEON 16
+
 enum {
     HW_ARCH_UKNW = 0,
     HW_ARCH_X86 = 1u << 0,
@@ -53,4 +57,35 @@ kfft_simd_analize(void);
 static inline bool
 kfft_simd_check(const kfft_simd_t S, uint32_t flag) {
     return (S.ext & flag);
+}
+
+static inline uint8_t
+simd_align_size(const kfft_simd_t S) {
+    switch (S.arch) {
+    case HW_ARCH_X86:
+    case HW_ARCH_X64: {
+        return
+#if defined(KFFT_SIMD_AVX2_SUPPORT)
+            (kfft_simd_check(S, HW_AVX2))
+                ? HW_ALIGN_X8664_AVX
+                :
+#endif
+#if defined(KFFT_SIMD_AVX_SUPPORT)
+                (kfft_simd_check(S, HW_AVX))
+                    ? HW_ALIGN_X8664_AVX
+                    :
+#endif
+#if defined(KFFT_SIMD_SSE_SUPPORT)
+                    (kfft_simd_check(S, HW_SSE | HW_SSE2)) ? HW_ALIGN_X8664_SSE :
+#endif
+                                                           0;
+    }
+    case HW_ARCH_ARM: {
+#if defined(KFFT_SIMD_NEON_SUPPORT)
+        // TODO detect NEON
+        return HW_ALIGN_ARM_NEON;
+#endif
+    }
+    case HW_ARCH_UKNW: return 0;
+    }
 }

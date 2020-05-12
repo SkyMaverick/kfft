@@ -35,4 +35,10 @@
 #endif
 
 #mesondefine KFFT_ARCH_X86
+
+#mesondefine KFFT_HAVE_NEON
+#if defined (KFFT_HAVE_NEON)
+    #define KFFT_SIMD_NEON_SUPPORT
+#endif
+
 #mesondefine KFFT_ARCH_ARM
