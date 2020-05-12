@@ -302,7 +302,7 @@ kfft_shift2_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, con
         kfft_scalar* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_scalar) * sz_x * sz_y, mmgr->align);
         if (tbuf) {
             shift_internal(buf, tbuf, sz_x, sz_y, is_inverse, mmgr);
-            KFFT_TMP_FREE(tbuf, KFFT_PLAN_ALIGN(st));
+            KFFT_TMP_FREE(tbuf, mmgr->align);
         }
     } else
 #endif /* KFFT_MEMLESS_MODE */
