@@ -18,7 +18,7 @@ kfft_trace_plan(kfft_csparse_t* P) {
     kfft_trace("\n\t %s - %u", "Dims", P->dims);
     kfft_trace("\n\t %s - %u", "Steps", P->step);
 
-    kfft_trace("\n\t %s - %p", "Plan for one lenght", (void*)P->subst);
+    kfft_trace("\n\t %s - %p\n", "Plan for one lenght", (void*)P->subst);
 }
 #endif /*KFFT_TRACE */
 
@@ -33,7 +33,7 @@ kfft_init(kfft_csparse_t* st) {
 }
 
 static inline size_t
-kfft_calculate(const uint32_t nfft, const uint32_t dims, uint32_t step, const uint32_t flags) {
+kfft_calculate(const uint32_t nfft, const uint32_t flags) {
     size_t ret;
     kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags), NULL, &ret);
 
@@ -46,7 +46,7 @@ KFFT_API kfft_csparse_t*
 kfft_config_sparse_cpx(const uint32_t nfft, const uint32_t flags, const uint32_t dims,
                        uint32_t step, kfft_pool_t* A, size_t* lenmem) {
     kfft_csparse_t* st = NULL;
-    size_t memneeded = kfft_calculate(nfft, dims, step, flags);
+    size_t memneeded = kfft_calculate(nfft, flags);
 
     kfft_pool_t* mmgr = NULL;
     bool flag_create = false;

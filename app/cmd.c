@@ -11,6 +11,27 @@ prepare_2d(app_mode_t* M) {
 }
 #endif /* KFFT_2D_ENABLE */
 
+static int
+parse_sparse_arg(char* arg, app_mode_t* M) {
+    size_t olen = strlen(arg);
+    char buf[olen + 1];
+    memset(buf, 0, olen + 1);
+
+    strncpy(buf, optarg, olen);
+
+    char* s = strchr(buf, ':');
+    if (s)
+        *s = '\0';
+
+    M->dim = atoi(buf);
+    if (strlen(buf) < olen) {
+        M->step = atoi(s + 1);
+    }
+
+    M->is_sparse = true;
+    return 0;
+}
+
 static inline char*
 cmd_line_parse(int argc, char* argv[], app_mode_t* mode) {
     char* ret = NULL;
@@ -35,6 +56,10 @@ cmd_line_parse(int argc, char* argv[], app_mode_t* mode) {
         case 'S':
             mode->is_cpx = false;
             break;
+        case 'd': {
+            parse_sparse_arg(optarg, mode);
+            break;
+        }
         case 'x':
             mode->x = atol(optarg);
             if (mode->x == 0)
