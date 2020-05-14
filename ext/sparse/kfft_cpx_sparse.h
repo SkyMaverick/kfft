@@ -3,6 +3,7 @@
 typedef struct {
     kfft_object_t object;
     uint32_t nfft;
+    uint32_t dim_nfft;
     uint32_t flags;
     /* Dimensions count. Ex.: x1,y1,z1,x2,y2,z2 ... xn,yn,zn */
     uint32_t dims;
