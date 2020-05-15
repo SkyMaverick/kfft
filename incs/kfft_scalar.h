@@ -16,7 +16,7 @@ typedef struct kfft_state {
 } kfft_sclr_t;
 
 KFFT_API kfft_sclr_t*
-kfft_config_scalar(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A, size_t* lenmem);
+kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
 KFFT_API kfft_return_t
 kfft_eval_scalar(kfft_sclr_t* cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
 KFFT_API kfft_return_t

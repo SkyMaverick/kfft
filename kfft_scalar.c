@@ -50,72 +50,37 @@ kfft_trace_plan(kfft_sclr_t* P) {
 ******************************************************************************** */
 
 KFFT_API kfft_sclr_t*
-kfft_config_scalar(const uint32_t nfft, const uint32_t flags, const kfft_pool_t* A,
+kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A,
                    size_t* lenmem) {
     kfft_sclr_t* st = NULL;
+    size_t memneeded = kfft_calculate(nfft, flags);
 
-    kfft_pool_t* mmgr = NULL;
-    bool flag_create = false;
+    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_sclr_t, memneeded, A, lenmem);
 
-    if (lenmem == NULL) {
-        if (A == 0) {
-            size_t memneeded = kfft_calculate(nfft, flags);
-
-            mmgr = kfft_allocator_create(memneeded);
-            flag_create = true;
-
-            kfft_trace_scalar("%s: %p\n", "Create new allocator and plan", (void*)mmgr);
-        } else {
-            mmgr = (kfft_pool_t*)A;
-            kfft_trace_scalar("%s: %p\n", "Use allocator and create plan", (void*)mmgr);
+    if (st) {
+        st->substate = kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags), st->object.mmgr, NULL);
+        if (st->substate == NULL) {
+            KFFT_ALGO_PLAN_TERMINATE(st, A);
+            return NULL;
         }
-
-        if (mmgr)
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_sclr_t));
-    } else {
-        size_t memneeded = kfft_calculate(nfft, flags);
-        if (A && *lenmem >= memneeded) {
-            mmgr = (kfft_pool_t*)A;
-
-            if (flags & KFFT_FLAG_RENEW)
-                kfft_allocator_clear(mmgr);
-
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_sclr_t));
-
-            kfft_trace_scalar("%s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
-        }
-        *lenmem = memneeded;
-    }
-
-    if (!st) {
-    bailout:
-        if (mmgr && (flag_create == true)) {
-            kfft_allocator_free(mmgr);
-        }
-        return 0;
-    }
-
-    st->object.mmgr = mmgr;
-
-    st->substate = kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags), st->object.mmgr, NULL);
-    if (st->substate == NULL)
-        goto bailout;
-
 #if !defined(KFFT_MEMLESS_MODE)
-    if (nfft > 1) {
-        st->super_twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * (nfft / 2));
-        if (st->super_twiddles == NULL)
-            goto bailout;
-    }
-    for (uint32_t i = 0; i < nfft / 2; ++i) {
-        st->super_twiddles[i] = kfft_sclr_twiddle(i, st);
-    }
+        if (nfft > 1) {
+            st->super_twiddles =
+                kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * (nfft / 2));
+            if (st->super_twiddles == NULL) {
+                KFFT_ALGO_PLAN_TERMINATE(st, A);
+                return NULL;
+            }
+        }
+        for (uint32_t i = 0; i < nfft / 2; ++i) {
+            st->super_twiddles[i] = kfft_sclr_twiddle(i, st);
+        }
 #endif /* not KFFT_MEMLESS_MODE */
 
 #ifdef KFFT_TRACE
-    kfft_trace_plan(st);
+        kfft_trace_plan(st);
 #endif
-
+    }
     return st;
 }
 

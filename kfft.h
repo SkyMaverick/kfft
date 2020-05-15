@@ -100,13 +100,13 @@ extern "C" {
             if ((st == NULL) && (pool == NULL))                                                    \
                 kfft_allocator_free(mm_##type);                                                    \
         } else {                                                                                   \
-            if (pool && *len_value >= (memneed)) {                                                   \
+            if (pool && *len_value >= (memneed)) {                                                 \
                 mm_##type = pool;                                                                  \
-                if ((flags) & KFFT_FLAG_RENEW)                                                       \
+                if ((flags)&KFFT_FLAG_RENEW)                                                       \
                     kfft_allocator_clear(mm_##type);                                               \
                 st = kfft_internal_alloc(mm_##type, sizeof(type));                                 \
             }                                                                                      \
-            *len_value = (memneed);                                                                  \
+            *len_value = (memneed);                                                                \
         }                                                                                          \
         if (st)                                                                                    \
             st->object.mmgr = mm_##type;                                                           \
