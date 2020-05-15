@@ -1,9 +1,11 @@
 #pragma once
 
+// VERSION info
 #mesondefine KFFT_MAJOR_VERSION
 #mesondefine KFFT_MINOR_VERSION
 #mesondefine KFFT_PATCH_VERSION
 
+// global library configuration
 #mesondefine KFFT_TRACE
 #mesondefine KFFT_USE_SIMD
 #mesondefine KFFT_USE_ALLOCA
@@ -12,12 +14,19 @@
 #mesondefine KFFT_RADER_ALGO
 #mesondefine KFFT_MEMLESS_MODE
 #mesondefine KFFT_HALF_SCALAR
-#mesondefine KFFT_2D_ENABLE
 
+// limits configuration info
 #mesondefine KFFT_RADER_LIMIT
 #mesondefine KFFT_PLAN_LEVEL
 #mesondefine KFFT_BFLY_LEVEL
 
+// extensions enable/disable info
+#mesondefine KFFT_2D_ENABLE
+#mesondefine KFFT_SPARSE_ENABLE
+
+// vector CPU extensions info
+
+// x86-64 architecture extensions
 #mesondefine KFFT_HAVE_SSE2
 #if defined (KFFT_HAVE_SSE2)
     #define KFFT_SIMD_SSE_SUPPORT
@@ -36,6 +45,7 @@
 
 #mesondefine KFFT_ARCH_X86
 
+// ARM architecture extensions
 #mesondefine KFFT_HAVE_NEON
 #if defined (KFFT_HAVE_NEON)
     #define KFFT_SIMD_NEON_SUPPORT

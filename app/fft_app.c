@@ -18,12 +18,16 @@ typedef struct {
 
     bool is_shift;
     bool is_cpx;
+    bool is_sparse;
     bool is_2d;
     bool is_stdin;
 
     size_t len;
     size_t x;
     size_t y;
+
+    size_t dim;
+    size_t step;
 
     uint32_t flags;
 } app_mode_t;
@@ -125,16 +129,6 @@ write_stdout(kfft_scalar* in, size_t sz) {
         free(out);
     } /* out allocated */
 }
-// #else
-// // TODO Windows
-// static char*
-// read_stdin(void) {
-//     return 0;
-// }
-// static void
-// write_stdout(kfft_scalar* in, size_t sz) {
-// }
-// #endif /* not KFFT_OS_WINDOWS */
 
 #include "cmd.c"
 #include "cwork.c"
@@ -147,12 +141,16 @@ main(int argc, char* argv[]) {
             .buf = NULL,
             .is_shift = false,
             .is_cpx = true,
+            .is_sparse = false,
             .is_2d = false,
             .is_stdin = true,
             
             .len = 0,
             .x = 0,
             .y = 0,
+     
+            .dim = 0,
+            .step = 0,
             
             .flags = 0};
     // clang-format on

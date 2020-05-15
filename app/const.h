@@ -1,6 +1,6 @@
 #include "config.h"
 
-#define FMT_OPTSTRING "gGisSx:vVf?"
+#define FMT_OPTSTRING "gGisSd:x:vVf?"
 
 #define STDIN_BUF_SIZE 0xFF
 #define STDOUT_BUF_SIZE 0xFF
@@ -24,7 +24,8 @@
     "\t-G - use ONLY generic algorithm for all sequence evalation \n"                              \
     "\t-f - parse last args as input sequence \n"                                                  \
     "\t-i - use inverse transformation \n"                                                         \
-    "\t-S - use scalar functions for evalate. \n"                                                  \
+    "\t-S - use scalar functions for evalate \n"                                                   \
+    "\t-d - use sparse functionality (arguments dims:step)\n"                                      \
     "\t-s - use shift functionality \n"                                                            \
     "\t-x - translate linear buffer as 2d buffer X * (lenght / X) \n"                              \
     "\t-v - version info \n"                                                                       \

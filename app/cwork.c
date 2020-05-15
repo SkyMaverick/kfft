@@ -32,6 +32,33 @@ work_cpx2_internal(kfft_cpx* buf, app_mode_t* M) {
 }
 #endif /* KFFT_2D_ENABLE */
 
+#if defined(KFFT_SPARSE_ENABLE)
+static kfft_return_t
+work_cpx_sparse_internal(kfft_cpx* buf, app_mode_t* M) {
+    kfft_return_t ret = KFFT_RET_ALLOC_FAIL;
+
+    kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
+    if (buf && ftmp) {
+        kfft_csparse_t* plan =
+            kfft_config_sparse_cpx(M->len, M->flags, M->dim, M->step, NULL, NULL);
+        if (plan) {
+            ret = kfft_eval_sparse_cpx(plan, buf, ftmp);
+            kfft_free(plan);
+        } else {
+            ret = KFFT_RET_ALLOC_FAIL;
+        } /* plan != NULL */
+
+        if (ret == KFFT_RET_SUCCESS) {
+            write_stdout((kfft_scalar*)ftmp, M->len * 2);
+            fprintf(stdout, "%s\n", "");
+        }
+        free(ftmp);
+    } /* in && ftmp */
+
+    return ret;
+}
+#endif /* KFFT_SPARSE_ENABLE */
+
 static kfft_return_t
 work_cpx_internal(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_ALLOC_FAIL;
@@ -80,6 +107,11 @@ work_cpx(char* buf, app_mode_t* M) {
                 }
             } else
 #endif /* KFFT_2D_ENABLE */
+#if defined(KFFT_SPARSE_ENABLE)
+                if (M->is_sparse) {
+                ret = work_cpx_sparse_internal(fin, M);
+            } else
+#endif
                 ret = work_cpx_internal(fin, M);
         }
         free(fin);
