@@ -170,3 +170,35 @@ kfft_eval_sparse_cpx(kfft_csparse_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     return kfft_process(cfg, fin, fout);
 #endif /* KFFT_MEMLESS_MODE */
 }
+
+static void
+shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t nfft, const uint32_t dims,
+               uint32_t step, const bool is_inverse, kfft_pool_t* mmgr) {
+
+    for (uint32_t n = 0; n < dims; n++) {
+        for (uint32_t i = 0; i < nfft; i++)
+            C_CPY(ftmp[i], buf[i * (dims + step) + n]);
+
+        kfft_shift_cpx(ftmp, nfft, is_inverse, mmgr);
+
+        for (uint32_t i = 0; i < nfft; i++)
+            C_CPY(buf[i * (dims + step) + n], ftmp[i]);
+    }
+}
+
+KFFT_API void
+kfft_shift_sparse_cpx(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t nfft, const uint32_t dims,
+                      uint32_t step, const bool is_inverse, kfft_pool_t* mmgr) {
+
+    size_t dim_nfft = (nfft + step) / (dims + step);
+#if !defined(KFFT_MEMLESS_MODE)
+    if (ftmp == NULL) {
+        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * dim_nfft, mmgr->align);
+        if (tbuf) {
+            shift_internal(buf, tbuf, dim_nfft, dims, step, is_inverse, mmgr);
+            KFFT_TMP_FREE(tbuf, mmgr->align);
+        }
+    } else
+#endif /* KFFT_MEMLESS_MODE */
+        shift_internal(buf, ftmp, dim_nfft, dims, step, is_inverse, mmgr);
+}
