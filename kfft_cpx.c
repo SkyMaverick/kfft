@@ -257,57 +257,28 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
 
     size_t memneeded = kfft_calculate(nfft, flags, level, &tmp);
 
-    kfft_pool_t* mmgr = NULL;
-    bool flag_create = false;
+    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_comp_t, memneeded, A, lenmem);
 
-    if (lenmem == NULL) {
-        if (A == NULL) {
-            mmgr = kfft_allocator_create(memneeded);
-            flag_create = true;
+    if (st) {
+        memcpy(&(tmp.object), &(st->object), sizeof(kfft_object_t));
+        memcpy(st, &tmp, sizeof(kfft_comp_t));
 
-            kfft_trace_core(level, "%s: %p\n", "Create new allocator and plan", (void*)mmgr);
-        } else {
-            mmgr = A;
-            kfft_trace_core(level, "%s: %p\n", "Use allocator and create plan", (void*)mmgr);
-        }
-        if (mmgr)
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_comp_t));
-    } else {
-        if (A && *lenmem >= memneeded) {
-            mmgr = A;
-
-            if (flags & KFFT_FLAG_RENEW)
-                kfft_allocator_clear(mmgr);
-
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_comp_t));
-            kfft_trace_core(level, "%s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
-        }
-        *lenmem = memneeded;
-    }
-
-    if (!st) {
-    bailout:
-        if (mmgr && (flag_create == true))
-            kfft_allocator_free(mmgr);
-        return NULL;
-    }
-
-    memcpy(st, &tmp, sizeof(kfft_comp_t));
-
-    st->object.mmgr = mmgr;
 #if !defined(KFFT_MEMLESS_MODE)
-    st->twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);
-    if (st->twiddles == NULL)
-        goto bailout;
+        st->twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);
+        if (st->twiddles == NULL) {
+            KFFT_ALGO_PLAN_TERMINATE(st, A);
+            return NULL;
+        }
 #endif /* not KFFT_MEMLESS_MODE */
-
-    if (kfft_kinit(st) != KFFT_RET_SUCCESS)
-        goto bailout;
+        if (kfft_kinit(st) != KFFT_RET_SUCCESS) {
+            KFFT_ALGO_PLAN_TERMINATE(st, A);
+            return NULL;
+        }
 
 #ifdef KFFT_TRACE
-    kfft_trace_plan(st);
+        kfft_trace_plan(st);
 #endif
-
+    }
     return st;
 }
 
