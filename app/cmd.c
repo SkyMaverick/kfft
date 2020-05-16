@@ -14,22 +14,25 @@ prepare_2d(app_mode_t* M) {
 static int
 parse_sparse_arg(char* arg, app_mode_t* M) {
     size_t olen = strlen(arg);
-    char buf[olen + 1];
-    memset(buf, 0, olen + 1);
+    char* buf = calloc(olen + 1, sizeof(char));
+    if (buf) {
+        strncpy(buf, optarg, olen);
 
-    strncpy(buf, optarg, olen);
+        char* s = strchr(buf, ':');
+        if (s)
+            *s = '\0';
 
-    char* s = strchr(buf, ':');
-    if (s)
-        *s = '\0';
+        M->dim = atoi(buf);
+        if (strlen(buf) < olen)
+            M->step = atoi(s + 1);
 
-    M->dim = atoi(buf);
-    if (strlen(buf) < olen) {
-        M->step = atoi(s + 1);
+        M->is_sparse = true;
+        free(buf);
+
+        return 0;
+    } else {
+        return 1;
     }
-
-    M->is_sparse = true;
-    return 0;
 }
 
 static inline char*
