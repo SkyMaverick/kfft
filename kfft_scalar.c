@@ -50,8 +50,7 @@ kfft_trace_plan(kfft_sclr_t* P) {
 ******************************************************************************** */
 
 KFFT_API kfft_sclr_t*
-kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A,
-                   size_t* lenmem) {
+kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem) {
     kfft_sclr_t* st = NULL;
     size_t memneeded = kfft_calculate(nfft, flags);
 

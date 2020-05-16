@@ -61,55 +61,22 @@ kfft_config2_cpx(const uint32_t x_size, const uint32_t y_size, const uint32_t fl
     kfft_comp2_t* st = NULL;
     size_t memneeded = kfft_calculate(x_size, y_size, flags);
 
-    kfft_pool_t* mmgr = NULL;
-    bool flag_create = false;
+    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_comp2_t, memneeded, A, lenmem);
+    if (st) {
 
-    if (lenmem == NULL) {
-        if (A == NULL) {
-            mmgr = kfft_allocator_create(memneeded);
-            flag_create = true;
+        st->nfft = x_size * y_size;
+        st->x = x_size;
+        st->y = y_size;
+        st->flags = flags;
 
-            kfft_trace_2d("%s: %p\n", "Create new allocator and plan", (void*)mmgr);
-        } else {
-            mmgr = A;
-            kfft_trace_2d("%s: %p\n", "Use allocator and create plan", (void*)mmgr);
+        if (kfft_init(st) != KFFT_RET_SUCCESS) {
+            KFFT_ALGO_PLAN_TERMINATE(st, A);
+            return NULL;
         }
-        if (mmgr)
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_comp2_t));
-    } else {
-        if (A && *lenmem >= memneeded) {
-            mmgr = A;
-
-            if (flags & KFFT_FLAG_RENEW)
-                kfft_allocator_clear(mmgr);
-
-            st = kfft_internal_alloc(mmgr, sizeof(kfft_comp2_t));
-            kfft_trace_2d("%s: %p\n", "Reuse allocator and create plan", (void*)mmgr);
-        }
-        *lenmem = memneeded;
-    }
-
-    if (!st) {
-    bailout:
-        if (mmgr && (flag_create == true))
-            kfft_allocator_free(mmgr);
-        return NULL;
-    }
-
-    st->object.mmgr = mmgr;
-
-    st->nfft = x_size * y_size;
-    st->x = x_size;
-    st->y = y_size;
-    st->flags = flags;
-
-    if (kfft_init(st) != KFFT_RET_SUCCESS)
-        goto bailout;
-
 #ifdef KFFT_TRACE
-    kfft_trace_plan(st);
+        kfft_trace_plan(st);
 #endif
-
+    }
     return st;
 }
 

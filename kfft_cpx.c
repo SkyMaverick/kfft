@@ -258,7 +258,6 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
     size_t memneeded = kfft_calculate(nfft, flags, level, &tmp);
 
     KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_comp_t, memneeded, A, lenmem);
-
     if (st) {
         memcpy(&(tmp.object), &(st->object), sizeof(kfft_object_t));
         memcpy(st, &tmp, sizeof(kfft_comp_t));
