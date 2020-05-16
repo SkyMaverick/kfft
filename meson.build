@@ -25,6 +25,7 @@ kfft_src = files('''
 
 kfft_headers = files('''
     incs/kfft_alloc.h
+    incs/kfft_algo.h
     incs/kfft_cpx.h
     incs/kfft_ext.h
     incs/kfft_macro.h
