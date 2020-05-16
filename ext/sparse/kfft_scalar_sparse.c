@@ -23,7 +23,7 @@ kfft_trace_plan(kfft_ssparse_t* P) {
 #endif /*KFFT_TRACE */
 
 static inline kfft_return_t
-kfft_init(kfft_csparse_t* st) {
+kfft_init(kfft_ssparse_t* st) {
     st->subst = kfft_config_scalar(st->nfft, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
     return (st->subst) ? KFFT_RET_SUCCESS : KFFT_RET_ALLOC_FAIL;
 }
@@ -75,8 +75,35 @@ kfft_evali_sparse_scalar(kfft_ssparse_t* cfg, const kfft_cpx* fin, kfft_scalar* 
     return ret;
 }
 
+static inline void
+shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nfft, const uint32_t dims,
+               uint32_t step, const bool is_inverse, kfft_pool_t* mmgr) {
+
+    for (uint32_t n = 0; n < dims; n++) {
+        for (uint32_t i = 0; i < nfft; i++)
+            ftmp[i] = buf[i * (dims + step) + n];
+
+        kfft_shift_scalar(ftmp, nfft, is_inverse, mmgr);
+
+        for (uint32_t i = 0; i < nfft; i++)
+            buf[i * (dims + step) + n] = ftmp[i];
+    }
+}
+
 KFFT_API void
-kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_cpx* ftmp, const uint32_t nfft, const uint32_t dims,
-                         uint32_t step, const bool is_inverse, kfft_pool_t* mmgr) {
+kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nfft,
+                         const uint32_t dims, uint32_t step, const bool is_inverse,
+                         kfft_pool_t* mmgr) {
+    size_t dim_nfft = (nfft + step) / (dims + step);
+#if !defined(KFFT_MEMLESS_MODE)
+    if (ftmp == NULL) {
+        kfft_scalar* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_scalar) * dim_nfft, mmgr->align);
+        if (tbuf) {
+            shift_internal(buf, tbuf, dim_nfft, dims, step, is_inverse, mmgr);
+            KFFT_TMP_FREE(tbuf, mmgr->align);
+        }
+    } else
+#endif /* KFFT_MEMLESS_MODE */
+        shift_internal(buf, ftmp, dim_nfft, dims, step, is_inverse, mmgr);
     return;
 }

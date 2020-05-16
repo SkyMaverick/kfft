@@ -20,5 +20,6 @@ kfft_eval_sparse_scalar(kfft_ssparse_t* cfg, const kfft_scalar* fin, kfft_cpx* f
 KFFT_API kfft_return_t
 kfft_evali_sparse_scalar(kfft_ssparse_t* cfg, const kfft_cpx* fin, kfft_scalar* fout);
 KFFT_API void
-kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_cpx* ftmp, const uint32_t nfft, const uint32_t dims,
-                         uint32_t step, const bool is_inverse, kfft_pool_t* mmgr);
+kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nfft,
+                         const uint32_t dims, uint32_t step, const bool is_inverse,
+                         kfft_pool_t* mmgr);

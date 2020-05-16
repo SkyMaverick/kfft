@@ -138,7 +138,7 @@ kfft_eval_sparse_cpx(kfft_csparse_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
 #endif /* KFFT_MEMLESS_MODE */
 }
 
-static void
+static inline void
 shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t nfft, const uint32_t dims,
                uint32_t step, const bool is_inverse, kfft_pool_t* mmgr) {
 

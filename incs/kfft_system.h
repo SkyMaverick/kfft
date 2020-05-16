@@ -40,19 +40,19 @@
         #pragma message WARN("SIMD functions need aligned memory. Disable alloca functionality")
     #endif /* KFFT_USE_ALLOCA */
 static inline void*
-__trace_malloc_aligned(size_t nmem, uint8_t align) {
-    void* ret = KFFT_MALLOC(nmem, align);
-    kfft_trace("[SYS] %s (%s %d) - %zu : %p\n", "Allocate temporary buffer", "aligned", align, nmem,
-               ret);
-    return ret;
-}
-static inline void*
 __trace_malloc(size_t nmem) {
     void* ret = KFFT_MALLOC_UNALIGN(nmem);
     kfft_trace("[SYS] %s - %zu: %p\n", "Allocate temporary buffer", nmem, ret);
     return ret;
 }
     #if defined(KFFT_USE_SIMD)
+static inline void*
+__trace_malloc_aligned(size_t nmem, uint8_t align) {
+    void* ret = KFFT_MALLOC(nmem, align);
+    kfft_trace("[SYS] %s (%s %d) - %zu : %p\n", "Allocate temporary buffer", "aligned", align, nmem,
+               ret);
+    return ret;
+}
         #if defined(KFFT_TRACE)
             #define KFFT_TMP_ALLOC(X, A)                                                           \
                 (((A) > 0) ? __trace_malloc_aligned((X), (A)) : __trace_malloc((X)))
