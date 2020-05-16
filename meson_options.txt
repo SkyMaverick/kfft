@@ -17,7 +17,7 @@ option ('enable_alloca', type: 'boolean', value: 'false',
         description: 'use alloca for temporary buffers (dangerouse)')
 option ('enable_sysmath', type: 'boolean', value: 'true',
         description: 'use system (or custom) defines and math functions')
-option ('enable_fastmath', type: 'boolean', value: 'false',
+option ('enable_fastmath', type: 'boolean', value: 'true',
         description: 'use -ffast-math optimization (maybe dangerouse)')
 option ('enable_extended', type: 'boolean', value: 'true',
         description: 'enable extended algoritms (use generic algorithm for prime-lenght sequence)')
@@ -30,7 +30,7 @@ option ('enable_openmp', type: 'boolean', value: 'true',
 
 option ('list_extensions', type: 'array', value: ['2d', 'sparse'],
         description: 'enable extensions')
-option ('list_vex86', type: 'array', choices: ['sse', 'avx', 'avx2'], value: ['sse', 'avx'],
+option ('list_vex86', type: 'array', choices: ['sse', 'avx', 'avx2'], value: ['sse'],
         description: 'enable vector extensioins support')
 option ('enable_sse3', type: 'boolean', value: 'true',
         description: 'enable SSE3 along with SSE2 (any CPU don\'t support this, but it\'s faster)')

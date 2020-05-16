@@ -38,7 +38,7 @@ extern "C" {
 #endif
 #if defined(KFFT_SPARSE_ENABLE)
     #include "sparse/kfft_cpx_sparse.h"
-//    #include "sparse/kfft_scalar2.h"
+    #include "sparse/kfft_scalar_sparse.h"
 #endif
 
 #define KFFT_PLAN_MMGR(X) (*((kfft_pool_t**)(X)))

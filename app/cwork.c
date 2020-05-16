@@ -42,7 +42,17 @@ work_cpx_sparse_internal(kfft_cpx* buf, app_mode_t* M) {
         kfft_csparse_t* plan =
             kfft_config_sparse_cpx(M->len, M->flags, M->dim, M->step, NULL, NULL);
         if (plan) {
+            if ((M->flags & KFFT_FLAG_INVERSE) && (M->is_shift))
+                kfft_shift_sparse_cpx(buf, NULL, M->len, M->dim, M->step, true,
+                                      KFFT_PLAN_MMGR(plan));
+
             ret = kfft_eval_sparse_cpx(plan, buf, ftmp);
+
+            if (ret == KFFT_RET_SUCCESS) {
+                if ((!(M->flags & KFFT_FLAG_INVERSE)) && (M->is_shift))
+                    kfft_shift_sparse_cpx(ftmp, NULL, M->len, M->dim, M->step, false,
+                                          KFFT_PLAN_MMGR(plan));
+            }
             kfft_free(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
