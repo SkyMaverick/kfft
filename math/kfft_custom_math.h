@@ -1,0 +1,29 @@
+#pragma once
+
+unsigned
+kfft_sincos_float(float* co, float* si, float x);
+unsigned
+kfft_sincos_double(double* co, double* si, double x);
+
+static inline kfft_scalar
+kfft_math_sqrt(const kfft_scalar number) {
+    const kfft_scalar ACCURACY = 0.001;
+    kfft_scalar lower, upper, guess;
+
+    if (number < 1) {
+        lower = number;
+        upper = 1;
+    } else {
+        lower = 1;
+        upper = number;
+    }
+
+    while ((upper - lower) > ACCURACY) {
+        guess = (lower + upper) / 2;
+        if (guess * guess > number)
+            upper = guess;
+        else
+            lower = guess;
+    }
+    return (lower + upper) / 2;
+}

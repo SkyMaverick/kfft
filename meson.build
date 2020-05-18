@@ -81,6 +81,8 @@ if get_option ('enable_sysmath')
     if not (osid == 'windows')
         kfft_deps += cc.find_library('m', required: true)
     endif
+else
+    subdir('math')
 endif
 if get_option ('enable_fastmath')
     if not (ccid == 'msvc')
