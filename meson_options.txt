@@ -23,7 +23,7 @@ option ('enable_extended', type: 'boolean', value: 'true',
         description: 'enable extended algoritms (use generic algorithm for prime-lenght sequence)')
 option ('enable_memless', type: 'boolean', value: 'false',
         description: 'use memory less mode (very slow)')
-option ('enable_half_scalar', type: 'boolean', value: 'false',
+option ('enable_half_scalar', type: 'boolean', value: 'true',
         description: 'use float data type without double (by default). This option disable SIMD build.')
 option ('enable_openmp', type: 'boolean', value: 'true',
         description: 'enable openmp parallel pragmas (uses 2d, sparse extensions)')

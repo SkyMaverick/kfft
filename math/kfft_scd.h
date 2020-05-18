@@ -1,4 +1,3 @@
-#define K0 8
 #define K1 48
 
 /* Frac: table of 2^(-k), k=1,...,K1 */

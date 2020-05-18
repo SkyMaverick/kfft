@@ -29,18 +29,18 @@ int_fract(int* sign, unsigned short* dest, float src) {
         return (NORMAL);
     } else
         return (ISNAN);
-    if (src > (float)0xffffffff)
+    if (src > (float)0xffff)
         return (*sign == 1 ? OVERFLOW : UNDERFLOW);
     intp = (unsigned long)src;
     src -= (float)intp;
-    dest[0] = (unsigned short)(intp & 0xffff);
-    dest[1] = (unsigned short)(intp >> 16);
+    dest[0] = (unsigned short)(intp & 0xff);
+    dest[1] = (unsigned short)(intp >> 8);
     dst = dest + 2;
     fr = Frac;
     for (i = 0; i < 3; i++) {
         *dst = 0;
         as = 1;
-        for (k = 0; k < 16; k++) {
+        for (k = 0; k < 8; k++) {
             if ((a = src - (*fr)) >= 0.) {
                 src = a;
                 *dst |= as;
@@ -81,7 +81,7 @@ kfft_sincos_float(float* co, float* si, float x) {
     xt = xx + 2;
     for (i = 0; i < 3; i++) {
         as = 1;
-        for (k = 0; k < 16; k++) {
+        for (k = 0; k < 8; k++) {
             if (*xt & as) {
                 ct = (*co);
                 st = (*si);
