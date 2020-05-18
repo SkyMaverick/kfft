@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
-#include <math.h>
+// #include <math.h>
 #include <string.h>
 #include <stdint.h>
 #include <stddef.h>

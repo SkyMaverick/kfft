@@ -64,15 +64,151 @@ kfft_config_sparse_scalar(const uint32_t nfft, const uint32_t flags, const uint3
     return st;
 }
 
-KFFT_API kfft_return_t
-kfft_eval_sparse_scalar(kfft_ssparse_t* cfg, const kfft_scalar* fin, kfft_cpx* fout) {
+#if defined(KFFT_MEMLESS_MODE)
+static inline kfft_return_t
+kfft_eval_process_memless(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
+    uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
+
+    kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
+    if (fbuf_cpx) {
+        for (uint32_t n = 0; n < plan->dims; n++) {
+            kfft_scalar* fbuf_scr = (kfft_scalar*)((kfft_cpx*)fbuf_cpx + plan->nfft);
+            // forward scramble input buffer
+            for (uint32_t i = 0; i < plan->nfft; i++) {
+                fbuf_scr[i] = fin[i * (plan->dims + plan->step) + n];
+            }
+            ret = kfft_eval_scalar(plan->subst, fbuf_scr, fbuf_cpx);
+            if (ret == KFFT_RET_SUCCESS) {
+                // backward put values in output buffer
+                for (uint32_t i = 0; i < plan->nfft; i++) {
+                    C_CPY(fout[i * (plan->dims + plan->step) + n], fbuf_cpx[i]);
+                }
+            }
+            KFFT_TMP_FREE(fbuf_cpx, KFFT_PLAN_ALIGN(plan));
+        }
+    } else {
+        ret = KFFT_RET_BUFFER_FAIL;
+    }
+
     return ret;
 }
-KFFT_API kfft_return_t
-kfft_evali_sparse_scalar(kfft_ssparse_t* cfg, const kfft_cpx* fin, kfft_scalar* fout) {
+#endif /* KFFT_MEMLESS_MODE */
+
+static inline kfft_return_t
+kfft_eval_process(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
+    uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
+
+#if !defined(KFFT_OS_WINDOWS)
+    #pragma omp parallel for schedule(static)
+#endif
+    for (uint32_t n = 0; n < plan->dims; n++) {
+        kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
+        if (fbuf_cpx) {
+            kfft_scalar* fbuf_scr = (kfft_scalar*)((kfft_cpx*)fbuf_cpx + plan->nfft);
+            // forward scramble input buffer
+            for (uint32_t i = 0; i < plan->nfft; i++) {
+                fbuf_scr[i] = fin[i * (plan->dims + plan->step) + n];
+            }
+            ret = kfft_eval_scalar(plan->subst, fbuf_scr, fbuf_cpx);
+            if (ret == KFFT_RET_SUCCESS) {
+                // backward put values in output buffer
+                for (uint32_t i = 0; i < plan->nfft; i++) {
+                    C_CPY(fout[i * (plan->dims + plan->step) + n], fbuf_cpx[i]);
+                }
+            }
+            KFFT_TMP_FREE(fbuf_cpx, KFFT_PLAN_ALIGN(plan));
+        } else {
+            ret = KFFT_RET_BUFFER_FAIL;
+        }
+    }
     return ret;
+}
+
+KFFT_API kfft_return_t
+kfft_eval_sparse_scalar(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* fout) {
+    if ((plan->dims < 2) && (plan->step))
+        return kfft_eval_scalar(plan->subst, fin, fout);
+
+#if defined(KFFT_MEMLESS_MODE)
+    return kfft_eval_process_memless(plan, fin, fout);
+#else
+    return kfft_eval_process(plan, fin, fout);
+#endif /* KFFT_MEMLESS_MODE */
+}
+
+#if defined(KFFT_MEMLESS_MODE)
+KFFT_API kfft_return_t
+kfft_evali_process_memless(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout) {
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+    uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
+
+    kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
+    if (fbuf_cpx) {
+        for (uint32_t n = 0; n < plan->dims; n++) {
+            kfft_scalar* fbuf_scr = (kfft_scalar*)((kfft_cpx*)fbuf_cpx + plan->nfft);
+            // forward scramble input buffer
+            for (uint32_t i = 0; i < plan->nfft; i++) {
+                C_CPY(fbuf_cpx[i], fin[i * (plan->dims + plan->step) + n]);
+            }
+            ret = kfft_evali_scalar(plan->subst, fbuf_cpx, fbuf_scr);
+            if (ret == KFFT_RET_SUCCESS) {
+                // backward put values in output buffer
+                for (uint32_t i = 0; i < plan->nfft; i++) {
+                    fout[i * (plan->dims + plan->step) + n] = fbuf_scr[i];
+                }
+            }
+            KFFT_TMP_FREE(fbuf_cpx, KFFT_PLAN_ALIGN(plan));
+        }
+    } else {
+        ret = KFFT_RET_BUFFER_FAIL;
+    }
+    return ret;
+}
+#endif /* KFFT_MEMLESS_MODE */
+
+KFFT_API kfft_return_t
+kfft_evali_process(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout) {
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+    uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
+
+#if !defined(KFFT_OS_WINDOWS)
+    #pragma omp parallel for schedule(static)
+#endif
+    for (uint32_t n = 0; n < plan->dims; n++) {
+        kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
+        if (fbuf_cpx) {
+            kfft_scalar* fbuf_scr = (kfft_scalar*)((kfft_cpx*)fbuf_cpx + plan->nfft);
+            // forward scramble input buffer
+            for (uint32_t i = 0; i < plan->nfft; i++) {
+                C_CPY(fbuf_cpx[i], fin[i * (plan->dims + plan->step) + n]);
+            }
+            ret = kfft_evali_scalar(plan->subst, fbuf_cpx, fbuf_scr);
+            if (ret == KFFT_RET_SUCCESS) {
+                // backward put values in output buffer
+                for (uint32_t i = 0; i < plan->nfft; i++) {
+                    fout[i * (plan->dims + plan->step) + n] = fbuf_scr[i];
+                }
+            }
+            KFFT_TMP_FREE(fbuf_cpx, KFFT_PLAN_ALIGN(plan));
+        } else {
+            ret = KFFT_RET_BUFFER_FAIL;
+        }
+    }
+    return ret;
+}
+
+KFFT_API kfft_return_t
+kfft_evali_sparse_scalar(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout) {
+    if ((plan->dims < 2) && (plan->step))
+        return kfft_evali_scalar(plan->subst, fin, fout);
+
+#if defined(KFFT_MEMLESS_MODE)
+    return kfft_evali_process_memless(plan, fin, fout);
+#else
+    return kfft_evali_process(plan, fin, fout);
+#endif /* KFFT_MEMLESS_MODE */
 }
 
 static inline void
