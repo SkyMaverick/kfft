@@ -1,12 +1,14 @@
 # --- simple test suites ---
 suites = {
-    #TODO 'suite' : 'main_app depends files'
+    'test_sqrt': files ('''
+                math_sqrt.c
+            '''.split())
 }
 
-foreach item_file, item_adds : suites
-    lib_name = item_file.split('.')[0]
-    lib_suite = shared_library (lib_name, item_file + item_adds,
-                                include_directories: kfft_inc,
+foreach targets, src : suites
+    lib_suite = shared_library (targets, src + test_utils_src,
+                                include_directories: [kfft_inc, test_inc],
                                 link_with: libkfft,
+                                dependencies: test_deps,
                                 install: false)
 endforeach

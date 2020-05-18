@@ -1,8 +1,9 @@
 test_name = 'test_bot'
 test_src = files('''
     run.c
+'''.split())
+test_utils_src = files('''
     util.c
-    util.h
 '''.split())
 
 test_deps = [
@@ -10,9 +11,11 @@ test_deps = [
     cc.find_library('dl', required: true),
 ]
 
+test_inc = include_directories('.')
 test_app = executable(test_name,
-                      test_src,
+                      test_src + test_utils_src,
                       dependencies: test_deps,
+                      include_directories: test_inc,
                       install: false)
 subdir('suites')
 
