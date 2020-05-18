@@ -61,7 +61,7 @@ kfft_sincos_float(float* co, float* si, float x) {
     int i, k, as;
     float st, ct, *sit, *cot;
     /* divide x by 2*pi */
-    x /= M_2PI;
+    x /= (float)M_2PI;
     /* decompose x */
     switch (int_fract(&sign, xx, x)) {
     case KFFT_MATH_OVERFLOW:

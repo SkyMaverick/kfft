@@ -1,5 +1,7 @@
 #pragma once
 
+#include "kfft_types.h"
+
 enum {
     KFFT_MATH_NORMAL,
     KFFT_MATH_OVERFLOW,
