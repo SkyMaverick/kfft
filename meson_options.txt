@@ -26,7 +26,7 @@ option ('enable_memless', type: 'boolean', value: 'false',
 option ('enable_half_scalar', type: 'boolean', value: 'false',
         description: 'use float data type without double (by default). This option disable SIMD build.')
 option ('enable_openmp', type: 'boolean', value: 'true',
-        description: 'enable openmp parallel pragmas (uses 2d and more dimensions)')
+        description: 'enable openmp parallel pragmas (uses 2d, sparse extensions)')
 
 option ('list_extensions', type: 'array', value: ['2d', 'sparse'],
         description: 'enable extensions')
