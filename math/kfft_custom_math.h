@@ -1,5 +1,13 @@
 #pragma once
 
+enum {
+    KFFT_MATH_NORMAL,
+    KFFT_MATH_OVERFLOW,
+    KFFT_MATH_UNDERFLOW,
+    KFFT_MATH_ISNAN,
+    KFFT_MATH_TLOSS
+};
+
 unsigned
 kfft_sincos_float(float* co, float* si, float x);
 unsigned

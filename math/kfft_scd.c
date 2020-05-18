@@ -4,8 +4,7 @@
 /* functions return */
 #define M_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
 
-enum { NORMAL, OVERFLOW, UNDERFLOW, ISNAN, TLOSS };
-
+#include "kfft_custom_math.h"
 #include "kfft_scd.h"
 
 /* decompose a double precision number into 5 unsigned short numbers + sign.
@@ -26,11 +25,11 @@ int_fract(int* sign, unsigned short* dest, double src) {
         *sign = 0;
         for (i = 0; i < 5; i++)
             dest[i] = 0;
-        return (NORMAL);
+        return (KFFT_MATH_NORMAL);
     } else
-        return (ISNAN);
+        return (KFFT_MATH_ISNAN);
     if (src > (double)0xffffffff)
-        return (*sign == 1 ? OVERFLOW : UNDERFLOW);
+        return (*sign == 1 ? KFFT_MATH_OVERFLOW : KFFT_MATH_UNDERFLOW);
     intp = (unsigned long)src;
     src -= (double)intp;
     dest[0] = (unsigned short)(intp & 0xffff);
@@ -50,7 +49,7 @@ int_fract(int* sign, unsigned short* dest, double src) {
         }
         dst++;
     }
-    return (NORMAL);
+    return (KFFT_MATH_NORMAL);
 }
 
 /* calculate the sine and cosine */
@@ -65,14 +64,14 @@ kfft_sincos_double(double* co, double* si, double x) {
     x /= M_2PI;
     /* decompose x */
     switch (int_fract(&sign, xx, x)) {
-    case OVERFLOW:
-    case UNDERFLOW: {
+    case KFFT_MATH_OVERFLOW:
+    case KFFT_MATH_UNDERFLOW: {
         *co = 1.;
         (*si) = 0.;
-        return (TLOSS);
+        return (KFFT_MATH_TLOSS);
     }
-    case ISNAN:
-        return (ISNAN);
+    case KFFT_MATH_ISNAN:
+        return (KFFT_MATH_ISNAN);
     }
     *co = 1.;
     *si = 0.;
@@ -97,5 +96,5 @@ kfft_sincos_double(double* co, double* si, double x) {
     /* if the sign was changed, change sine result */
     if (sign < 0)
         *si = -(*si);
-    return (NORMAL);
+    return (KFFT_MATH_NORMAL);
 }
