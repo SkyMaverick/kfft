@@ -102,8 +102,8 @@ kf_factor(kfft_comp_t* st) {
     kfft_splan_t* pbuf = st->primes;
 #endif /* KFFT_RADER_ALGO */
 
-    double floor_sqrt;
-    floor_sqrt = floor(sqrt((double)st->nfft));
+    unsigned floor_sqrt;
+    floor_sqrt = (unsigned)KFFT_SQRT((double)st->nfft);
 
     /*factor out powers of 4, powers of 2, then any remaining primes */
     do {

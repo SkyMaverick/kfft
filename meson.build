@@ -1,5 +1,5 @@
 project ('kfft', 'c',
-         version: '0.4.0',
+         version: '0.4.1',
          license: 'Zlib',
          default_options:[
             'c_std=gnu11',
@@ -81,6 +81,8 @@ if get_option ('enable_sysmath')
     if not (osid == 'windows')
         kfft_deps += cc.find_library('m', required: true)
     endif
+else
+    subdir('math')
 endif
 if get_option ('enable_fastmath')
     if not (ccid == 'msvc')

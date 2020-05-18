@@ -1,9 +1,12 @@
 #pragma once
 
+#define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
+
 #ifdef KFFT_USE_SYSMATH
     #include <math.h>
+#else
+    #include "kfft_custom_math.h"
 #endif
-#define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
 
 /*
   Explanation of macros dealing with complex math:
@@ -71,16 +74,27 @@
         (res).i -= (a).i;                                                                          \
     } while (0)
 
-#define KFFT_COS(phase) (kfft_scalar) cos(phase)
-#define KFFT_SIN(phase) (kfft_scalar) sin(phase)
+#ifdef KFFT_USE_SYSMATH
+    #define KFFT_SQRT(X) sqrt((X))
+#else
+    #define KFFT_SQRT(X) kfft_math_sqrt((X))
+#endif
+
+#ifdef KFFT_USE_SYSMATH
+    #define kf_cexp(x, phase)                                                                      \
+        do {                                                                                       \
+            (x)->r = (kfft_scalar)cos(phase);                                                      \
+            (x)->i = (kfft_scalar)sin(phase);                                                      \
+        } while (0)
+#else
+    #if defined(KFFT_HALF_SCALAR)
+        #define kf_cexp(x, phase) kfft_sincos_float(&((x)->r), &((x)->i), phase);
+    #else
+        #define kf_cexp(x, phase) kfft_sincos_double(&((x)->r), &((x)->i), phase);
+    #endif
+#endif
 #define HALF_OF(x) ((x)*.5)
 // #endif
-
-#define kf_cexp(x, phase)                                                                          \
-    do {                                                                                           \
-        (x)->r = KFFT_COS(phase);                                                                  \
-        (x)->i = KFFT_SIN(phase);                                                                  \
-    } while (0)
 
 /* Define as static inline because it's very hot functions */
 static inline uint32_t
