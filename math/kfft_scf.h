@@ -1,5 +1,8 @@
 #define K1 24
 
+#if defined(_MSC_VER)
+    #pragma warning(disable : 4305)
+#endif
 /* Frac: table of 2^(-k), k=1,...,K1 */
 static float Frac[K1] = {
     5.0000000000000000e-001, /* 2^{-1} */
@@ -83,3 +86,7 @@ static float Sine[K1] = {
     7.4901405658471570e-007, /* sin(2*Pi*2^{-23}) */
     3.7450702829238410e-007, /* sin(2*Pi*2^{-24}) */
 };
+
+#if defined(_MSC_VER)
+    #pragma warning(default : 4305)
+#endif
