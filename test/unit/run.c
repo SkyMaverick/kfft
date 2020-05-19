@@ -75,7 +75,7 @@ lookup_suites(char* lookup_dir, module_t** found_suites) {
             *found_suites = new_module;
         }
 
-        fprintf(stdout, "Found test suite: %s\n", ls->d_name);
+        //        fprintf(stdout, "Found test suite: %s\n", ls->d_name);
 
         new_module->handle = h_module;
         new_module->start_func = func_suite;
@@ -146,7 +146,7 @@ main(int argc, char* argv[]) {
         } else
             suites_list = NULL;
 
-        fprintf(stdout, "Free module: %s\n", tmp_suites->module_path);
+        //        fprintf(stdout, "Free module: %s\n", tmp_suites->module_path);
 
         dlclose(tmp_suites->handle);
         free(tmp_suites->module_path);

@@ -199,6 +199,12 @@ install_headers(kfft_headers, subdir: 'kfft/incs')
 install_headers(kfft_cfg, subdir: 'kfft/incs')
 
 if get_option('enable_tests')
+    libkfft_static = static_library (meson.project_name(), kfft_src,
+                              dependencies: kfft_deps,
+                              override_options : optimize_opts,
+                              include_directories: kfft_inc,
+                              link_with: kfft_link,
+                              install: false)
     subdir('test')
 endif
 if get_option('enable_app')

@@ -60,6 +60,9 @@ kfft_sincos_double(double* co, double* si, double x) {
     unsigned short xx[5], *xt;
     int i, k, as;
     double st, ct, *sit, *cot;
+
+    if (!((co) && (si)))
+        return (KFFT_MATH_ISNAN);
     /* divide x by 2*pi */
     x /= M_2PI;
     /* decompose x */

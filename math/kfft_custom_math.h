@@ -11,8 +11,6 @@ enum {
 };
 
 unsigned
-kfft_sincos_float(float* co, float* si, float x);
-unsigned
 kfft_sincos_double(double* co, double* si, double x);
 
 static inline kfft_scalar
