@@ -25,13 +25,13 @@ _TEST(normal) {
     srand(time(NULL));
     for (unsigned i = 0; i < TEST_CYCLE_COUNT; i++) {
         unsigned gnm = rand();
-        CU_ASSERT_DOUBLE_EQUAL(kfft_math_sqrt(gnm), sqrt(gnm), TEST_ACCURACY);
+        if (kfft_math_sqrt(gnm) - sqrt(gnm) > TEST_ACCURACY)
+            CU_FAIL_FATAL("SQRT accuracy problem");
     }
 }
 
 void
 _run_suite(void) {
-    // ... all startup functionality
     CU_pSuite suite = CUnitCreateSuite("math custom sqrt() func");
     if (suite) {
         _ADD_TEST(suite, zero);
