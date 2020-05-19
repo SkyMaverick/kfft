@@ -87,8 +87,19 @@
             (x)->i = (kfft_scalar)sin(phase);                                                      \
         } while (0)
 #else
+
     #if defined(KFFT_HALF_SCALAR)
-        #define kf_cexp(x, phase) kfft_sincos_float(&((x)->r), &((x)->i), phase);
+static inline unsigned
+__kfft_sincos_float(kfft_cpx* X, float num) {
+    double co = 0.0, si = 0.0;
+    unsigned ret = kfft_sincos_double(&co, &si, (double)num);
+
+    X->r = (float)co;
+    X->i = (float)si;
+
+    return ret;
+}
+        #define kf_cexp(x, phase) __kfft_sincos_float((x), phase)
     #else
         #define kf_cexp(x, phase) kfft_sincos_double(&((x)->r), &((x)->i), phase);
     #endif
