@@ -5,6 +5,8 @@ suites = {
             '''.split())
 }
 
+test_deps += cc.find_library('m', required: true)
+
 foreach targets, src : suites
     lib_suite = shared_library (targets, src + test_utils_src,
                                 include_directories: [kfft_inc, test_inc],
