@@ -7,7 +7,7 @@
 // clang-format on
 
 static inline kfft_pool_t*
-kfft_allocator_init(void* mem, const size_t nmem, kfft_simd_t vex, uint8_t align) {
+kfft_pool_init(void* mem, const size_t nmem, kfft_simd_t vex, uint8_t align) {
     kfft_pool_t* ret = (kfft_pool_t*)mem;
     if (mem && (nmem > sizeof(kfft_pool_t))) {
 
@@ -27,8 +27,8 @@ kfft_allocator_init(void* mem, const size_t nmem, kfft_simd_t vex, uint8_t align
 }
 
 kfft_pool_t*
-kfft_allocator_create(const size_t size) {
-    kfft_trace_kia("%s: %zu byte\n", "Allocator capacity", size);
+kfft_pool_create(const size_t size) {
+    kfft_trace_kia("%s: %zu byte\n", "pool capacity", size);
 
     size_t memneed = sizeof(kfft_pool_t) + size;
     kfft_simd_t vex = {0};
@@ -43,11 +43,11 @@ kfft_allocator_create(const size_t size) {
     kfft_pool_t* ret = KFFT_MALLOC(memneed, 0);
 #endif /* KFFT_USE_SIMD */
 
-    return kfft_allocator_init(ret, memneed, vex, align);
+    return kfft_pool_init(ret, memneed, vex, align);
 }
 
 void*
-kfft_internal_alloc(kfft_pool_t* A, const size_t nmem) {
+kfft_pool_alloc(kfft_pool_t* A, const size_t nmem) {
     uint8_t* ret = NULL;
 
     if (A && (nmem > 0)) {
@@ -64,26 +64,26 @@ kfft_internal_alloc(kfft_pool_t* A, const size_t nmem) {
 }
 
 void
-kfft_internal_zmem(const kfft_pool_t* A, void* ptr, const size_t size) {
+kfft_pool_zmem(const kfft_pool_t* A, void* ptr, const size_t size) {
     if (A && ptr && (size > 0))
         if ((uint8_t*)ptr + size <= A->tail)
             KFFT_ZEROMEM(ptr, size);
 }
 
 void
-kfft_allocator_clear(kfft_pool_t* A) {
-    kfft_internal_zmem(A, (void*)(A->area), A->tail - A->head);
+kfft_pool_clear(kfft_pool_t* A) {
+    kfft_pool_zmem(A, (void*)(A->area), A->tail - A->head);
     A->cur = A->head;
 }
 
 void
-kfft_allocator_free(kfft_pool_t* A) {
+kfft_pool_free(kfft_pool_t* A) {
     if (A) {
         KFFT_FREE(A, A->align);
     }
 }
 
 size_t
-kfft_allocator_empty(const kfft_pool_t* A) {
+kfft_pool_empty(const kfft_pool_t* A) {
     return (A) ? A->tail - A->cur : 0;
 }

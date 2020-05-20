@@ -15,7 +15,7 @@ kfft_ver = meson.project_version().split('.')
 
 kfft_src = files('''
     kfft.h
-    kfft_alloc.c
+    kfft_pool.c
     kfft_cpx.c
     kfft_scalar.c
     kfft_ext.c
@@ -24,7 +24,7 @@ kfft_src = files('''
 '''.split())
 
 kfft_headers = files('''
-    incs/kfft_alloc.h
+    incs/kfft_pool.h
     incs/kfft_algo.h
     incs/kfft_cpx.h
     incs/kfft_ext.h

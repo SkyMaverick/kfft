@@ -64,8 +64,7 @@ kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, si
         }
 #if !defined(KFFT_MEMLESS_MODE)
         if (nfft > 1) {
-            st->super_twiddles =
-                kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * (nfft / 2));
+            st->super_twiddles = kfft_pool_alloc(st->object.mmgr, sizeof(kfft_cpx) * (nfft / 2));
             if (st->super_twiddles == NULL) {
                 KFFT_ALGO_PLAN_TERMINATE(st, A);
                 return NULL;

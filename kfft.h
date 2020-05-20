@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 #include "incs/kfft_math.h"
-#include "incs/kfft_alloc.h"
+#include "incs/kfft_pool.h"
 #include "incs/kfft_algo.h"
 #include "incs/kfft_ext.h"
 
