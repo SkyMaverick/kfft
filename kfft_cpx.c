@@ -162,8 +162,8 @@ kfft_kinit(kfft_comp_t* st) {
                 sP->p = kfft_math_prmni(sP->q, sP->prime);
 
     #if !defined(KFFT_MEMLESS_MODE)
-                sP->qidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
-                sP->pidx = kfft_internal_alloc(st->object.mmgr, sizeof(uint32_t) * len);
+                sP->qidx = kfft_pool_alloc(st->object.mmgr, sizeof(uint32_t) * len);
+                sP->pidx = kfft_pool_alloc(st->object.mmgr, sizeof(uint32_t) * len);
 
                 if (sP->qidx && sP->pidx) {
 
@@ -177,8 +177,7 @@ kfft_kinit(kfft_comp_t* st) {
                         kfft_config_lvlcpx(len, (KFFT_CHECK_FLAGS(st->flags | KFFT_FLAG_INVERSE)),
                                            st->level + 1, st->object.mmgr, NULL);
 
-                    sP->shuffle_twiddles =
-                        kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * len);
+                    sP->shuffle_twiddles = kfft_pool_alloc(st->object.mmgr, sizeof(kfft_cpx) * len);
                     if (sP->shuffle_twiddles) {
 
                         for (uint32_t j = 0; j < len; j++) {
@@ -263,7 +262,7 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
         memcpy(st, &tmp, sizeof(kfft_comp_t));
 
 #if !defined(KFFT_MEMLESS_MODE)
-        st->twiddles = kfft_internal_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);
+        st->twiddles = kfft_pool_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);
         if (st->twiddles == NULL) {
             KFFT_ALGO_PLAN_TERMINATE(st, A);
             return NULL;

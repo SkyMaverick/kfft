@@ -56,7 +56,7 @@ kfft_cleanup(uintptr_t mem) {
     if (M->mmgr == NULL)
         return KFFT_RET_FREE_NULL;
 
-    kfft_allocator_free(M->mmgr);
+    kfft_pool_free(M->mmgr);
     return KFFT_RET_SUCCESS;
 }
 

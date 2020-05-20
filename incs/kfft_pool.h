@@ -5,7 +5,7 @@
 
 typedef struct {
     size_t allocated; // area size
-    uint8_t align;    // memory align in allocator
+    uint8_t align;    // memory align in pool
     kfft_simd_t vex;  // system extensions info
 
     uint8_t* head; // current head address
@@ -16,25 +16,25 @@ typedef struct {
 } kfft_pool_t;
 
 kfft_pool_t*
-kfft_allocator_create(const size_t size);
+kfft_pool_create(const size_t size);
 
 void*
-kfft_internal_alloc(kfft_pool_t* A, const size_t nmem);
+kfft_pool_alloc(kfft_pool_t* A, const size_t nmem);
 
 size_t
-kfft_allocator_empty(const kfft_pool_t* A);
+kfft_pool_empty(const kfft_pool_t* A);
 
 void
-kfft_internal_zmem(const kfft_pool_t* A, void* ptr, const size_t size);
+kfft_pool_zmem(const kfft_pool_t* A, void* ptr, const size_t size);
 
 void
-kfft_allocator_clear(kfft_pool_t* A);
+kfft_pool_clear(kfft_pool_t* A);
 
 void
-kfft_allocator_free(kfft_pool_t* A);
+kfft_pool_free(kfft_pool_t* A);
 
-#define kfft_allocator_free_and_null(A)                                                            \
+#define kfft_pool_free_and_null(A)                                                                 \
     do {                                                                                           \
-        kfft_allocator_free(A);                                                                    \
+        kfft_pool_free(A);                                                                         \
         A = NULL;                                                                                  \
     } while (0)
