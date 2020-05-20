@@ -9,15 +9,16 @@
 static inline kfft_pool_t*
 kfft_pool_init(void* mem, const size_t nmem, kfft_simd_t vex, uint8_t align) {
     kfft_pool_t* ret = (kfft_pool_t*)mem;
-    if (mem && (nmem > sizeof(kfft_pool_t))) {
+    if (mem && (nmem >= sizeof(kfft_pool_t))) {
 
         ret->allocated = nmem;
         ret->vex = vex;
         ret->align = align;
 
         ret->head = ret->area;
-        ret->tail = (uint8_t*)ret + nmem;
-
+        /* FIXME I didn’t fully understand why,
+           but the size always differs by the size of the pointer */
+        ret->tail = (uint8_t*)ret + nmem - sizeof(uintptr_t);
         ret->cur = ret->head;
 
         kfft_trace_kia("Address: %p . Head - %p; tail - %p\n", (void*)mem, (void*)ret->head,

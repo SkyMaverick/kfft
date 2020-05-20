@@ -4,7 +4,8 @@ suites = {}
 if (not get_option('enable_sysmath'))
     suites = {
         'test_sqrt': files ('math_sqrt.c'),
-        'test_sincos': files ('math_sincos.c')
+        'test_sincos': files ('math_sincos.c'),
+        'sys_pool': files ('sys_pool.c')
     }
     test_deps += cc.find_library('m', required: true)
 endif
