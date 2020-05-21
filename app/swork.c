@@ -13,7 +13,7 @@ work_scalar2_forward(kfft_scalar* buf, app_mode_t* M) {
                 if (M->is_shift)
                     kfft_shift2_cpx(ftmp, NULL, M->x, M->y, false, KFFT_PLAN_MMGR(plan));
             }
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         }
@@ -38,7 +38,7 @@ work_scalar2_inverse(kfft_cpx* buf, app_mode_t* M) {
                 kfft_shift2_cpx(buf, NULL, M->x, M->y, true, KFFT_PLAN_MMGR(plan));
 
             ret = kfft_evali2_scalar(plan, buf, ftmp);
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         }
@@ -68,7 +68,7 @@ work_scalar_sparse_forward(kfft_scalar* buf, app_mode_t* M) {
                     kfft_shift_sparse_cpx(ftmp, NULL, M->len, M->dim, M->step, true,
                                           KFFT_PLAN_MMGR(plan));
             }
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */
@@ -96,7 +96,7 @@ work_scalar_sparse_inverse(kfft_cpx* buf, app_mode_t* M) {
                                       KFFT_PLAN_MMGR(plan));
 
             ret = kfft_evali_sparse_scalar(plan, buf, ftmp);
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */
@@ -125,7 +125,7 @@ work_scalar_forward(kfft_scalar* buf, app_mode_t* M) {
                 if (M->is_shift)
                     kfft_shift_cpx(ftmp, M->len, false, KFFT_PLAN_MMGR(plan));
             }
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */
@@ -151,7 +151,7 @@ work_scalar_inverse(kfft_cpx* buf, app_mode_t* M) {
                 kfft_shift_cpx(buf, M->len, true, KFFT_PLAN_MMGR(plan));
 
             ret = kfft_evali_scalar(plan, buf, ftmp);
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */

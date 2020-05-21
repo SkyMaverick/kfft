@@ -17,7 +17,7 @@ work_cpx2_internal(kfft_cpx* buf, app_mode_t* M) {
                 if ((!(M->flags & KFFT_FLAG_INVERSE)) && (M->is_shift))
                     kfft_shift2_cpx(ftmp, buf, M->x, M->y, false, KFFT_PLAN_MMGR(plan));
             }
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */
@@ -53,7 +53,7 @@ work_cpx_sparse_internal(kfft_cpx* buf, app_mode_t* M) {
                     kfft_shift_sparse_cpx(ftmp, NULL, M->len, M->dim, M->step, false,
                                           KFFT_PLAN_MMGR(plan));
             }
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */
@@ -86,7 +86,7 @@ work_cpx_internal(kfft_cpx* buf, app_mode_t* M) {
                 if ((!(M->flags & KFFT_FLAG_INVERSE)) && (M->is_shift))
                     kfft_shift_cpx(ftmp, M->len, false, KFFT_PLAN_MMGR(plan));
             }
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */

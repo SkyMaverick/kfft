@@ -50,8 +50,26 @@ kfft_next_fast_size(uint32_t n) {
     return n;
 }
 
+KFFT_API void*
+kfft_malloc(uint32_t sz) {
+#if defined(KFFT_USE_SIMD)
+    return KFFT_MALLOC(sz, kfft_simd_align(kfft_simd_analize()));
+#else
+    return KFFT_MALLOC(sz, 0);
+#endif
+}
+KFFT_API void
+kfft_free_null(void** mem) {
+#if defined(KFFT_USE_SIMD)
+    KFFT_FREE(mem, kfft_simd_align(kfft_simd_analize()));
+#else
+    KFFT_FREE(mem, 0);
+#endif
+    *mem = NULL;
+}
+
 KFFT_API kfft_return_t
-kfft_cleanup(uintptr_t mem) {
+kfft_cleanup(void* mem) {
     kfft_object_t* M = (kfft_object_t*)(mem);
     if (M->mmgr == NULL)
         return KFFT_RET_FREE_NULL;
