@@ -4,7 +4,7 @@ static kfft_return_t
 work_cpx2_internal(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_ALLOC_FAIL;
 
-    kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
+    kfft_cpx* ftmp = kfft_malloc(M->len * sizeof(kfft_cpx));
     if (buf && ftmp) {
         kfft_comp2_t* plan = kfft_config2_cpx(M->x, M->y, M->flags, 0, NULL);
         if (plan) {
@@ -17,7 +17,7 @@ work_cpx2_internal(kfft_cpx* buf, app_mode_t* M) {
                 if ((!(M->flags & KFFT_FLAG_INVERSE)) && (M->is_shift))
                     kfft_shift2_cpx(ftmp, buf, M->x, M->y, false, KFFT_PLAN_MMGR(plan));
             }
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */
@@ -26,7 +26,7 @@ work_cpx2_internal(kfft_cpx* buf, app_mode_t* M) {
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");
         }
-        free(ftmp);
+        kfft_free(&ftmp);
     } /* in && ftmp */
     return ret;
 }
@@ -37,7 +37,7 @@ static kfft_return_t
 work_cpx_sparse_internal(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_ALLOC_FAIL;
 
-    kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
+    kfft_cpx* ftmp = kfft_malloc(M->len * sizeof(kfft_cpx));
     if (buf && ftmp) {
         kfft_csparse_t* plan =
             kfft_config_sparse_cpx(M->len, M->flags, M->dim, M->step, NULL, NULL);
@@ -53,7 +53,7 @@ work_cpx_sparse_internal(kfft_cpx* buf, app_mode_t* M) {
                     kfft_shift_sparse_cpx(ftmp, NULL, M->len, M->dim, M->step, false,
                                           KFFT_PLAN_MMGR(plan));
             }
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */
@@ -62,7 +62,7 @@ work_cpx_sparse_internal(kfft_cpx* buf, app_mode_t* M) {
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");
         }
-        free(ftmp);
+        kfft_free(&ftmp);
     } /* in && ftmp */
 
     return ret;
@@ -73,7 +73,7 @@ static kfft_return_t
 work_cpx_internal(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_ALLOC_FAIL;
 
-    kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
+    kfft_cpx* ftmp = kfft_malloc(M->len * sizeof(kfft_cpx));
     if (buf && ftmp) {
         kfft_comp_t* plan = kfft_config_cpx(M->len, M->flags, 0, NULL);
         if (plan) {
@@ -86,7 +86,7 @@ work_cpx_internal(kfft_cpx* buf, app_mode_t* M) {
                 if ((!(M->flags & KFFT_FLAG_INVERSE)) && (M->is_shift))
                     kfft_shift_cpx(ftmp, M->len, false, KFFT_PLAN_MMGR(plan));
             }
-            kfft_free(plan);
+            kfft_cleanup(plan);
         } else {
             ret = KFFT_RET_ALLOC_FAIL;
         } /* plan != NULL */
@@ -95,7 +95,7 @@ work_cpx_internal(kfft_cpx* buf, app_mode_t* M) {
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");
         }
-        free(ftmp);
+        kfft_free(&ftmp);
     } /* in && ftmp */
     return ret;
 }
@@ -124,7 +124,7 @@ work_cpx(char* buf, app_mode_t* M) {
 #endif
                 ret = work_cpx_internal(fin, M);
         }
-        free(fin);
+        kfft_free(&fin);
     }
     return ret;
 }

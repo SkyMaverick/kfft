@@ -49,9 +49,3 @@ kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
 
 KFFT_API kfft_return_t
 kfft_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi);
-
-#define kfft_kfree(X)                                                                              \
-    do {                                                                                           \
-        free(X);                                                                                   \
-        X = NULL;                                                                                  \
-    } while (0)
