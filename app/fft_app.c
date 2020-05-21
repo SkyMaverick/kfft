@@ -46,7 +46,7 @@ parse_buffer(void** out, char* buf, bool as_cpx) {
     size_t alloc_size = (as_cpx) ? ((len % 2) ? ((len + 1) / 2) : (len / 2)) * sizeof(kfft_cpx)
                                  : len * sizeof(kfft_scalar);
 
-    kfft_scalar* tmp = calloc(len, alloc_size);
+    kfft_scalar* tmp = kfft_malloc(len * alloc_size);
     if (tmp) {
         for (size_t i = 0; i < len; i++) {
             tmp[i] = (kfft_scalar)atof(args);

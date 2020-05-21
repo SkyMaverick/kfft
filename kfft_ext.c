@@ -61,9 +61,9 @@ kfft_malloc(uint32_t sz) {
 KFFT_API void
 kfft_free_null(void** mem) {
 #if defined(KFFT_USE_SIMD)
-    KFFT_FREE(mem, kfft_simd_align(kfft_simd_analize()));
+    KFFT_FREE(*mem, kfft_simd_align(kfft_simd_analize()));
 #else
-    KFFT_FREE(mem, 0);
+    KFFT_FREE(*mem, 0);
 #endif
     *mem = NULL;
 }

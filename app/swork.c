@@ -4,7 +4,7 @@ static kfft_return_t
 work_scalar2_forward(kfft_scalar* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
+    kfft_cpx* ftmp = kfft_malloc(M->len * sizeof(kfft_cpx));
     if (buf && ftmp) {
         kfft_sclr2_t* plan = kfft_config2_scalar(M->x, M->y, M->flags, 0, NULL);
         if (plan) {
@@ -21,7 +21,7 @@ work_scalar2_forward(kfft_scalar* buf, app_mode_t* M) {
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");
         }
-        free(ftmp);
+        kfft_free(&ftmp);
     }
     return ret;
 }
@@ -29,7 +29,7 @@ static kfft_return_t
 work_scalar2_inverse(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_scalar* ftmp = calloc(M->len, sizeof(kfft_scalar));
+    kfft_scalar* ftmp = kfft_malloc(M->len * sizeof(kfft_scalar));
     if (buf && ftmp) {
 
         kfft_sclr2_t* plan = kfft_config2_scalar(M->x, M->y, M->flags, 0, NULL);
@@ -46,7 +46,7 @@ work_scalar2_inverse(kfft_cpx* buf, app_mode_t* M) {
             write_stdout((kfft_scalar*)ftmp, M->len);
             fprintf(stdout, "%s\n", "");
         }
-        free(ftmp);
+        kfft_free(&ftmp);
     }
     return ret;
 }
@@ -56,7 +56,7 @@ static kfft_return_t
 work_scalar_sparse_forward(kfft_scalar* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
+    kfft_cpx* ftmp = kfft_malloc(M->len * sizeof(kfft_cpx));
     if (buf && ftmp) {
 
         kfft_ssparse_t* plan =
@@ -77,7 +77,7 @@ work_scalar_sparse_forward(kfft_scalar* buf, app_mode_t* M) {
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");
         }
-        free(ftmp);
+        kfft_free(&ftmp);
     } /* in && ftmp */
     return ret;
 }
@@ -86,7 +86,7 @@ static kfft_return_t
 work_scalar_sparse_inverse(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_scalar* ftmp = calloc(M->len, sizeof(kfft_scalar));
+    kfft_scalar* ftmp = kfft_malloc(M->len * sizeof(kfft_scalar));
     if (buf && ftmp) {
         kfft_ssparse_t* plan =
             kfft_config_sparse_scalar(M->len, M->flags, M->dim, M->step, 0, NULL);
@@ -105,7 +105,7 @@ work_scalar_sparse_inverse(kfft_cpx* buf, app_mode_t* M) {
             write_stdout(ftmp, M->len);
             fprintf(stdout, "%s\n", "");
         }
-        free(ftmp);
+        kfft_free(&ftmp);
     } /* in && ftmp */
     return ret;
 }
@@ -115,7 +115,7 @@ static kfft_return_t
 work_scalar_forward(kfft_scalar* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_cpx* ftmp = calloc(M->len, sizeof(kfft_cpx));
+    kfft_cpx* ftmp = kfft_malloc(M->len * sizeof(kfft_cpx));
     if (buf && ftmp) {
 
         kfft_sclr_t* plan = kfft_config_scalar(M->len, M->flags, 0, NULL);
@@ -134,7 +134,7 @@ work_scalar_forward(kfft_scalar* buf, app_mode_t* M) {
             write_stdout((kfft_scalar*)ftmp, M->len * 2);
             fprintf(stdout, "%s\n", "");
         }
-        free(ftmp);
+        kfft_free(&ftmp);
     } /* in && ftmp */
     return ret;
 }
@@ -143,7 +143,7 @@ static kfft_return_t
 work_scalar_inverse(kfft_cpx* buf, app_mode_t* M) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
-    kfft_scalar* ftmp = calloc(M->len, sizeof(kfft_scalar));
+    kfft_scalar* ftmp = kfft_malloc(M->len * sizeof(kfft_scalar));
     if (buf && ftmp) {
         kfft_sclr_t* plan = kfft_config_scalar(M->len, M->flags, 0, NULL);
         if (plan) {
@@ -160,7 +160,7 @@ work_scalar_inverse(kfft_cpx* buf, app_mode_t* M) {
             write_stdout(ftmp, M->len);
             fprintf(stdout, "%s\n", "");
         }
-        free(ftmp);
+        kfft_free(&ftmp);
     } /* in && ftmp */
     return ret;
 }
@@ -192,7 +192,7 @@ work_scalar(char* buf, app_mode_t* M) {
                                                      : work_scalar_forward((kfft_scalar*)fin, M);
             }
         }
-        free(fin);
+        kfft_free(&fin);
     }
     return ret;
 }
