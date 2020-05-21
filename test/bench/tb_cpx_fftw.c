@@ -16,7 +16,7 @@ fft_test(fftw_complex* tbuf, size_t size) {
 
     size_t memneed = size * sizeof(fftw_complex);
 
-    fftw_complex* ftmp = calloc(size, sizeof(fftw_complex));
+    fftw_complex* ftmp = fftw_malloc(size * sizeof(fftw_complex));
     if (ftmp) {
         memcpy(ftmp, tbuf, memneed);
 #ifdef CHECK_WITH_PLAN
@@ -45,7 +45,7 @@ fft_test(fftw_complex* tbuf, size_t size) {
 
         fftw_destroy_plan(plan);
 #endif
-        free(ftmp);
+        fftw_free(ftmp);
         return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
     } else {
         return -1;
@@ -69,7 +69,7 @@ main(int argc, char* argv[]) {
         double ivals[TEST_COUNT];
         size_t size = atoi(argv[1]);
 
-        fftw_complex* kfft_spectr = calloc(size, sizeof(fftw_complex));
+        fftw_complex* kfft_spectr = fftw_malloc(size * sizeof(fftw_complex));
         if (kfft_spectr) {
 
             for (int32_t i = 0; i < TEST_COUNT; i++) {
@@ -88,7 +88,7 @@ main(int argc, char* argv[]) {
             }
             stdout_time(ivals);
 
-            free(kfft_spectr);
+            fftw_free(kfft_spectr);
         }
         return 0;
     } else {

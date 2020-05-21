@@ -16,7 +16,7 @@ kfft_ktest(kfft_cpx* tbuf, size_t size) {
 
     size_t memneed = size * sizeof(kfft_cpx);
 
-    kfft_cpx* ftmp = calloc(size, sizeof(kfft_cpx));
+    kfft_cpx* ftmp = kfft_malloc(size * sizeof(kfft_cpx));
     if (ftmp) {
         memcpy(ftmp, tbuf, memneed);
 #ifdef CHECK_WITH_PLAN
@@ -29,7 +29,7 @@ kfft_ktest(kfft_cpx* tbuf, size_t size) {
         }
 
         kfft_eval_cpx(plan, ftmp, tbuf);
-        kfft_free(plan);
+        kfft_cleanup(plan);
 
         clock_t t_ret = clock();
 #else
@@ -43,9 +43,9 @@ kfft_ktest(kfft_cpx* tbuf, size_t size) {
         kfft_eval_cpx(plan, ftmp, tbuf);
         clock_t t_ret = clock();
 
-        kfft_free(plan);
+        kfft_cleanup(plan);
 #endif
-        free(ftmp);
+        kfft_free(&ftmp);
         return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
     } else {
         return -1;
@@ -69,7 +69,7 @@ main(int argc, char* argv[]) {
         double ivals[TEST_COUNT];
         size_t size = atoi(argv[1]);
 
-        kfft_cpx* kfft_spectr = calloc(size, sizeof(kfft_cpx));
+        kfft_cpx* kfft_spectr = kfft_malloc(size * sizeof(kfft_cpx));
         if (kfft_spectr) {
 
             for (int32_t i = 0; i < TEST_COUNT; i++) {
@@ -88,7 +88,7 @@ main(int argc, char* argv[]) {
             }
             stdout_time(ivals);
 
-            free(kfft_spectr);
+            kfft_free(&kfft_spectr);
         }
         return 0;
     } else {
