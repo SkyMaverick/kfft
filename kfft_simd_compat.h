@@ -19,7 +19,7 @@ extern "C" {
 #include "incs/kfft_system.h"
 
 #include "incs/kfft_types.h"
-#include "incs/kfft_alloc.h"
+#include "incs/kfft_pool.h"
 #include "incs/kfft_ext.h"
 #include "incs/kfft_math.h"
 #include "incs/kfft_cpx.h"
