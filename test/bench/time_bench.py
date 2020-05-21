@@ -12,20 +12,19 @@ def app_run (app, len_fft):
 
 def gen_svg(kfft, fftw, len, step):
     x = range (step, len, step)
-    plt.figure(figsize=(40, 20), dpi= 72)
+    plt.figure(figsize=(40, 40), dpi= 72)
 
     plt.subplot(2, 1, 1)
-    plt.xlabel("seq")  # ось абсцисс
-    plt.plot(x, kfft)               # построение графика
-#    plt.title("Зависимости: y1 = x, y2 = x^2") # заголовок
-    plt.ylabel("kfft") # ось ординат
-    plt.grid(True)                # включение отображение сетки
+    plt.xlabel("seq")
+    plt.plot(x, kfft)
+    plt.ylabel("kfft")
+    plt.grid(True)
+    
     plt.subplot(2, 1, 2)
-    plt.plot(x, fftw)               # построение графика
-    plt.xlabel("seq")  # ось абсцисс
-    plt.ylabel("fftw") # ось ординат
-    plt.grid(True)                # включение отображение сетки
-    plt.subplot(2, 1, 1)
+    plt.plot(x, fftw)
+    plt.xlabel("seq")
+    plt.ylabel("fftw")
+    plt.grid(True)
 
     plt.savefig('bench.svg')
 
@@ -37,10 +36,10 @@ def run_analize(**job):
     
     kfft_vals = []
     for i in range (step, len, step):
-        kfft_vals.append(app_run(kfft_app, i))
+        kfft_vals.append(float(app_run(kfft_app, i).strip()))
     fftw_vals = []
     for i in range (step, len, step):
-        fftw_vals.append(app_run(fftw_app, i))
+        fftw_vals.append(float(app_run(fftw_app, i).strip()))
         
     kfft_vals.sort()
     fftw_vals.sort()
