@@ -54,10 +54,6 @@ def run_analize(**job):
     for i in range (step, len, step):
         kiss_vals.append(float(app_run(kiss_app, i).strip()))
         
-#    kfft_vals.sort()
-#    fftw_vals.sort()
-#    kiss_vals.sort()
-
     gen_svg (kfft_vals, fftw_vals, kiss_vals, len, step, out_dir)
     return 0
 
