@@ -24,7 +24,7 @@ kiss_cpx_app = executable ('run_kiss', files('tb_cpx_kiss.c'),
                            install: false)
 
 
-speed_test = run_target ('speed_test',
+speed_test_cpx = run_target ('speed_test_cpx',
                           command: [rt_python,
                                     speed_bench,
                                     kfft_cpx_app,
@@ -33,7 +33,7 @@ speed_test = run_target ('speed_test',
                                     get_option('speed_test_sequence_limit').to_string(),
                                     get_option('speed_test_step').to_string(),
                                     meson.current_build_dir()])
-speed_kfft_test = run_target ('speed_kfft_test',
+speed_kfft_test_cpx = run_target ('speed_kfft_test_cpx',
                               command: [rt_python,
                                         speed_kfft_bench,
                                         kfft_cpx_app,

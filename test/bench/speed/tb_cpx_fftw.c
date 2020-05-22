@@ -8,48 +8,40 @@
 #include <fftw3.h>
 
 #ifndef TEST_COUNT
-    #define TEST_COUNT 7
+    #define TEST_COUNT 5
 #endif
 
 static double
-fft_test(fftw_complex* tbuf, size_t size) {
+fft_test(fftw_complex* tbuf, fftw_complex* ftmp, size_t size) {
 
-    size_t memneed = size * sizeof(fftw_complex);
-
-    fftw_complex* ftmp = fftw_malloc(size * sizeof(fftw_complex));
-    if (ftmp) {
-        memcpy(ftmp, tbuf, memneed);
+    memcpy(ftmp, tbuf, size * sizeof(fftw_complex));
 #ifdef CHECK_WITH_PLAN
-        clock_t t_start = clock();
+    clock_t t_start = clock();
 
-        fftw_plan plan = fftw_plan_dft_1d(size, ftmp, tbuf, FFTW_FORWARD, FFTW_ESTIMATE);
-        if (plan == NULL) {
-            free(ftmp);
-            return -1;
-        }
-
-        fftw_execute(plan);
-        fftw_destroy_plan(plan);
-
-        clock_t t_ret = clock();
-#else
-        fftw_plan plan = fftw_plan_dft_1d(size, ftmp, tbuf, FFTW_FORWARD, FFTW_ESTIMATE);
-        if (plan == NULL) {
-            free(ftmp);
-            return -1;
-        }
-
-        clock_t t_start = clock();
-        fftw_execute(plan);
-        clock_t t_ret = clock();
-
-        fftw_destroy_plan(plan);
-#endif
-        fftw_free(ftmp);
-        return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
-    } else {
+    fftw_plan plan = fftw_plan_dft_1d(size, ftmp, tbuf, FFTW_FORWARD, FFTW_ESTIMATE);
+    if (plan == NULL) {
+        free(ftmp);
         return -1;
     }
+
+    fftw_execute(plan);
+    fftw_destroy_plan(plan);
+
+    clock_t t_ret = clock();
+#else
+    fftw_plan plan = fftw_plan_dft_1d(size, ftmp, tbuf, FFTW_FORWARD, FFTW_ESTIMATE);
+    if (plan == NULL) {
+        free(ftmp);
+        return -1;
+    }
+
+    clock_t t_start = clock();
+    fftw_execute(plan);
+    clock_t t_ret = clock();
+
+    fftw_destroy_plan(plan);
+#endif
+    return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
 }
 
 void
@@ -69,8 +61,9 @@ main(int argc, char* argv[]) {
         double ivals[TEST_COUNT];
         size_t size = atoi(argv[1]);
 
-        fftw_complex* kfft_spectr = fftw_malloc(size * sizeof(fftw_complex));
+        fftw_complex* kfft_spectr = fftw_malloc(2 * size * sizeof(fftw_complex));
         if (kfft_spectr) {
+            fftw_complex* temp = kfft_spectr + size;
 
             for (int32_t i = 0; i < TEST_COUNT; i++) {
                 memset(kfft_spectr, 0, size * sizeof(fftw_complex));
@@ -81,7 +74,7 @@ main(int argc, char* argv[]) {
                     memcpy(&(kfft_spectr[j]), &rand_arg, sizeof(fftw_complex));
                 }
 
-                double ret = fft_test(kfft_spectr, size);
+                double ret = fft_test(kfft_spectr, temp, size);
                 if (ret < 0)
                     return -1;
                 ivals[i] = ret;

@@ -1,5 +1,6 @@
 kiss_src = files ('''
     kiss_fft.c
+    kiss_fftr.c
 '''.split())
 
 c_args = '''

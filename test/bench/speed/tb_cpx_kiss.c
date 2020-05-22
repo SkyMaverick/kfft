@@ -8,48 +8,40 @@
 #include "kiss_fft.h"
 
 #ifndef TEST_COUNT
-    #define TEST_COUNT 7
+    #define TEST_COUNT 5
 #endif
 
 static double
-fft_test(kiss_fft_cpx* tbuf, size_t size) {
+fft_test(kiss_fft_cpx* tbuf, kiss_fft_cpx* ftmp, size_t size) {
 
-    size_t memneed = size * sizeof(kiss_fft_cpx);
-
-    kiss_fft_cpx* ftmp = calloc(size, sizeof(kiss_fft_cpx));
-    if (ftmp) {
-        memcpy(ftmp, tbuf, memneed);
+    memcpy(ftmp, tbuf, size * sizeof(kiss_fft_cpx));
 #ifdef CHECK_WITH_PLAN
-        clock_t t_start = clock();
+    clock_t t_start = clock();
 
-        kiss_fft_cfg plan = kiss_fft_alloc(size, 0, NULL, NULL);
-        if (plan == NULL) {
-            free(ftmp);
-            return -1;
-        }
-
-        kiss_fft(plan, ftmp, tbuf);
-        free(plan);
-
-        clock_t t_ret = clock();
-#else
-        kiss_fft_cfg plan = kiss_fft_alloc(size, 0, NULL, NULL);
-        if (plan == NULL) {
-            free(ftmp);
-            return -1;
-        }
-
-        clock_t t_start = clock();
-        kiss_fft(plan, ftmp, tbuf);
-        clock_t t_ret = clock();
-
-        free(plan);
-#endif
+    kiss_fft_cfg plan = kiss_fft_alloc(size, 0, NULL, NULL);
+    if (plan == NULL) {
         free(ftmp);
-        return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
-    } else {
         return -1;
     }
+
+    kiss_fft(plan, ftmp, tbuf);
+    free(plan);
+
+    clock_t t_ret = clock();
+#else
+    kiss_fft_cfg plan = kiss_fft_alloc(size, 0, NULL, NULL);
+    if (plan == NULL) {
+        free(ftmp);
+        return -1;
+    }
+
+    clock_t t_start = clock();
+    kiss_fft(plan, ftmp, tbuf);
+    clock_t t_ret = clock();
+
+    free(plan);
+#endif
+    return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
 }
 
 void
@@ -69,8 +61,9 @@ main(int argc, char* argv[]) {
         double ivals[TEST_COUNT];
         size_t size = atoi(argv[1]);
 
-        kiss_fft_cpx* fft_spectr = calloc(size, sizeof(kiss_fft_cpx));
+        kiss_fft_cpx* fft_spectr = calloc(size * 2, sizeof(kiss_fft_cpx));
         if (fft_spectr) {
+            kiss_fft_cpx* temp = fft_spectr + size;
 
             for (int32_t i = 0; i < TEST_COUNT; i++) {
                 memset(fft_spectr, 0, size * sizeof(kiss_fft_cpx));
@@ -81,7 +74,7 @@ main(int argc, char* argv[]) {
                     fft_spectr[j].i = rand();
                 }
 
-                double ret = fft_test(fft_spectr, size);
+                double ret = fft_test(fft_spectr, temp, size);
                 if (ret < 0)
                     return -1;
                 ivals[i] = ret;

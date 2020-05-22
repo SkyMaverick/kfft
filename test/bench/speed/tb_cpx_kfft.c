@@ -8,48 +8,40 @@
 #include "kfft.h"
 
 #ifndef TEST_COUNT
-    #define TEST_COUNT 7
+    #define TEST_COUNT 5
 #endif
 
 static double
-kfft_ktest(kfft_cpx* tbuf, size_t size) {
+kfft_ktest(kfft_cpx* tbuf, kfft_cpx* ftmp, size_t size) {
 
-    size_t memneed = size * sizeof(kfft_cpx);
-
-    kfft_cpx* ftmp = kfft_malloc(size * sizeof(kfft_cpx));
-    if (ftmp) {
-        memcpy(ftmp, tbuf, memneed);
+    memcpy(ftmp, tbuf, size * sizeof(kfft_cpx));
 #ifdef CHECK_WITH_PLAN
-        clock_t t_start = clock();
+    clock_t t_start = clock();
 
-        kfft_comp_t* plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
-        if (plan == NULL) {
-            free(ftmp);
-            return -1;
-        }
-
-        kfft_eval_cpx(plan, ftmp, tbuf);
-        kfft_cleanup(plan);
-
-        clock_t t_ret = clock();
-#else
-        kfft_comp_t* plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
-        if (plan == NULL) {
-            kfft_free(ftmp);
-            return -1;
-        }
-
-        clock_t t_start = clock();
-        kfft_eval_cpx(plan, ftmp, tbuf);
-        clock_t t_ret = clock();
-
-        kfft_cleanup(plan);
-#endif
-        kfft_free(&ftmp);
-        return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
-    } else {
+    kfft_comp_t* plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
+    if (plan == NULL) {
+        free(ftmp);
         return -1;
     }
+
+    kfft_eval_cpx(plan, ftmp, tbuf);
+    kfft_cleanup(plan);
+
+    clock_t t_ret = clock();
+#else
+    kfft_comp_t* plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
+    if (plan == NULL) {
+        kfft_free(ftmp);
+        return -1;
+    }
+
+    clock_t t_start = clock();
+    kfft_eval_cpx(plan, ftmp, tbuf);
+    clock_t t_ret = clock();
+
+    kfft_cleanup(plan);
+#endif
+    return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
 }
 
 void
@@ -69,8 +61,9 @@ main(int argc, char* argv[]) {
         double ivals[TEST_COUNT];
         size_t size = atoi(argv[1]);
 
-        kfft_cpx* kfft_spectr = kfft_malloc(size * sizeof(kfft_cpx));
+        kfft_cpx* kfft_spectr = kfft_malloc(2 * size * sizeof(kfft_cpx));
         if (kfft_spectr) {
+            kfft_cpx* temp = kfft_spectr + size;
 
             for (int32_t i = 0; i < TEST_COUNT; i++) {
                 memset(kfft_spectr, 0, size * sizeof(kfft_cpx));
@@ -81,7 +74,7 @@ main(int argc, char* argv[]) {
                     kfft_spectr[j].i = rand();
                 }
 
-                double ret = kfft_ktest(kfft_spectr, size);
+                double ret = kfft_ktest(kfft_spectr, temp, size);
                 if (ret < 0)
                     return -1;
                 ivals[i] = ret;
