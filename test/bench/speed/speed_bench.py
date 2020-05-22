@@ -10,7 +10,7 @@ def app_run (app, len_fft):
     return subprocess.check_output([app, str(len_fft)], \
             stdin=None, stderr=None, shell=False, universal_newlines=True)
 
-def gen_svg(kfft, fftw, kiss, len, step, out_file):
+def gen_svg(kfft, fftw, kiss, len, step, out_dir):
     x = range (step, len, step)
     plt.figure(figsize=(40, 40), dpi= 72)
 
@@ -32,7 +32,7 @@ def gen_svg(kfft, fftw, kiss, len, step, out_file):
     plt.ylabel("kiss")
     plt.grid(True)
 
-    plt.savefig(out_file)
+    plt.savefig(os.path.join(out_dir,"speed_test.svg"))
 
 def run_analize(**job):
     kfft_app    = job['kfft_app']
@@ -42,7 +42,7 @@ def run_analize(**job):
     len         = int(job['seq_lenght'])
     step        = int(job['seq_step'])
     
-    out_file = job['result']
+    out_dir     = job['result_dir']
 
     kfft_vals = []
     for i in range (step, len, step):
@@ -58,7 +58,7 @@ def run_analize(**job):
     fftw_vals.sort()
     kiss_vals.sort()
 
-    gen_svg (kfft_vals, fftw_vals, kiss_vals, len, step, out_file)
+    gen_svg (kfft_vals, fftw_vals, kiss_vals, len, step, out_dir)
     return 0
 
 # Main app
@@ -69,7 +69,7 @@ try:
         'kiss_app'  : os.path.abspath(argv[3]),
         'seq_lenght': argv[4],  
         'seq_step'  : argv[5],
-        'result'    : argv[6]
+        'result_dir': argv[6]
     }
 except IndexError as e:
     print("Arguments error")

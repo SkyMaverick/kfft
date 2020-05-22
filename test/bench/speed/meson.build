@@ -1,5 +1,4 @@
 speed_bench = files('speed_bench.py')
-result_file = meson.current_build_dir() / 'speed_bench.svg'
 
 fftw_dep = dependency ('fftw3', required: false)
 if not fftw_dep.found()
@@ -32,4 +31,4 @@ speed_test = run_target ('speed_test',
                                     kiss_cpx_app,
                                     get_option('speed_test_sequence_limit').to_string(),
                                     get_option('speed_test_step').to_string(),
-                                    result_file])
+                                    meson.current_build_dir()])
