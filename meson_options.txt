@@ -5,8 +5,6 @@ option ('build_with_pgo', type: 'boolean', value: 'false',
 option ('build_with_native', type: 'boolean', value: 'false',
         description: 'build with native CPU instructions')
 
-option ('enable_tests', type: 'boolean', value: 'true',
-        description: 'build with tests applications')
 option ('enable_app', type: 'boolean', value: 'true',
         description: 'build with demo applications')
 option ('enable_traces', type: 'boolean', value: 'true',
@@ -44,3 +42,10 @@ option ('level_plan_max', type: 'integer', value: '3',
         description: 'max reqursive subplan level')
 option ('level_bfly_max', type: 'integer', value: '5',
         description: 'max butterfly level')
+# === TESTS options ===
+option ('enable_tests', type: 'boolean', value: 'true',
+        description: 'build with tests applications')
+option ('speed_test_sequence_limit', type: 'integer', value: 100000,
+        description: 'sequence limit parameter for speed test')
+option ('speed_test_step', type: 'integer', value: 101,
+        description: 'sequence step parameter for speed test')

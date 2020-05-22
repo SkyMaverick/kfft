@@ -23,12 +23,13 @@ kiss_cpx_app = executable ('run_kiss', files('tb_cpx_kiss.c'),
                            include_directories: kiss_inc,
                            install: false)
 
+
 speed_test = run_target ('speed_test',
                           command: [rt_python,
                                     speed_bench,
                                     kfft_cpx_app,
                                     fftw_cpx_app,
                                     kiss_cpx_app,
-                                    '100000',
-                                    '10001',
+                                    get_option('speed_test_sequence_limit').to_string(),
+                                    get_option('speed_test_step').to_string(),
                                     result_file])
