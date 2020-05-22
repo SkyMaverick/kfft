@@ -12,7 +12,7 @@ def app_run (app, len_fft):
 
 def gen_svg(kfft, len, step, out_dir):
     x = range (step, len, step)
-    plt.figure(figsize=(40, 40), dpi= 72)
+    plt.figure(figsize=(40, 20), dpi= 72)
 
     plt.subplot(1, 1, 1)
     plt.xlabel("seq")

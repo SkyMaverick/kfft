@@ -38,7 +38,7 @@ option ('build_library_api', type : 'combo', choices: ['export', 'import', 'none
 
 option ('limit_rader', type: 'integer', value: '50',
         description: 'barier use rader or generic algorithm')
-option ('level_plan_max', type: 'integer', value: '3',
+option ('level_plan_max', type: 'integer', value: '7',
         description: 'max reqursive subplan level')
 option ('level_bfly_max', type: 'integer', value: '5',
         description: 'max butterfly level')
