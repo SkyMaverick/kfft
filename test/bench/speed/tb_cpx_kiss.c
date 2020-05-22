@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +8,7 @@
 #include "kiss_fft.h"
 
 #ifndef TEST_COUNT
-    #define TEST_COUNT 12
+    #define TEST_COUNT 7
 #endif
 
 static double

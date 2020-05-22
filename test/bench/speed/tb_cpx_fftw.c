@@ -8,7 +8,7 @@
 #include <fftw3.h>
 
 #ifndef TEST_COUNT
-    #define TEST_COUNT 12
+    #define TEST_COUNT 7
 #endif
 
 static double
