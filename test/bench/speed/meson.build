@@ -1,4 +1,5 @@
 speed_bench = files('speed_bench.py')
+speed_kfft_bench = files('speed_kfft_bench.py')
 
 fftw_dep = dependency ('fftw3', required: false)
 if not fftw_dep.found()
@@ -32,3 +33,10 @@ speed_test = run_target ('speed_test',
                                     get_option('speed_test_sequence_limit').to_string(),
                                     get_option('speed_test_step').to_string(),
                                     meson.current_build_dir()])
+speed_kfft_test = run_target ('speed_kfft_test',
+                              command: [rt_python,
+                                        speed_kfft_bench,
+                                        kfft_cpx_app,
+                                        get_option('speed_test_sequence_limit').to_string(),
+                                        get_option('speed_test_step').to_string(),
+                                        meson.current_build_dir()])
