@@ -10,6 +10,4 @@ if rt_python.found()
     foreach test : tests
         subdir(test)
     endforeach
-else
-    
 endif

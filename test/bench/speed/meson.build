@@ -1,3 +1,6 @@
+speed_bench = files('speed_bench.py')
+result_file = meson.current_build_dir() / 'speed_bench.svg'
+
 fftw_dep = dependency ('fftw3', required: false)
 if not fftw_dep.found()
     message ('FFTW3 not found. Try with compilator.')
@@ -19,3 +22,13 @@ kiss_cpx_app = executable ('run_kiss', files('tb_cpx_kiss.c'),
                            link_with: kiss_lib,
                            include_directories: kiss_inc,
                            install: false)
+
+speed_test = run_target ('speed_test',
+                          command: [rt_python,
+                                    speed_bench,
+                                    kfft_cpx_app,
+                                    fftw_cpx_app,
+                                    kiss_cpx_app,
+                                    '100000',
+                                    '10001',
+                                    result_file])
