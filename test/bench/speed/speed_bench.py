@@ -6,12 +6,11 @@ import matplotlib.pyplot as plt
 from sys import argv
 
 def app_run (app, len_fft):
-    print (app, len_fft)
+    print (">>", os.path.basename(app), "size -", len_fft)
     return subprocess.check_output([app, str(len_fft)], \
             stdin=None, stderr=None, shell=False, universal_newlines=True)
 
 def gen_svg(kfft, fftw, kiss, len, step, out_file):
-    print (out_file)
     x = range (step, len, step)
     plt.figure(figsize=(40, 40), dpi= 72)
 
