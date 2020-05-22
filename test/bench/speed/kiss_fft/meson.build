@@ -3,14 +3,23 @@ kiss_src = files ('''
     kiss_fftr.c
 '''.split())
 
-c_args = '''
-    -mtune=native
-    -ffast-math
-    -fomit-frame-pointer
-    -unroll-loops
-    -dA
-    -fverbose-asm
-'''.split()
+c_args=[]
+if ccid == 'msvc'
+    c_args = '''
+        /DFIXED_POINT=32
+    '''.split()
+else
+    c_args = '''
+        -mtune=native
+        -ffast-math
+        -fomit-frame-pointer
+        -unroll-loops
+        -dA
+        -fverbose-asm
+        -DFIXED_POINT=32
+    '''.split()
+endif
+kiss_dep = dependency ('openmp', language: 'c')
 
 kiss_inc = include_directories('.')
 kiss_dep = cc.find_library('m', required: false)
