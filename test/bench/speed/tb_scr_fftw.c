@@ -4,41 +4,47 @@
 #include <assert.h>
 #include <time.h>
 
-#include "kfft.h"
+#include <fftw3.h>
 
 #ifndef TEST_COUNT
     #define TEST_COUNT 5
 #endif
+#if defined(TEST_HALF_SCALAR)
+    #define FFTW(X) fftwf_##X
+    #define fftw_scalar float
+#else
+    #define FFTW(X) fftw_##X
+    #define fftw_scalar double
+#endif
 
 static double
-kfft_ktest(kfft_cpx* tbuf, kfft_cpx* ftmp, size_t size) {
+fft_test(fftw_scalar* tbuf, FFTW(complex) * ftmp, size_t size) {
 
-    memcpy(ftmp, tbuf, size * sizeof(kfft_cpx));
 #ifdef CHECK_WITH_PLAN
     clock_t t_start = clock();
 
-    kfft_comp_t* plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
+    FFTW(plan) plan = FFTW(plan_dft_r2c_1d)(size, tbuf, ftmp, FFTW_ESTIMATE);
     if (plan == NULL) {
-        free(tbuf);
+        free(ftmp);
         return -1;
     }
 
-    kfft_eval_cpx(plan, ftmp, tbuf);
-    kfft_cleanup(plan);
+    FFTW(execute)(plan);
+    FFTW(destroy_plan)(plan);
 
     clock_t t_ret = clock();
 #else
-    kfft_comp_t* plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
+    FFTW(plan) plan = FFTW(plan_dft_r2c_1d)(size, tbuf, ftmp, FFTW_ESTIMATE);
     if (plan == NULL) {
-        kfft_free(tbuf);
+        free(ftmp);
         return -1;
     }
 
     clock_t t_start = clock();
-    kfft_eval_cpx(plan, ftmp, tbuf);
+    FFTW(execute)(plan);
     clock_t t_ret = clock();
 
-    kfft_cleanup(plan);
+    FFTW(destroy_plan)(plan);
 #endif
     return (t_ret - t_start) * 1000 / CLOCKS_PER_SEC;
 }
@@ -60,27 +66,27 @@ main(int argc, char* argv[]) {
         double ivals[TEST_COUNT];
         size_t size = atoi(argv[1]);
 
-        kfft_cpx* kfft_spectr = kfft_malloc(2 * size * sizeof(kfft_cpx));
-        if (kfft_spectr) {
-            kfft_cpx* temp = kfft_spectr + size;
+        fftw_scalar* fft_spectr =
+            FFTW(malloc)(size * (sizeof(FFTW(complex)) + sizeof(fftw_scalar)));
+        if (fft_spectr) {
+            fftw_scalar* temp = fft_spectr + size;
 
             for (int32_t i = 0; i < TEST_COUNT; i++) {
-                memset(kfft_spectr, 0, size * sizeof(kfft_cpx));
+                memset(fft_spectr, 0, size * (sizeof(FFTW(complex)) + sizeof(fftw_scalar)));
 
                 srand(time(NULL));
                 for (size_t j = 0; j < size; j++) {
-                    kfft_spectr[j].r = rand();
-                    kfft_spectr[j].i = rand();
+                    fft_spectr[j] = (fftw_scalar)rand();
                 }
 
-                double ret = kfft_ktest(kfft_spectr, temp, size);
+                double ret = fft_test(fft_spectr, (FFTW(complex)*)temp, size);
                 if (ret < 0)
                     return -1;
                 ivals[i] = ret;
             }
             stdout_time(ivals);
 
-            kfft_free(&kfft_spectr);
+            FFTW(free)(fft_spectr);
         }
         return 0;
     } else {

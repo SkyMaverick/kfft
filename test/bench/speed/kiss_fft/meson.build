@@ -28,3 +28,7 @@ kiss_lib = shared_library('kiss', kiss_src,
                            c_args: c_args,
                            dependencies: kiss_dep,
                            install: false)
+kiss_lib_static = static_library('kiss', kiss_src,
+                           c_args: c_args,
+                           dependencies: kiss_dep,
+                           install: false)

@@ -35,6 +35,9 @@ if fftw_dep.found()
                                dependencies: fftw_dep,
                                include_directories: kfft_inc,
                                install: false)
+else
+    fftw_cpx_app = 'noop'
+    fftw_scr_app = 'noop'
 endif
 
 kfft_cpx_app = executable ('run_kfft_cpx', files('tb_cpx_kfft.c'),
@@ -50,12 +53,12 @@ kfft_scr_app = executable ('run_kfft_scr', files('tb_scr_kfft.c'),
 subdir('kiss_fft')
 kiss_cpx_app = executable ('run_kiss_cpx', files('tb_cpx_kiss.c'),
                            c_args : c_args,
-                           link_with: kiss_lib,
+                           link_with: kiss_lib_static,
                            include_directories: kiss_inc,
                            install: false)
 kiss_scr_app = executable ('run_kiss_scr', files('tb_scr_kiss.c'),
                            c_args : c_args,
-                           link_with: kiss_lib,
+                           link_with: kiss_lib_static,
                            include_directories: kiss_inc,
                            install: false)
 
