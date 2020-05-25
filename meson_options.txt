@@ -36,7 +36,7 @@ option ('enable_sse3', type: 'boolean', value: 'true',
 option ('build_library_api', type : 'combo', choices: ['export', 'import', 'none'], value: 'export',
         description: 'library API type')
 
-option ('limit_rader', type: 'integer', value: '50',
+option ('limit_rader', type: 'integer', value: '25',
         description: 'barier use rader or generic algorithm')
 option ('level_plan_max', type: 'integer', value: '7',
         description: 'max reqursive subplan level')

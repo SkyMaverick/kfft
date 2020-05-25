@@ -27,7 +27,7 @@ fft_test(FFTW(complex) * tbuf, FFTW(complex) * ftmp, size_t size) {
 
     FFTW(plan) plan = FFTW(plan_dft_1d)(size, ftmp, tbuf, FFTW_FORWARD, FFTW_ESTIMATE);
     if (plan == NULL) {
-        free(ftmp);
+        free(tbuf);
         return -1;
     }
 
@@ -38,7 +38,7 @@ fft_test(FFTW(complex) * tbuf, FFTW(complex) * ftmp, size_t size) {
 #else
     FFTW(plan) plan = FFTW(plan_dft_1d)(size, ftmp, tbuf, FFTW_FORWARD, FFTW_ESTIMATE);
     if (plan == NULL) {
-        free(ftmp);
+        free(tbuf);
         return -1;
     }
 

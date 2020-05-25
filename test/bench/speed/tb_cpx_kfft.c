@@ -20,7 +20,7 @@ kfft_ktest(kfft_cpx* tbuf, kfft_cpx* ftmp, size_t size) {
 
     kfft_comp_t* plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
     if (plan == NULL) {
-        free(ftmp);
+        free(tbuf);
         return -1;
     }
 
@@ -31,7 +31,7 @@ kfft_ktest(kfft_cpx* tbuf, kfft_cpx* ftmp, size_t size) {
 #else
     kfft_comp_t* plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
     if (plan == NULL) {
-        kfft_free(ftmp);
+        kfft_free(tbuf);
         return -1;
     }
 

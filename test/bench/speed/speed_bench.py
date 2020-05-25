@@ -7,8 +7,11 @@ from sys import argv
 
 def app_run (app, len_fft):
     print ("Testing >>", os.path.basename(app), "size -", len_fft)
-    return subprocess.check_output([app, str(len_fft)], \
-            stdin=None, stderr=None, shell=False, universal_newlines=True)
+    try:
+        return subprocess.check_output([app, str(len_fft)], \
+                stdin=None, stderr=None, shell=False, universal_newlines=True)
+    except subprocess.CalledProcessError as e:
+        return "0"
 
 def gen_svg(kfft, fftw, kiss, len, step, out_dir):
     x = range (step, len, step)
@@ -45,14 +48,17 @@ def run_analize(**job):
     out_dir     = job['result_dir']
 
     kfft_vals = []
-    for i in range (step, len, step):
-        kfft_vals.append(float(app_run(kfft_app, i).strip()))
+    if os.path.isfile(kfft_app):
+        for i in range (step, len, step):
+            kfft_vals.append(float(app_run(kfft_app, i).strip()))
     fftw_vals = []
-    for i in range (step, len, step):
-        fftw_vals.append(float(app_run(fftw_app, i).strip()))
+    if os.path.isfile(fftw_app):
+        for i in range (step, len, step):
+            fftw_vals.append(float(app_run(fftw_app, i).strip()))
     kiss_vals = []
-    for i in range (step, len, step):
-        kiss_vals.append(float(app_run(kiss_app, i).strip()))
+    if os.path.isfile(kiss_app):
+        for i in range (step, len, step):
+            kiss_vals.append(float(app_run(kiss_app, i).strip()))
         
     gen_svg (kfft_vals, fftw_vals, kiss_vals, len, step, out_dir)
     return 0

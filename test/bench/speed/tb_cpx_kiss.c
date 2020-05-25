@@ -20,7 +20,7 @@ fft_test(kiss_fft_cpx* tbuf, kiss_fft_cpx* ftmp, size_t size) {
 
     kiss_fft_cfg plan = kiss_fft_alloc(size, 0, NULL, NULL);
     if (plan == NULL) {
-        free(ftmp);
+        free(tbuf);
         return -1;
     }
 
@@ -31,7 +31,7 @@ fft_test(kiss_fft_cpx* tbuf, kiss_fft_cpx* ftmp, size_t size) {
 #else
     kiss_fft_cfg plan = kiss_fft_alloc(size, 0, NULL, NULL);
     if (plan == NULL) {
-        free(ftmp);
+        free(tbuf);
         return -1;
     }
 
