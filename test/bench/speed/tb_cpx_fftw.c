@@ -65,7 +65,7 @@ main(int argc, char* argv[]) {
     if (argc > 1) {
 
         double ivals[TEST_COUNT];
-        size_t size = atoi(argv[1]);
+        size_t size = atol(argv[1]);
 
         FFTW(complex)* fft_spectr = FFTW(malloc)(2 * size * sizeof(FFTW(complex)));
         if (fft_spectr) {

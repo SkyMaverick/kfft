@@ -58,7 +58,7 @@ main(int argc, char* argv[]) {
     if (argc > 1) {
 
         double ivals[TEST_COUNT];
-        size_t size = atoi(argv[1]);
+        size_t size = atol(argv[1]);
 
         kfft_cpx* kfft_spectr = kfft_malloc(2 * size * sizeof(kfft_cpx));
         if (kfft_spectr) {

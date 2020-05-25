@@ -58,7 +58,7 @@ main(int argc, char* argv[]) {
     if (argc > 1) {
 
         double ivals[TEST_COUNT];
-        size_t size = atoi(argv[1]);
+        size_t size = atol(argv[1]);
 
         kiss_fft_scalar* fft_spectr =
             calloc(size + 1, sizeof(kiss_fft_cpx) + sizeof(kiss_fft_scalar));
