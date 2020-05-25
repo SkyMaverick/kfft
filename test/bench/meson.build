@@ -1,5 +1,6 @@
 tests = '''
     speed
+    valid
 '''.split()
 
 rt_python = import('python').find_installation()
