@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, subprocess
+import os, subprocess, csv
 import matplotlib.pyplot as plt
 
 from sys import argv
@@ -22,6 +22,12 @@ def gen_svg(kfft, len, step, out_dir):
 
     plt.savefig(os.path.join(out_dir,"speed_test.svg"))
 
+def gen_csv(kfft, len, step, out_dir):
+    data = [range (step, len, step), kfft]
+    with open(os.path.join(out_dir, "speed_test.csv"), "w+") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(data)
+
 def run_analize(**job):
     kfft_app    = job['kfft_app']
 
@@ -35,6 +41,7 @@ def run_analize(**job):
         kfft_vals.append(float(app_run(kfft_app, i).strip()))
 
     gen_svg (kfft_vals, len, step, out_dir)
+    gen_csv (kfft_vals, len, step, out_dir)
     return 0
 
 # Main app
