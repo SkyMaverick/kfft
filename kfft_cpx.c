@@ -1,5 +1,13 @@
 #include "kfft.h"
 
+#if defined(KFFT_RADER_ALGO)
+    #define CHECK_PLAN_NOTPRIME(S)                                                                 \
+        (((S)->flags & (KFFT_FLAG_GENERIC_ONLY | KFFT_FLAG_GENERIC))) ||                           \
+            (((S)->factors[0]) <= KFFT_RADER_LIMIT)
+#else
+    #define CHECK_PLAN_NOTPRIME(S) true
+#endif
+
 static kfft_comp_t*
 kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
                    size_t* lenmem); /* forward declaration configure function */
@@ -145,10 +153,13 @@ kfft_kinit(kfft_comp_t* st) {
 #if defined(KFFT_MEMLESS_MODE)
     (void)st; // unused warning disable
 #else
-    for (uint32_t i = 0; i < st->nfft; ++i) {
-        st->twiddles[i] = kfft_kernel_twiddle(i, st->nfft, st->flags & KFFT_FLAG_INVERSE);
-    }
-#endif /* KFFT_MEMLESS_MODE */
+    #if defined(KFFT_RADER_ALGO)
+    if (CHECK_PLAN_NOTPRIME(st))
+    #endif /* KFFT_RADER_ALGO */
+        for (uint32_t i = 0; i < st->nfft; ++i) {
+            st->twiddles[i] = kfft_kernel_twiddle(i, st->nfft, st->flags & KFFT_FLAG_INVERSE);
+        }
+#endif     /* KFFT_MEMLESS_MODE */
 
 #if defined(KFFT_RADER_ALGO)
     if (st->prm_count > 0) {
@@ -206,21 +217,26 @@ kfft_kinit(kfft_comp_t* st) {
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_comp_t* st) {
 
+    kf_factor(st);
     size_t ret = sizeof(kfft_comp_t);
+
+#if !defined(KFFT_RADER_ALGO)
+    KFFT_UNUSED_VAR(level);
+    KFFT_UNUSED_VAR(st);
+#endif /* KFFT_RADER_ALGO */
+
 #if !defined(KFFT_MEMLESS_MODE)
-    ret += sizeof(kfft_cpx) * nfft;
+    #if defined(KFFT_RADER_ALGO)
+    if (CHECK_PLAN_NOTPRIME(st))
+    #endif /* KFFT_RADER_ALGO */
+        ret += sizeof(kfft_cpx) * nfft;
+#else
+    KFFT_UNUSED_VAR(nfft);
 #endif
 
-    st->nfft = nfft;
-    st->flags = flags;
-    st->level = level;
-
     if (!(flags & KFFT_FLAG_GENERIC_ONLY)) {
-
-        kf_factor(st);
-
 #if defined(KFFT_RADER_ALGO)
-        /* Recursive clculate memory for plan and all subplans */
+        /* Recursive calculate memory for plan and all subplans */
         for (size_t i = 0; i < st->prm_count; i++) {
             size_t snfft = st->primes[i].prime - 1;
 
@@ -254,6 +270,10 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
     kfft_comp_t tmp;
     KFFT_ZEROMEM(&tmp, sizeof(kfft_comp_t));
 
+    tmp.nfft = nfft;
+    tmp.flags = flags;
+    tmp.level = level;
+
     size_t memneeded = kfft_calculate(nfft, flags, level, &tmp);
 
     KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_comp_t, memneeded, A, lenmem);
@@ -262,11 +282,21 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
         memcpy(st, &tmp, sizeof(kfft_comp_t));
 
 #if !defined(KFFT_MEMLESS_MODE)
-        st->twiddles = kfft_pool_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);
-        if (st->twiddles == NULL) {
-            KFFT_ALGO_PLAN_TERMINATE(st, A);
-            return NULL;
+
+    #if defined(KFFT_RADER_ALGO)
+        if (CHECK_PLAN_NOTPRIME(st)) {
+    #endif /* KFFT_RADER_ALGO */
+
+            st->twiddles = kfft_pool_alloc(st->object.mmgr, sizeof(kfft_cpx) * st->nfft);
+            if (st->twiddles == NULL) {
+                KFFT_ALGO_PLAN_TERMINATE(st, A);
+                return NULL;
+            }
+
+    #if defined(KFFT_RADER_ALGO)
         }
+    #endif /* KFFT_RADER_ALGO */
+
 #endif /* not KFFT_MEMLESS_MODE */
         if (kfft_kinit(st) != KFFT_RET_SUCCESS) {
             KFFT_ALGO_PLAN_TERMINATE(st, A);
