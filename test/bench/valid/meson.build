@@ -1,4 +1,4 @@
-#speed_bench = files('valid_bench.py')
+valide_bench = files('valid_kfft_bench.py')
 
 test_link = [libkfft]
 c_args = []
@@ -24,18 +24,34 @@ else
 endif
 
 if fftw_dep.found()
-    fftw_cpx_app = executable ('run_kf_cpx', files('kfft_fftw_cpx.c'),
+    fft_cpx_app = executable ('run_kf_cpx', files('kfft_fftw_cpx.c'),
                                c_args : c_args,
                                dependencies: fftw_dep,
                                link_with: libkfft,
                                include_directories: kfft_inc,
                                install: false)
-    fftw_scr_app = executable ('run_kf_scr', files('kfft_fftw_scr.c'),
+    fft_scr_app = executable ('run_kf_scr', files('kfft_fftw_scr.c'),
                                c_args : c_args,
                                dependencies: fftw_dep,
                                link_with: libkfft,
                                include_directories: kfft_inc,
                                install: false)
+
+    test_speed_cpx = run_target ('test_valide_cpx',
+                              depends: [libkfft,fft_cpx_app],
+                              command: [rt_python,
+                                        valide_bench,
+                                        fft_cpx_app,
+                                        get_option('valide_test_limit').to_string(),
+                                        get_option('valide_test_round').to_string()])
+    test_speed_scr = run_target ('test_valide_scr',
+                              depends: [libkfft,fft_scr_app],
+                              command: [rt_python,
+                                        valide_bench,
+                                        fft_cpx_app,
+                                        get_option('valide_test_limit').to_string(),
+                                        get_option('valide_test_round').to_string()])
+
 else
     error('Validate test framework must have libfftw as dependency')
 endif

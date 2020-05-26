@@ -49,3 +49,9 @@ option ('speed_test_sequence_limit', type: 'integer', value: 100000,
         description: 'sequence limit parameter for speed test')
 option ('speed_test_step', type: 'integer', value: 101,
         description: 'sequence step parameter for speed test')
+option ('speed_test_with_plan', type: 'boolean', value: 'true',
+        description: 'sequence step parameter for speed test')
+option ('valide_test_limit', type: 'integer', value: 100000,
+        description: 'sequence step parameter for speed test')
+option ('valide_test_round', type: 'integer', value: 100,
+        description: 'sequence step parameter for speed test')
