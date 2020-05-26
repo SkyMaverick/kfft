@@ -15,6 +15,7 @@ def app_run (app, len_fft):
 
 def gen_svg(kfft, fftw, kiss, len, step, out_dir):
     x = range (step, len, step)
+    plt.rc('font', size=36)
     plt.figure(figsize=(40, 40), dpi= 72)
 
     plt.subplot(3, 1, 1)
