@@ -217,7 +217,6 @@ kfft_kinit(kfft_comp_t* st) {
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_comp_t* st) {
 
-    kf_factor(st);
     size_t ret = sizeof(kfft_comp_t);
 
 #if !defined(KFFT_RADER_ALGO)
@@ -232,7 +231,7 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
         ret += sizeof(kfft_cpx) * nfft;
 #else
     KFFT_UNUSED_VAR(nfft);
-#endif
+#endif /* not KFFT_MEMLESS_MODE */
 
     if (!(flags & KFFT_FLAG_GENERIC_ONLY)) {
 #if defined(KFFT_RADER_ALGO)
@@ -274,6 +273,7 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
     tmp.flags = flags;
     tmp.level = level;
 
+    kf_factor(&tmp);
     size_t memneeded = kfft_calculate(nfft, flags, level, &tmp);
 
     KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_comp_t, memneeded, A, lenmem);

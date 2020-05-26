@@ -72,50 +72,50 @@ x86_exts(void) {
     //  Detect Features
     if (nIds >= 0x00000001) {
         cpuid(info, 0x00000001);
-        ret |= (info[3] & ((int)1 << 23)) ? HW_MMX : 0;
-        ret |= (info[3] & ((int)1 << 25)) ? HW_SSE : 0;
-        ret |= (info[3] & ((int)1 << 26)) ? HW_SSE2 : 0;
-        ret |= (info[2] & ((int)1 << 0)) ? HW_SSE3 : 0;
+        ret |= (info[3] & ((unsigned)1 << 23)) ? HW_MMX : 0;
+        ret |= (info[3] & ((unsigned)1 << 25)) ? HW_SSE : 0;
+        ret |= (info[3] & ((unsigned)1 << 26)) ? HW_SSE2 : 0;
+        ret |= (info[2] & ((unsigned)1 << 0)) ? HW_SSE3 : 0;
 
-        ret |= (info[2] & ((int)1 << 9)) ? HW_SSSE3 : 0;
-        ret |= (info[2] & ((int)1 << 19)) ? HW_SSE41 : 0;
-        ret |= (info[2] & ((int)1 << 20)) ? HW_SSE42 : 0;
-        ret |= (info[2] & ((int)1 << 25)) ? HW_AES : 0;
+        ret |= (info[2] & ((unsigned)1 << 9)) ? HW_SSSE3 : 0;
+        ret |= (info[2] & ((unsigned)1 << 19)) ? HW_SSE41 : 0;
+        ret |= (info[2] & ((unsigned)1 << 20)) ? HW_SSE42 : 0;
+        ret |= (info[2] & ((unsigned)1 << 25)) ? HW_AES : 0;
 
-        ret |= ((info[2] & ((int)1 << 28)) && (protect_avx())) ? HW_AVX : 0;
-        ret |= (info[2] & ((int)1 << 12)) ? HW_FMA3 : 0;
+        ret |= ((info[2] & ((unsigned)1 << 28)) && (protect_avx())) ? HW_AVX : 0;
+        ret |= (info[2] & ((unsigned)1 << 12)) ? HW_FMA3 : 0;
 
-        ret |= (info[2] & ((int)1 << 30)) ? HW_RDRAND : 0;
+        ret |= (info[2] & ((unsigned)1 << 30)) ? HW_RDRAND : 0;
     }
     if (nIds >= 0x00000007) {
         cpuid(info, 0x00000007);
-        ret |= ((info[1] & ((int)1 << 5)) && (protect_avx())) ? HW_AVX2 : 0;
+        ret |= ((info[1] & ((unsigned)1 << 5)) && (protect_avx())) ? HW_AVX2 : 0;
 
-        ret |= (info[1] & ((int)1 << 3)) ? HW_BMI1 : 0;
-        ret |= (info[1] & ((int)1 << 8)) ? HW_BMI2 : 0;
-        ret |= (info[1] & ((int)1 << 19)) ? HW_ADX : 0;
-        ret |= (info[1] & ((int)1 << 14)) ? HW_MPX : 0;
-        ret |= (info[1] & ((int)1 << 29)) ? HW_SHA : 0;
-        ret |= (info[2] & ((int)1 << 0)) ? HW_PREFETCHWT1 : 0;
+        ret |= (info[1] & ((unsigned)1 << 3)) ? HW_BMI1 : 0;
+        ret |= (info[1] & ((unsigned)1 << 8)) ? HW_BMI2 : 0;
+        ret |= (info[1] & ((unsigned)1 << 19)) ? HW_ADX : 0;
+        ret |= (info[1] & ((unsigned)1 << 14)) ? HW_MPX : 0;
+        ret |= (info[1] & ((unsigned)1 << 29)) ? HW_SHA : 0;
+        ret |= (info[2] & ((unsigned)1 << 0)) ? HW_PREFETCHWT1 : 0;
 
-        ret |= (info[1] & ((int)1 << 16)) && (protect_avx512()) ? HW_AVX512_F : 0;
-        ret |= (info[1] & ((int)1 << 28)) && (protect_avx512()) ? HW_AVX512_CD : 0;
-        ret |= (info[1] & ((int)1 << 26)) && (protect_avx512()) ? HW_AVX512_PF : 0;
-        ret |= (info[1] & ((int)1 << 27)) && (protect_avx512()) ? HW_AVX512_ER : 0;
-        ret |= (info[1] & ((int)1 << 31)) && (protect_avx512()) ? HW_AVX512_VL : 0;
-        ret |= (info[1] & ((int)1 << 30)) && (protect_avx512()) ? HW_AVX512_BW : 0;
-        ret |= (info[1] & ((int)1 << 17)) && (protect_avx512()) ? HW_AVX512_DQ : 0;
-        ret |= (info[1] & ((int)1 << 21)) && (protect_avx512()) ? HW_AVX512_IFMA : 0;
-        ret |= (info[2] & ((int)1 << 1)) && (protect_avx512()) ? HW_AVX512_VBMI : 0;
+        ret |= (info[1] & ((unsigned)1 << 16)) && (protect_avx512()) ? HW_AVX512_F : 0;
+        ret |= (info[1] & ((unsigned)1 << 28)) && (protect_avx512()) ? HW_AVX512_CD : 0;
+        ret |= (info[1] & ((unsigned)1 << 26)) && (protect_avx512()) ? HW_AVX512_PF : 0;
+        ret |= (info[1] & ((unsigned)1 << 27)) && (protect_avx512()) ? HW_AVX512_ER : 0;
+        ret |= (info[1] & ((unsigned)1 << 31)) && (protect_avx512()) ? HW_AVX512_VL : 0;
+        ret |= (info[1] & ((unsigned)1 << 30)) && (protect_avx512()) ? HW_AVX512_BW : 0;
+        ret |= (info[1] & ((unsigned)1 << 17)) && (protect_avx512()) ? HW_AVX512_DQ : 0;
+        ret |= (info[1] & ((unsigned)1 << 21)) && (protect_avx512()) ? HW_AVX512_IFMA : 0;
+        ret |= (info[2] & ((unsigned)1 << 1)) && (protect_avx512()) ? HW_AVX512_VBMI : 0;
     }
     if (nExIds >= 0x80000001) {
         cpuid(info, 0x80000001);
 
-        ret |= (info[3] & ((int)1 << 29)) ? HW_x64 : 0;
-        ret |= (info[2] & ((int)1 << 5)) ? HW_ABM : 0;
-        ret |= (info[2] & ((int)1 << 6)) ? HW_SSE4a : 0;
-        ret |= (info[2] & ((int)1 << 16)) ? HW_FMA4 : 0;
-        ret |= (info[2] & ((int)1 << 11)) ? HW_XOP : 0;
+        ret |= (info[3] & ((unsigned)1 << 29)) ? HW_x64 : 0;
+        ret |= (info[2] & ((unsigned)1 << 5)) ? HW_ABM : 0;
+        ret |= (info[2] & ((unsigned)1 << 6)) ? HW_SSE4a : 0;
+        ret |= (info[2] & ((unsigned)1 << 16)) ? HW_FMA4 : 0;
+        ret |= (info[2] & ((unsigned)1 << 11)) ? HW_XOP : 0;
     }
     return ret;
 }
