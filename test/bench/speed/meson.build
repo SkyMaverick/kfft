@@ -23,6 +23,13 @@ else
         fftw_dep = cc.find_library('fftw3', required: false)
     endif
 endif
+if get_option('speed_test_with_plan')
+    if ccid == 'msvc'
+        c_args += '/DCHECK_WITH_PLAN'
+    else
+        c_args += '-DCHECK_WITH_PLAN'
+    endif
+endif
 
 if fftw_dep.found()
     fftw_cpx_app = executable ('run_fftw_cpx', files('tb_cpx_fftw.c'),
