@@ -11,12 +11,13 @@ enum {
 };
 
 unsigned
-kfft_sincos_float(float* co, float* si, float x);
-unsigned
 kfft_sincos_double(double* co, double* si, double x);
 
 static inline kfft_scalar
 kfft_math_sqrt(const kfft_scalar number) {
+    if (number <= 0)
+        return 0;
+
     const kfft_scalar ACCURACY = 0.001;
     kfft_scalar lower, upper, guess;
 

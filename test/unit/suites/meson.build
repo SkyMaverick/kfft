@@ -1,12 +1,19 @@
 # --- simple test suites ---
-suites = {
-    #TODO 'suite' : 'main_app depends files'
-}
+suites = {}
 
-foreach item_file, item_adds : suites
-    lib_name = item_file.split('.')[0]
-    lib_suite = shared_library (lib_name, item_file + item_adds,
-                                include_directories: kfft_inc,
-                                link_with: libkfft,
+if (not get_option('enable_sysmath'))
+    suites = {
+        'test_sqrt': files ('math_sqrt.c'),
+        'test_sincos': files ('math_sincos.c'),
+        'sys_pool': files ('sys_pool.c')
+    }
+    test_deps += cc.find_library('m', required: true)
+endif
+
+foreach targets, src : suites
+    lib_suite = shared_library (targets, src + test_utils_src,
+                                include_directories: [kfft_inc, test_inc],
+                                link_with: libkfft_static,
+                                dependencies: test_deps,
                                 install: false)
 endforeach

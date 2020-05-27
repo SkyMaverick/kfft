@@ -30,11 +30,11 @@
     close(out);                                                                                    \
     close(err);
 
-#define _MSGID_OFF(id)                                                                             \
+#define STDIO_OFF(id)                                                                              \
     int _mfdout_##id = 0, _mfderr_##id = 0;                                                        \
     _MSG_OFF(_mfdout_##id, _mfderr_##id);
 
-#define _MSGID_ON(id) _MSG_ON(_mfdout_##id, _mfderr_##id);
+#define STDIO_ON(id) _MSG_ON(_mfdout_##id, _mfderr_##id);
 
 CU_pSuite
 CUnitCreateSuite(const char* title);

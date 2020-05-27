@@ -1,5 +1,5 @@
 project ('kfft', 'c',
-         version: '0.4.1',
+         version: '0.4.4',
          license: 'Zlib',
          default_options:[
             'c_std=gnu11',
@@ -15,7 +15,7 @@ kfft_ver = meson.project_version().split('.')
 
 kfft_src = files('''
     kfft.h
-    kfft_alloc.c
+    kfft_pool.c
     kfft_cpx.c
     kfft_scalar.c
     kfft_ext.c
@@ -24,7 +24,7 @@ kfft_src = files('''
 '''.split())
 
 kfft_headers = files('''
-    incs/kfft_alloc.h
+    incs/kfft_pool.h
     incs/kfft_algo.h
     incs/kfft_cpx.h
     incs/kfft_ext.h
@@ -199,6 +199,12 @@ install_headers(kfft_headers, subdir: 'kfft/incs')
 install_headers(kfft_cfg, subdir: 'kfft/incs')
 
 if get_option('enable_tests')
+    libkfft_static = static_library (meson.project_name(), kfft_src,
+                              dependencies: kfft_deps,
+                              override_options : optimize_opts,
+                              include_directories: kfft_inc,
+                              link_with: kfft_link,
+                              install: false)
     subdir('test')
 endif
 if get_option('enable_app')
