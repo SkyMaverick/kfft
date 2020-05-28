@@ -58,15 +58,14 @@
     #define KFFT_CC_GNU
     #if defined(__MINGW32__)
         #define KFFT_CC_MINGW
-    #endif
-    #if defined(__INTEL_COMPILER)
+    #elif defined(__INTEL_COMPILER)
         #define KFFT_CC_INTEL
-    #endif
-    #if defined(__clang__)
+    #elif defined(__clang__)
         #define KFFT_CC_CLANG
-    #endif
-    #if defined(_CRAYC)
+    #elif defined(_CRAYC)
         #define KFFT_CC_CRAY
+    #else
+        #define KFFT_CC_GCC
     #endif
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
     #define KFFT_CC_SUN
