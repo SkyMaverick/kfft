@@ -91,3 +91,7 @@ kfft_simd_align(const kfft_simd_t S) {
     }
     return 0;
 }
+
+#if defined(KFFT_DYNAPI_ENABLE)
+typedef kfft_simd_t (*kfft_callback_simd_analize)(void);
+#endif /* KFFT_DYNAPI_ENABLE */

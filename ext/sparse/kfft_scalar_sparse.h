@@ -23,3 +23,18 @@ KFFT_API void
 kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nfft,
                          const uint32_t dims, uint32_t step, const bool is_inverse,
                          kfft_pool_t* mmgr);
+
+#if defined(KFFT_DYNAPI_ENABLE)
+typedef kfft_ssparse_t* (*kfft_callback_config_sparse_scalar)(const uint32_t nfft,
+                                                              const uint32_t flags,
+                                                              const uint32_t dims, uint32_t step,
+                                                              kfft_pool_t* A, size_t* lenmem);
+typedef kfft_return_t (*kfft_callback_eval_sparse_scalar)(kfft_ssparse_t* cfg,
+                                                          const kfft_scalar* fin, kfft_cpx* fout);
+typedef kfft_return_t (*kfft_callback_evali_sparse_scalar)(kfft_ssparse_t* cfg, const kfft_cpx* fin,
+                                                           kfft_scalar* fout);
+typedef void (*kfft_callback_shift_sparse_scalar)(kfft_scalar* buf, kfft_scalar* ftmp,
+                                                  const uint32_t nfft, const uint32_t dims,
+                                                  uint32_t step, const bool is_inverse,
+                                                  kfft_pool_t* mmgr);
+#endif /* KFFT_DYNAPI_ENABLE */
