@@ -63,6 +63,8 @@ kfft_config = {
     'KFFT_MINOR_VERSION': kfft_ver[1],
     'KFFT_PATCH_VERSION': kfft_ver[2],
 
+    'KFFT_DYNAPI_ENABLE': get_option('enable_dynamical_api'),
+    
     'KFFT_TRACE'        : get_option('enable_traces')       ,
     'KFFT_USE_SIMD'     : get_option('enable_simd') and
                           (not get_option('enable_half_scalar')),

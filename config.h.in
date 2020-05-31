@@ -5,6 +5,9 @@
 #mesondefine KFFT_MINOR_VERSION
 #mesondefine KFFT_PATCH_VERSION
 
+// dynamic load API enable
+#mesondefine KFFT_DYNAPI_ENABLE
+
 // global library configuration
 #mesondefine KFFT_TRACE
 #mesondefine KFFT_USE_SIMD
