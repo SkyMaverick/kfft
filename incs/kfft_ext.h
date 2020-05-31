@@ -15,10 +15,18 @@ KFFT_API const char*
 kfft_strerr(const kfft_return_t code);
 
 #if defined(KFFT_DYNAPI_ENABLE)
-typedef void (*kfft_callback_info)(kfft_info_t* info);
-typedef uint32_t (*kfft_callback_next_fast_size)(uint32_t n);
-typedef void* (*kfft_callback_malloc)(uint32_t sz);
-typedef void (*kfft_callback_free_null)(void** mem);
-typedef kfft_return_t (*kfft_callback_cleanup)(void* mem);
-typedef const char* (*kfft_callback_strerr)(const kfft_return_t code);
+// clang-format off
+typedef void
+(*kfft_callback_info)(kfft_info_t* info);
+typedef uint32_t
+(*kfft_callback_next_fast_size)(uint32_t n);
+typedef void*
+(*kfft_callback_malloc)(uint32_t sz);
+typedef void
+(*kfft_callback_free_null)(void** mem);
+typedef kfft_return_t
+(*kfft_callback_cleanup)(void* mem);
+typedef const char*
+(*kfft_callback_strerr)(const kfft_return_t code);
+// clang-format on
 #endif /* KFFT_DYNAPI_ENABLE */

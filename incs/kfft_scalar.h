@@ -31,10 +31,13 @@ kfft_evali_scalar_internal(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scal
                            kfft_cpx* tmpbuf);
 
 #if defined(KFFT_DYNAPI_ENABLE)
-typedef kfft_sclr_t* (*kfft_callback_config_scalar)(const uint32_t nfft, const uint32_t flags,
-                                                    kfft_pool_t* A, size_t* lenmem);
-typedef kfft_return_t (*kfft_callback_eval_scalar)(kfft_sclr_t* cfg, const kfft_scalar* timedata,
-                                                   kfft_cpx* freqdata);
-typedef kfft_return_t (*kfft_callback_evali_scalar)(kfft_sclr_t* cfg, const kfft_cpx* freqdata,
-                                                    kfft_scalar* timedata);
+// clang-format off
+typedef kfft_sclr_t*
+(*kfft_callback_config_scalar)(const uint32_t nfft, const uint32_t flags,
+                               kfft_pool_t* A, size_t* lenmem);
+typedef kfft_return_t
+(*kfft_callback_eval_scalar)(kfft_sclr_t* cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
+typedef kfft_return_t
+(*kfft_callback_evali_scalar)(kfft_sclr_t* cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
+// clang-format on
 #endif /* KFFT_DYNAPI_ENABLE */
