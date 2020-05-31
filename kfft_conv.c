@@ -19,7 +19,6 @@ kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t
  */
 KFFT_API kfft_return_t
 kfft_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi) {
-
     kfft_return_t ret = kfft_eval_cpx(P, Fin, Fin);
     return (ret == KFFT_RET_SUCCESS) ? kfft_part_convolution(Fout, Fin, P, Pi) : ret;
 }

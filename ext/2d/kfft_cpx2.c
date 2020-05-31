@@ -25,7 +25,6 @@ kfft_trace_plan(kfft_comp2_t* P) {
 
 static inline kfft_return_t
 kfft_init(kfft_comp2_t* st) {
-
     st->plan_x = kfft_config_cpx(st->x, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
     if (st->plan_x) {
         if (st->x != st->y) {
@@ -57,13 +56,11 @@ kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
 KFFT_API kfft_comp2_t*
 kfft_config2_cpx(const uint32_t x_size, const uint32_t y_size, const uint32_t flags, kfft_pool_t* A,
                  size_t* lenmem) {
-
     kfft_comp2_t* st = NULL;
     size_t memneeded = kfft_calculate(x_size, y_size, flags);
 
     KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_comp2_t, memneeded, A, lenmem);
     if (st) {
-
         st->nfft = x_size * y_size;
         st->x = x_size;
         st->y = y_size;

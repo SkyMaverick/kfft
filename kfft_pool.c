@@ -10,7 +10,6 @@ static inline kfft_pool_t*
 kfft_pool_init(void* mem, const size_t nmem, kfft_simd_t vex, uint8_t align) {
     kfft_pool_t* ret = (kfft_pool_t*)mem;
     if (mem && (nmem >= sizeof(kfft_pool_t))) {
-
         ret->allocated = nmem;
         ret->vex = vex;
         ret->align = align;

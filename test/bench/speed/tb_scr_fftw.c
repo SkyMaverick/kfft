@@ -19,7 +19,6 @@
 
 static double
 fft_test(fftw_scalar* tbuf, FFTW(complex) * ftmp, size_t size) {
-
 #ifdef CHECK_WITH_PLAN
     clock_t t_start = clock();
 
@@ -62,7 +61,6 @@ stdout_time(double* T) {
 int
 main(int argc, char* argv[]) {
     if (argc > 1) {
-
         double ivals[TEST_COUNT];
         size_t size = atol(argv[1]);
 

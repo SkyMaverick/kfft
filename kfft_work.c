@@ -1,7 +1,6 @@
 static kfft_return_t
 kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_stride,
         uint32_t* factors, const kfft_comp_t* st) {
-
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_cpx* Fout_beg = Fout;

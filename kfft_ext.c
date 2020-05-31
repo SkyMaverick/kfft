@@ -2,7 +2,6 @@
 
 KFFT_API void
 kfft_info(kfft_info_t* info) {
-
     info->vmajor = KFFT_MAJOR_VERSION;
     info->vminor = KFFT_MINOR_VERSION;
     info->vpatch = KFFT_PATCH_VERSION;

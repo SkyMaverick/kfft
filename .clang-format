@@ -6,7 +6,7 @@ ColumnLimit: 100
 UseTab: Never
 
 PointerAlignment: Left
-AlwaysBreakAfterReturnType: TopLevel
+AlwaysBreakAfterReturnType: All
 IndentPPDirectives: BeforeHash
 
 SortIncludes: false

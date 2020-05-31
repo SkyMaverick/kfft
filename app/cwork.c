@@ -8,7 +8,6 @@ work_cpx2_internal(kfft_cpx* buf, app_mode_t* M) {
     if (buf && ftmp) {
         kfft_comp2_t* plan = kfft_config2_cpx(M->x, M->y, M->flags, 0, NULL);
         if (plan) {
-
             if ((M->flags & KFFT_FLAG_INVERSE) && (M->is_shift))
                 kfft_shift2_cpx(buf, ftmp, M->x, M->y, true, KFFT_PLAN_MMGR(plan));
 

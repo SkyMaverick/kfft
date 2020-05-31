@@ -214,7 +214,6 @@ kfft_evali_sparse_scalar(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar*
 static inline void
 shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nfft, const uint32_t dims,
                uint32_t step, const bool is_inverse, kfft_pool_t* mmgr) {
-
     for (uint32_t n = 0; n < dims; n++) {
         for (uint32_t i = 0; i < nfft; i++)
             ftmp[i] = buf[i * (dims + step) + n];

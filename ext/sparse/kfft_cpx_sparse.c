@@ -95,7 +95,6 @@ kfft_process_memless(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) 
 
 static kfft_return_t
 kfft_process(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) {
-
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->subst->nfft * sizeof(kfft_cpx);
 
@@ -127,7 +126,6 @@ kfft_process(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) {
 
 KFFT_API kfft_return_t
 kfft_eval_sparse_cpx(kfft_csparse_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
-
     if ((cfg->dims < 2) && (cfg->step))
         return kfft_eval_cpx(cfg->subst, fin, fout);
 
@@ -141,7 +139,6 @@ kfft_eval_sparse_cpx(kfft_csparse_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
 static inline void
 shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t nfft, const uint32_t dims,
                uint32_t step, const bool is_inverse, kfft_pool_t* mmgr) {
-
     for (uint32_t n = 0; n < dims; n++) {
         for (uint32_t i = 0; i < nfft; i++)
             C_CPY(ftmp[i], buf[i * (dims + step) + n]);
@@ -156,7 +153,6 @@ shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t nfft, const uint32_
 KFFT_API void
 kfft_shift_sparse_cpx(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t nfft, const uint32_t dims,
                       uint32_t step, const bool is_inverse, kfft_pool_t* mmgr) {
-
     size_t dim_nfft = (nfft + step) / (dims + step);
 #if !defined(KFFT_MEMLESS_MODE)
     if (ftmp == NULL) {

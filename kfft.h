@@ -51,7 +51,7 @@ extern "C" {
 
 #if defined(KFFT_USE_SIMD)
     #define __VEXST(S) KFFT_PLAN_VEX((S))
-// clang-format off
+    // clang-format off
     #define VEX_CHECK_AVX2(S)                                                                   \
         kfft_simd_check(__VEXST((S)),HW_AVX2)
     #define VEX_CHECK_AVX(S)                                                                    \

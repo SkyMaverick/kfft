@@ -193,7 +193,6 @@ FUNC_SSE(kf_bfly5)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
     kfft_cpx* Fout4 = Fout0 + 4 * m;
 
     for (u = 0; u < m; ++u) {
-
         kfft_cpx ctw1 = TWIDDLE(u * fstride, st);
         kfft_cpx ctw2 = TWIDDLE(2 * u * fstride, st);
         kfft_cpx ctw3 = TWIDDLE(3 * u * fstride, st);

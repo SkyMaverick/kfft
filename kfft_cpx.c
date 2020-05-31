@@ -147,7 +147,6 @@ kf_factor(kfft_comp_t* st) {
 
 static inline kfft_return_t
 kfft_kinit(kfft_comp_t* st) {
-
     kfft_return_t ret = KFFT_RET_SUCCESS;
     /* Generate twiddles  */
 #if defined(KFFT_MEMLESS_MODE)
@@ -164,7 +163,6 @@ kfft_kinit(kfft_comp_t* st) {
 #if defined(KFFT_RADER_ALGO)
     if (st->prm_count > 0) {
         if (!(st->flags & KFFT_FLAG_GENERIC_ONLY)) {
-
             for (uint32_t i = 0; i < st->prm_count; i++) {
                 kfft_splan_t* sP = &(st->primes[i]);
                 uint32_t len = sP->prime - 1;
@@ -177,7 +175,6 @@ kfft_kinit(kfft_comp_t* st) {
                 sP->pidx = kfft_pool_alloc(st->object.mmgr, sizeof(uint32_t) * len);
 
                 if (sP->qidx && sP->pidx) {
-
                     kfft_rader_idxs(sP->qidx, sP->q, sP->prime);
                     kfft_rader_idxs(sP->pidx, sP->p, sP->prime);
     #endif /* not KFFT_MEMLESS_MODE */
@@ -190,7 +187,6 @@ kfft_kinit(kfft_comp_t* st) {
 
                     sP->shuffle_twiddles = kfft_pool_alloc(st->object.mmgr, sizeof(kfft_cpx) * len);
                     if (sP->shuffle_twiddles) {
-
                         for (uint32_t j = 0; j < len; j++) {
                             uint32_t ip = RAD_INVERSE_IDX(j, sP);
 
@@ -216,7 +212,6 @@ kfft_kinit(kfft_comp_t* st) {
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_comp_t* st) {
-
     size_t ret = sizeof(kfft_comp_t);
 
 #if !defined(KFFT_RADER_ALGO)

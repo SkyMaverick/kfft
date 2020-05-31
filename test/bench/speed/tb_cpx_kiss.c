@@ -12,7 +12,6 @@
 
 static double
 fft_test(kiss_fft_cpx* tbuf, kiss_fft_cpx* ftmp, size_t size) {
-
     memcpy(ftmp, tbuf, size * sizeof(kiss_fft_cpx));
 #ifdef CHECK_WITH_PLAN
     clock_t t_start = clock();
@@ -56,7 +55,6 @@ stdout_time(double* T) {
 int
 main(int argc, char* argv[]) {
     if (argc > 1) {
-
         double ivals[TEST_COUNT];
         size_t size = atol(argv[1]);
 

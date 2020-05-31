@@ -31,7 +31,6 @@ work_scalar2_inverse(kfft_cpx* buf, app_mode_t* M) {
 
     kfft_scalar* ftmp = kfft_malloc(M->len * sizeof(kfft_scalar));
     if (buf && ftmp) {
-
         kfft_sclr2_t* plan = kfft_config2_scalar(M->x, M->y, M->flags, 0, NULL);
         if (plan) {
             if (M->is_shift)
@@ -58,7 +57,6 @@ work_scalar_sparse_forward(kfft_scalar* buf, app_mode_t* M) {
 
     kfft_cpx* ftmp = kfft_malloc(M->len * sizeof(kfft_cpx));
     if (buf && ftmp) {
-
         kfft_ssparse_t* plan =
             kfft_config_sparse_scalar(M->len, M->flags, M->dim, M->step, 0, NULL);
         if (plan) {
@@ -117,7 +115,6 @@ work_scalar_forward(kfft_scalar* buf, app_mode_t* M) {
 
     kfft_cpx* ftmp = kfft_malloc(M->len * sizeof(kfft_cpx));
     if (buf && ftmp) {
-
         kfft_sclr_t* plan = kfft_config_scalar(M->len, M->flags, 0, NULL);
         if (plan) {
             ret = kfft_eval_scalar(plan, buf, ftmp);

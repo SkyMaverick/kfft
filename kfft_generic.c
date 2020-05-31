@@ -5,7 +5,6 @@
 static inline kfft_return_t
 rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                   uint32_t u, uint32_t m, uint32_t p) {
-
     (void)fstride; // disable unused parameter
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
@@ -85,7 +84,6 @@ std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft
 static kfft_return_t
 kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
                 uint32_t p) {
-
     kfft_trace_core(st->level, "[Generic] m - %d | p - %d | stride - %zu\n", m, p, fstride);
 
     kfft_return_t ret = KFFT_RET_SUCCESS;
@@ -99,7 +97,6 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uin
             if ((p >= KFFT_RADER_LIMIT) &&
                 (!((st->flags & KFFT_FLAG_GENERIC) || (st->flags & KFFT_FLAG_GENERIC_ONLY))) &&
                 st->prm_count) {
-
                 kfft_trace_core(st->level, "%s: %u\n", "Use Rader algorithm for resolve", p);
                 ret = rader_method_eval(Fout, scratch, fstride, st, u, m, p);
 

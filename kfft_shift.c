@@ -3,7 +3,6 @@
 
 KFFT_API void
 kfft_shift_cpx(kfft_cpx* buf, const uint32_t size, const bool is_inverse, kfft_pool_t* mmgr) {
-
     KFFT_UNUSED_VAR(mmgr);
 
     int64_t k = 0;
@@ -33,7 +32,6 @@ kfft_shift_cpx(kfft_cpx* buf, const uint32_t size, const bool is_inverse, kfft_p
 
 KFFT_API void
 kfft_shift_scalar(kfft_scalar* buf, const uint32_t size, const bool is_inverse, kfft_pool_t* mmgr) {
-
     KFFT_UNUSED_VAR(mmgr);
 
     int64_t k = 0;
