@@ -36,6 +36,9 @@
                                          _mm256_permute2f128_pd(AB, AB, 0x3)),                                       \
                         _mm256_setr_pd(1.0,1.0,-1.0,1.0));                                                           \
     } while (0)
+
+#define C_MUL_AVX2(M, A)                                                                                             \
+        C_MUL_AVX1(M,_mm256_permute2f128_pd(A, A, 0x2), _mm256_permute2f128_pd(A, A, 0x57));
 // clang-format on
 
 // #define S_MOD_AVX(A, B) _mm_sub_pd(A, _mm_mul_pd(_mm_div_pd(A, B), B));

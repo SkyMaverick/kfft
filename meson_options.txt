@@ -28,7 +28,7 @@ option ('enable_openmp', type: 'boolean', value: 'true',
 
 option ('list_extensions', type: 'array', value: ['2d', 'sparse'],
         description: 'enable extensions')
-option ('list_vex86', type: 'array', choices: ['sse', 'avx', 'avx2'], value: ['sse', 'avx'],
+option ('list_vex86', type: 'array', choices: ['sse', 'avx', 'avx2'], value: ['sse'],
         description: 'enable vector extensioins support')
 option ('enable_sse3', type: 'boolean', value: 'true',
         description: 'enable SSE3 along with SSE2 (any CPU don\'t support this, but it\'s faster)')
