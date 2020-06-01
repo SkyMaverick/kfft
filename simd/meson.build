@@ -16,10 +16,6 @@ if ccfam.startswith('x86')
     if get_option('list_vex86').contains('avx')
         subdir('avx')
     endif
-
-    if get_option('list_vex86').contains('avx2')
-        subdir('avx2')
-    endif
 endif # X86 architecture
 
 if (ccfam == 'aarch64') or (ccid == 'arm')
@@ -40,5 +36,4 @@ kfft_incdirs += '''
     ./simd
     ./simd/sse
     ./simd/avx
-    ./simd/avx2
 '''.split()

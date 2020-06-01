@@ -85,13 +85,6 @@ display_simd(void) {
             "NO"
     #endif
     );
-    fprintf(stdout, "%s - %s\n", "Enable AVX2 support",
-    #if defined(KFFT_SIMD_AVX2_SUPPORT)
-            "YES"
-    #else
-            "NO"
-    #endif
-    );
 }
 #endif /* KFFT_USE_SIMD */
 

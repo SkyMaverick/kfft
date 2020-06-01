@@ -41,11 +41,6 @@
     #define KFFT_SIMD_AVX_SUPPORT
 #endif
 
-#mesondefine KFFT_HAVE_AVX2
-#if defined (KFFT_HAVE_AVX2)
-    #define KFFT_SIMD_AVX2_SUPPORT
-#endif
-
 #mesondefine KFFT_ARCH_X86
 
 // ARM architecture extensions

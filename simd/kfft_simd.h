@@ -16,8 +16,5 @@
     #include "avx/kfft_bfly.h"
     #include "avx/kfft_generic.h"
 #endif
-#if defined(KFFT_SIMD_AVX2_SUPPORT)
-    #define FUNC_AVX2(X) X##_avx2
-#endif
 
 #include "kfft_simd_check.h"
