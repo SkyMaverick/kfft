@@ -210,5 +210,5 @@ if get_option('enable_tests')
     subdir('test')
 endif
 if get_option('enable_app')
-    subdir('app')
+    subdir('new_app')
 endif
