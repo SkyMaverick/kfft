@@ -87,3 +87,17 @@ typedef struct {
 
 #define KRNL_FUNCS(S) (S)->lib.sfuns
 #define KRNL_LIB(S) (S)->lib.handle
+
+static inline uint32_t
+translate_kfft_state (state_t* st) {
+    uint32_t ret = KFFT_FLAG_NORMAL;
+
+    if (st->mode & KFA_MODE_INVERSE)
+        ret |= KFFT_FLAG_INVERSE;
+    if (st->mode & KFA_MODE_GENERIC)
+        ret |= KFFT_FLAG_GENERIC;
+    if (st->mode & KFA_MODE_GENONLY)
+        ret |= KFFT_FLAG_GENERIC_ONLY;
+
+    return ret;
+}
