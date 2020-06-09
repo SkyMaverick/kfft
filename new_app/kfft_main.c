@@ -3,6 +3,45 @@
 #include "loader.c"
 #include "cmdline.c"
 
+static inline void
+write_stdout_binary(kfft_scalar* in, state_t* st) {
+    // TODO Copy buffer
+    fprintf(stdout, "%s", (char*)in);
+    fflush(stdout);
+}
+
+static inline void
+write_stdout_manual(kfft_scalar* in, state_t* st) {
+    char buf[80];
+    size_t out_size = 1;
+
+    char* out = calloc(1, sizeof(STDOUT_BUF_SIZE));
+    if (out) {
+        out[0] = '\0';
+        for (size_t i = 0; i < st->out_lenght; i++) {
+            sprintf(buf, "%.3f ", in[i]);
+            out_size += strlen(buf);
+            char* old = out;
+            out = realloc(out, out_size);
+            if (out == NULL) {
+                free(old);
+            }
+            strcat(out, buf);
+        }
+        out[out_size - 2] = '\0'; // erase last space
+
+        fprintf(stdout, "%s", out);
+        fflush(stdout);
+
+        free(out);
+    } /* out allocated */
+}
+
+static void
+write_stdout(kfft_scalar* in, state_t* st) {
+    (st->mode & KFA_MODE_BINARY) ? write_stdout_binary(in, st) : write_stdout_manual(in, st);
+}
+
 int
 main(int argc, char* argv[]) {
     unsigned ret = KFA_RET_SUCCESS;
@@ -14,8 +53,11 @@ main(int argc, char* argv[]) {
     ret = load_kfft_core(k_state);
     if (ret == KFA_RET_SUCCESS) {
 
-        char* buffer = cmd_line_parse(argc, argv, k_state);
-
+        kfft_scalar* buffer = cmd_line_parse(argc, argv, k_state);
+        if (buffer) {
+            write_stdout(buffer, k_state);
+            KRNL_FUNCS(k_state).cb_free_null((void*)(&buffer));
+        }
         unload_kfft_core(k_state);
     }
     free(k_state);

@@ -1,64 +1,211 @@
 #include "info.c"
 
-#if defined(KFFT_2D_ENABLE)
 static int
-prepare_2d(state_t* M) {
-    //    if ((M->len > 0) && (M->x > 0) && (M->len % M->x > 0))
-    //        return 1;
-    //
-    //    M->y = M->len / M->x;
-    //    return 0;
+parse_2d_arg(char* arg, state_t* st) {
+    int ret = atoi(arg);
+    if (ret > 0) {
+        st->dims.x = ret;
+        return 0;
+    }
+    return 1;
 }
-#endif /* KFFT_2D_ENABLE */
 
 static int
-parse_sparse_arg(char* arg, state_t* M) {
-    //    size_t olen = strlen(arg);
-    //    char* buf = calloc(olen + 1, sizeof(char));
-    //    if (buf) {
-    //        strncpy(buf, optarg, olen);
-    //
-    //        char* s = strchr(buf, ':');
-    //        if (s)
-    //            *s = '\0';
-    //
-    //        M->dim = atoi(buf);
-    //        if (strlen(buf) < olen)
-    //            M->step = atoi(s + 1);
-    //
-    //        M->is_sparse = true;
-    //        free(buf);
-    //
-    //        return 0;
-    //    } else {
-    //        return 1;
-    //    }
+parse_sparse_arg(char* arg, state_t* st) {
+    size_t olen = strlen(arg);
+    char* buf = calloc(olen + 1, sizeof(char));
+    if (buf == NULL)
+        return 1;
+
+    strncpy(buf, optarg, olen);
+
+    char* s = strchr(buf, ':');
+    if (s)
+        *s = '\0';
+
+    st->sparse.dx = atoi(buf);
+    if (strlen(buf) < olen)
+        st->sparse.sx = atoi(s + 1);
+
+    free(buf);
+    return 0;
+}
+
+#if !defined(KFFT_OS_WINDOWS)
+int
+stdin_check(void) {
+    fd_set rd;
+    struct timeval tv = {1, 0};
+    int ret;
+
+    FD_ZERO(&rd);
+    FD_SET(STDIN_FILENO, &rd);
+    ret = select(1, &rd, NULL, NULL, &tv);
+
+    return (ret > 0);
+}
+#else
+int
+stdin_check(void) {
+    // FIXME
+    return 1;
+}
+#endif /* not KFFT_OS_WINDOWS */
+
+void*
+reallocz(void* mem, size_t old_sz, size_t new_sz) {
+    void *ret = NULL, *old_mem = NULL, *old_ptr = mem;
+
+    if (old_mem = malloc(old_sz)) {
+        memcpy(old_mem, mem, old_sz);
+
+        ret = realloc(mem, new_sz);
+        if (ret) {
+            memset(ret, 0, new_sz);
+            memcpy(ret, old_mem, old_sz);
+        }
+
+        free(old_ptr);
+        free(old_mem);
+    }
+
+    return ret;
 }
 
 static inline char*
 pipe_read_stdin(state_t* st) {
-    // TODO
-    return NULL;
+    char buf[STDIN_BUF_SIZE];
+    size_t ret_size = 1;
+    char* ret = NULL;
+
+    if (stdin_check() > 0) {
+        ret = calloc(STDIN_BUF_SIZE, sizeof(kfft_scalar));
+        if (ret) {
+            size_t n = 0;
+            while ((n = fread(buf, 1, STDIN_BUF_SIZE, stdin)) > 0) {
+                if (st->mode & KFA_MODE_BINARY) {
+                    size_t new_size = (ret_size + n) + (ret_size + n) % sizeof(kfft_scalar);
+                    if ((ret = reallocz(ret, ret_size, new_size + 1)) != NULL) {
+                        strcat(ret, buf);
+                        ret_size += new_size;
+                    } else
+                        return NULL;
+                } else {
+                    size_t new_size = ret_size + n;
+                    if ((ret = reallocz(ret, ret_size, new_size + 1)) != NULL) {
+                        strcat(ret, buf);
+                        ret_size += new_size;
+                    } else
+                        return NULL;
+                }
+            }
+            ret[ret_size] = '\0';
+        } /* ret allocated */
+    }
+    st->buf.lenght = ret_size;
+
+    return ret;
 }
 
 static inline char*
 manual_read_stdin(int argc, char* argv[], int idx) {
-    return NULL;
+    char* buf = NULL;
+    if (idx < argc) {
+        size_t tmp_size = 1;
+        buf = calloc(1, tmp_size);
+        if (buf) {
+            do {
+                char* old = buf;
+                tmp_size += strlen(argv[idx]) + 1;
+
+                buf = realloc(buf, tmp_size);
+                if (buf == NULL) {
+                    free(old);
+                    return NULL;
+                }
+
+                strcat(buf, argv[idx]);
+                strcat(buf, " ");
+            } while (argc > ++idx);
+
+            buf[strlen(buf) - 1] = '\0';
+        } /* buf allocated */
+    }
+    return buf;
 }
 
-static char*
-cmd_line_parse(int argc, char* argv[], state_t* st) {
-    char* ret = NULL;
+static inline unsigned
+post_buffer_process(state_t* st) {
+    if (st->mode & KFA_MODE_SCALAR) {
+        if (st->mode & KFA_MODE_INVERSE) {
+            st->out_lenght = (st->lenght % 2) ? (st->lenght + 1) / 2 : st->lenght / 2;
+        } else {
+            st->out_lenght = st->lenght * 2;
+        }
+    } else {
+        st->out_lenght = (st->lenght % 2) ? st->lenght + 1 : st->lenght;
+    }
 
+    if (st->mode & KFA_MODE_2D) {
+        if (st->lenght % st->dims.x)
+            return KFA_RET_FAIL_ARGS;
+    }
+    if (st->mode & KFA_MODE_SPARSE) {
+        if (st->lenght % (st->sparse.dx + st->sparse.sx))
+            return KFA_RET_FAIL_ARGS;
+    }
+    printf("%zu\n", st->lenght);
+    printf("%zu\n", st->out_lenght);
+    return KFA_RET_SUCCESS;
+}
+
+static inline kfft_scalar*
+b2s_binary(char* buffer, state_t* st) {
+    return (kfft_scalar*)buffer;
+}
+
+static inline kfft_scalar*
+b2s_manual(char* buffer, state_t* st) {
+    size_t len = 1;
+
+    char* args = buffer;
+    // Analize
+    while ((args = strchr(args, ' ')) != NULL)
+        len++, *args = '\0', args++;
+    args = buffer;
+
+    kfft_scalar* tmp = KRNL_FUNCS(st).cb_malloc(len * sizeof(kfft_scalar));
+    if (tmp) {
+        for (size_t i = 0; i < len; i++) {
+            tmp[i] = (kfft_scalar)atof(args);
+            args += strlen(args) + 1;
+
+            st->lenght++;
+        }
+    }
+    free(buffer);
+
+    if (post_buffer_process(st) != KFA_RET_SUCCESS) {
+        free(tmp);
+        tmp = NULL;
+    }
+
+    return tmp;
+}
+
+static kfft_scalar*
+buf2scalar(char* buffer, state_t* st) {
+    return (st->mode & KFA_MODE_BINARY) ? b2s_binary(buffer, st) : b2s_manual(buffer, st);
+}
+
+static kfft_scalar*
+cmd_line_parse(int argc, char* argv[], state_t* st) {
     int opt = 0;
     while ((opt = getopt(argc, argv, FMT_OPTSTRING)) != -1) {
         switch (opt) {
         case 'b':
             st->mode |= KFA_MODE_BINARY;
             break;
-        case 'f':
-            st->mode |= KFA_MODE_STDIN;
-            // TODO
         case 'g':
             st->mode |= KFA_MODE_GENERIC;
             break;
@@ -75,11 +222,14 @@ cmd_line_parse(int argc, char* argv[], state_t* st) {
             st->mode |= KFA_MODE_SCALAR;
             break;
         case 'd': {
+            if (parse_sparse_arg(optarg, st))
+                return NULL;
             st->mode |= KFA_MODE_SPARSE;
-            //            parse_sparse_arg(optarg, mode);
             break;
         }
         case 'x':
+            if (parse_2d_arg(optarg, st))
+                return NULL;
             st->mode |= KFA_MODE_2D;
             break;
         case 'v':
@@ -91,36 +241,10 @@ cmd_line_parse(int argc, char* argv[], state_t* st) {
         case '?':
             display_help();
             exit(0);
+        case 'f':
+            st->mode |= KFA_MODE_STDIN;
+            return buf2scalar(manual_read_stdin(argc, argv, optind), st);
         }
     }
-// buffer_work:
-//     if (optind < argc) {
-//         size_t tmp_size = 1;
-//         char* buf = calloc(1, tmp_size);
-//         if (buf) {
-//             do {
-//                 char* old = buf;
-//                 tmp_size += strlen(argv[optind]) + 1;
-//
-//                 buf = realloc(buf, tmp_size);
-//                 if (buf == NULL) {
-//                     free(old);
-//                     goto bailout;
-//                 }
-//
-//                 strcat(buf, argv[optind]);
-//                 strcat(buf, " ");
-//             } while (argc > ++optind);
-//
-//             buf[strlen(buf) - 1] = '\0';
-//         } /* buf allocated */
-//         ret = buf;
-//     }
-//
-//     if (ret == NULL) {
-//         ret = read_stdin();
-//         mode->is_stdin = true;
-//     }
-bailout:
-    return ret;
+    return buf2scalar(pipe_read_stdin(st), st);
 }

@@ -36,7 +36,8 @@ enum {
     KFA_RET_SUCCESS = 0,
     KFA_RET_FAIL_INTERNAL = 1,
     KFA_RET_FAIL_PARSE = 2,
-    KFA_RET_FAIL_LOAD = 3
+    KFA_RET_FAIL_LOAD = 3,
+    KFA_RET_FAIL_ARGS = 4
 };
 
 enum {
@@ -60,7 +61,9 @@ typedef struct {
 #endif
         vtm_t sfuns;
     } lib;
-    size_t lenght;
+    struct {
+        size_t lenght;
+    } buf;
     struct {
         uint32_t x;
         uint32_t y;
@@ -69,6 +72,9 @@ typedef struct {
         uint32_t dx;
         uint32_t sx;
     } sparse;
+
+    size_t lenght;
+    size_t out_lenght;
 
     uint32_t mode;
 } state_t;

@@ -44,5 +44,5 @@ load_kfft_core(state_t* st) {
 
 void
 unload_kfft_core(state_t* st) {
-    return unload_kfft_library(st);
+    unload_kfft_library(st);
 }

@@ -1,6 +1,6 @@
 #include "config.h"
 
-#define FMT_OPTSTRING "gGisSd:x:vVf?"
+#define FMT_OPTSTRING "bB:gGisSd:x:vVf?"
 
 #define STDIN_BUF_SIZE 0xFF
 #define STDOUT_BUF_SIZE 0xFF
