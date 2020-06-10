@@ -6,7 +6,7 @@
 static inline void
 write_stdout_binary(kfft_scalar* in, state_t* st) {
     // TODO Copy buffer
-    fprintf(stdout, "%s", (char*)in);
+    fprintf(stdout, "%s\n", (char*)in);
     fflush(stdout);
 }
 
@@ -30,17 +30,20 @@ write_stdout_manual(kfft_scalar* in, state_t* st) {
         }
         out[out_size - 2] = '\0'; // erase last space
 
-        fprintf(stdout, "%s", out);
+        fprintf(stdout, "%s\n", out);
         fflush(stdout);
 
         free(out);
     } /* out allocated */
 }
 
-static void
+void
 write_stdout(kfft_scalar* in, state_t* st) {
     (st->mode & KFA_MODE_BINARY) ? write_stdout_binary(in, st) : write_stdout_manual(in, st);
 }
+
+#include "complex.c"
+#include "scalar.c"
 
 int
 main(int argc, char* argv[]) {
@@ -55,10 +58,13 @@ main(int argc, char* argv[]) {
 
         kfft_scalar* buffer = cmd_line_parse(argc, argv, k_state);
         if (buffer) {
-            write_stdout(buffer, k_state);
+            ret = (k_state->mode & KFA_MODE_SCALAR) ? work_scalar_plan(buffer, k_state)
+                                                    : work_complex_plan(buffer, k_state);
             KRNL_FUNCS(k_state).cb_free_null((void*)(&buffer));
+        } else {
+            display_help();
         }
-        unload_kfft_core(k_state);
+        //        unload_kfft_core(k_state);
     }
     free(k_state);
     return ret;

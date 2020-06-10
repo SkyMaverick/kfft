@@ -23,21 +23,24 @@
 #include "const.h"
 #include "config.h"
 
+#define KCB_TYPE(X) kfft_callback_##X
+
 typedef struct {
-    kfft_callback_info cb_info;
-    kfft_callback_next_fast_size cb_next_fast_size;
-    kfft_callback_malloc cb_malloc;
-    kfft_callback_free_null cb_free_null;
-    kfft_callback_cleanup cb_cleanup;
-    kfft_callback_strerr cb_strerr;
+    KCB_TYPE(info) cb_info;
+    KCB_TYPE(next_fast_size) cb_next_fast_size;
+    KCB_TYPE(malloc) cb_malloc;
+    KCB_TYPE(free_null) cb_free_null;
+    KCB_TYPE(cleanup) cb_cleanup;
+    KCB_TYPE(strerr) cb_strerr;
 } vtm_t;
 
 enum {
     KFA_RET_SUCCESS = 0,
-    KFA_RET_FAIL_INTERNAL = 1,
+    KFA_RET_FAIL_INTRNL = 1,
     KFA_RET_FAIL_PARSE = 2,
     KFA_RET_FAIL_LOAD = 3,
-    KFA_RET_FAIL_ARGS = 4
+    KFA_RET_FAIL_ARGS = 4,
+    KFA_RET_FAIL_UNREAL = 5,
 };
 
 enum {
@@ -79,17 +82,19 @@ typedef struct {
     uint32_t mode;
 } state_t;
 
+#define KFA_CHECK(S, X) (S)->mode& KFA_MODE_##X
+
 #if defined(KFFT_OS_WINDOWS)
-    #define KFFT_CALLBACK(S, X) GetProcAddress((S)->lib.handle, "kfft_" X)
+    #define KFFT_CALLBACK(S, X) (KCB_TYPE(X)) GetProcAddress((S)->lib.handle, "kfft_" #X)
 #else
-    #define KFFT_CALLBACK(S, X) dlsym((S)->lib.handle, "kfft_" X)
+    #define KFFT_CALLBACK(S, X) (KCB_TYPE(X)) dlsym((S)->lib.handle, "kfft_" #X)
 #endif /* KFFT_OS_WINDOWS */
 
 #define KRNL_FUNCS(S) (S)->lib.sfuns
 #define KRNL_LIB(S) (S)->lib.handle
 
 static inline uint32_t
-translate_kfft_state (state_t* st) {
+sm2kfl(state_t* st) {
     uint32_t ret = KFFT_FLAG_NORMAL;
 
     if (st->mode & KFA_MODE_INVERSE)

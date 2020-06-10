@@ -53,22 +53,14 @@ stdin_check(void) {
 #endif /* not KFFT_OS_WINDOWS */
 
 void*
-reallocz(void* mem, size_t old_sz, size_t new_sz) {
-    void *ret = NULL, *old_mem = NULL, *old_ptr = mem;
-
-    if (old_mem = malloc(old_sz)) {
-        memcpy(old_mem, mem, old_sz);
-
-        ret = realloc(mem, new_sz);
-        if (ret) {
-            memset(ret, 0, new_sz);
-            memcpy(ret, old_mem, old_sz);
-        }
-
-        free(old_ptr);
-        free(old_mem);
+realloc_align(void* mem, size_t old_sz, size_t new_sz, state_t* st) {
+    void* ret = KRNL_FUNCS(st).cb_malloc(new_sz);
+    if (ret) {
+        memset(ret, 0, new_sz);
+        memcpy(ret, mem, old_sz);
     }
 
+    free(mem);
     return ret;
 }
 
@@ -83,21 +75,14 @@ pipe_read_stdin(state_t* st) {
         if (ret) {
             size_t n = 0;
             while ((n = fread(buf, 1, STDIN_BUF_SIZE, stdin)) > 0) {
-                if (st->mode & KFA_MODE_BINARY) {
-                    size_t new_size = (ret_size + n) + (ret_size + n) % sizeof(kfft_scalar);
-                    if ((ret = reallocz(ret, ret_size, new_size + 1)) != NULL) {
-                        strcat(ret, buf);
-                        ret_size += new_size;
-                    } else
-                        return NULL;
-                } else {
-                    size_t new_size = ret_size + n;
-                    if ((ret = reallocz(ret, ret_size, new_size + 1)) != NULL) {
-                        strcat(ret, buf);
-                        ret_size += new_size;
-                    } else
-                        return NULL;
-                }
+                size_t new_size = (st->mode & KFA_MODE_BINARY)
+                                      ? (ret_size + n) + (ret_size + n) % sizeof(kfft_scalar)
+                                      : ret_size + n;
+                if ((ret = realloc_align(ret, ret_size, new_size + 1, st)) != NULL) {
+                    strcat(ret, buf);
+                    ret_size += new_size;
+                } else
+                    return NULL;
             }
             ret[ret_size] = '\0';
         } /* ret allocated */
@@ -168,13 +153,16 @@ static inline kfft_scalar*
 b2s_manual(char* buffer, state_t* st) {
     size_t len = 1;
 
+    if (buffer == NULL)
+        return NULL;
+
     char* args = buffer;
     // Analize
     while ((args = strchr(args, ' ')) != NULL)
         len++, *args = '\0', args++;
     args = buffer;
 
-    kfft_scalar* tmp = KRNL_FUNCS(st).cb_malloc(len * sizeof(kfft_scalar));
+    kfft_scalar* tmp = KRNL_FUNCS(st).cb_malloc((len + 1) * sizeof(kfft_scalar));
     if (tmp) {
         for (size_t i = 0; i < len; i++) {
             tmp[i] = (kfft_scalar)atof(args);
@@ -184,6 +172,9 @@ b2s_manual(char* buffer, state_t* st) {
         }
     }
     free(buffer);
+
+    if (len % 2)
+        st->lenght += 1;
 
     if (post_buffer_process(st) != KFA_RET_SUCCESS) {
         free(tmp);

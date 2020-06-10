@@ -31,13 +31,12 @@ load_kfft_core(state_t* st) {
     if (ret != KFFT_RET_SUCCESS)
         return ret;
 
-    KRNL_FUNCS(st).cb_info = (kfft_callback_info)KFFT_CALLBACK(st, "info");
-    KRNL_FUNCS(st).cb_next_fast_size =
-        (kfft_callback_next_fast_size)KFFT_CALLBACK(st, "next_fast_size");
-    KRNL_FUNCS(st).cb_malloc = (kfft_callback_malloc)KFFT_CALLBACK(st, "malloc");
-    KRNL_FUNCS(st).cb_free_null = (kfft_callback_free_null)KFFT_CALLBACK(st, "free_null");
-    KRNL_FUNCS(st).cb_cleanup = (kfft_callback_cleanup)KFFT_CALLBACK(st, "cleanup");
-    KRNL_FUNCS(st).cb_strerr = (kfft_callback_strerr)KFFT_CALLBACK(st, "strerr");
+    KRNL_FUNCS(st).cb_info = KFFT_CALLBACK(st, info);
+    KRNL_FUNCS(st).cb_next_fast_size = KFFT_CALLBACK(st, next_fast_size);
+    KRNL_FUNCS(st).cb_malloc = KFFT_CALLBACK(st, malloc);
+    KRNL_FUNCS(st).cb_free_null = KFFT_CALLBACK(st, free_null);
+    KRNL_FUNCS(st).cb_cleanup = KFFT_CALLBACK(st, cleanup);
+    KRNL_FUNCS(st).cb_strerr = KFFT_CALLBACK(st, strerr);
 
     return ret;
 }
