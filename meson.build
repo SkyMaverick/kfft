@@ -3,7 +3,7 @@ project ('kfft', 'c',
          license: 'Zlib',
          default_options:[
             'c_std=gnu11',
-            'warning_level=2',
+            'warning_level=0',
             'strip=true',
             'b_pie=true'
          ],
