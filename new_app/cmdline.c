@@ -19,7 +19,7 @@ out_iscpx(state_t* st) {
     return true;
 }
 
-static inline size_t
+static inline void
 calculate_io(state_t* st, size_t in_size) {
     if (in_iscpx(st)) {
         if (in_size % 2)
