@@ -133,23 +133,6 @@ read_stdin_pipe(state_t* st) {
 }
 
 static kfft_scalar*
-read_stdin_args(int argc, char* argv[], int idx, state_t* st) {
-    kfft_scalar* tmp = NULL;
-    if (idx < argc) {
-        size_t needed = argc - idx;
-
-        tmp = KRNL_FUNCS(st).cb_malloc(st->in_len * st->scsz);
-        if (tmp) {
-            memset(tmp, 0, needed * st->scsz);
-            for (size_t i = 0; idx < argc; idx++, i++)
-                tmp[i] = (kfft_scalar)atof(argv[idx]);
-        }
-        calculate_io(st, needed);
-    }
-    return tmp;
-}
-
-static kfft_scalar*
 cmd_line_parse(int argc, char* argv[], state_t* st) {
     int opt = 0;
     while ((opt = getopt(argc, argv, FMT_OPTSTRING)) != -1) {
@@ -192,9 +175,6 @@ cmd_line_parse(int argc, char* argv[], state_t* st) {
         case '?':
             display_help();
             exit(0);
-        case 'f':
-            st->mode |= KFA_MODE_STDIN;
-            return read_stdin_args(argc, argv, optind, st);
         }
     }
     return read_stdin_pipe(st);

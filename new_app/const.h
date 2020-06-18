@@ -1,15 +1,13 @@
 #include "config.h"
 
-#define FMT_OPTSTRING "bB:gGisSd:x:vVf?"
+#define FMT_OPTSTRING "gGisSd:x:vV?"
 
 #define STDIN_BUF_SIZE 0xFF
 #define STDOUT_BUF_SIZE 0xFF
 
 #define __HELP_SRING                                                                               \
     "Fast Fourier Transform for input sequence. Use kfft library.\n"                               \
-    "\nUse the program independently:\n"                                                           \
-    "\t" APP_NAME " [-" FMT_OPTSTRING "] <sequence>\n"                                             \
-    "or as part of an operations pipeline:\n"                                                      \
+    "Use as part of an operations pipeline:\n"                                                     \
     "\t... <sequence> | " APP_NAME " [-" FMT_OPTSTRING "] | " APP_NAME " [-" FMT_OPTSTRING         \
     "] | <sequence>...\n"                                                                          \
     "\nInput/output buffer format - float / double numbers separated by spaces \n"                 \
@@ -22,7 +20,6 @@
     "\nArguments: \n"                                                                              \
     "\t-g - use generic algorithm for prime size chuncks evalation \n"                             \
     "\t-G - use ONLY generic algorithm for all sequence evalation \n"                              \
-    "\t-f - parse last args as input sequence \n"                                                  \
     "\t-i - use inverse transformation \n"                                                         \
     "\t-S - use scalar functions for evalate \n"                                                   \
     "\t-d - use sparse functionality (arguments dims:step)\n"                                      \
