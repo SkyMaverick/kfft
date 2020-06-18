@@ -15,6 +15,7 @@ static void
 kfft_trace_plan(kfft_csparse_t* P) {
     kfft_trace_spr("%s: %p", "Create KFFT complex plan", (void*)P);
     kfft_trace("\n\t %s - %u", "Total lenght", P->nfft);
+    kfft_trace("\n\t %s - %u", "Dim lenght", P->dnfft);
     kfft_trace("\n\t %s - %u", "Dims", P->dims);
     kfft_trace("\n\t %s - %u", "Steps", P->step);
 
@@ -24,7 +25,7 @@ kfft_trace_plan(kfft_csparse_t* P) {
 
 static inline kfft_return_t
 kfft_init(kfft_csparse_t* st) {
-    st->subst = kfft_config_cpx(st->nfft, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
+    st->subst = kfft_config_cpx(st->dnfft, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
     return (st->subst) ? KFFT_RET_SUCCESS : KFFT_RET_ALLOC_FAIL;
 }
 
@@ -47,7 +48,8 @@ kfft_config_sparse_cpx(const uint32_t nfft, const uint32_t flags, const uint32_t
 
     KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_csparse_t, memneeded, A, lenmem);
     if (st) {
-        st->nfft = dim_nfft;
+        st->nfft = nfft;
+        st->dnfft = dim_nfft;
         st->dims = dims;
         st->step = step;
 
@@ -126,7 +128,7 @@ kfft_process(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) {
 
 KFFT_API kfft_return_t
 kfft_eval_sparse_cpx(kfft_csparse_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
-    if ((cfg->dims < 2) && (cfg->step))
+    if ((cfg->dims < 2) && (!(cfg->step)))
         return kfft_eval_cpx(cfg->subst, fin, fout);
 
 #if defined(KFFT_MEMLESS_MODE)

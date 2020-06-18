@@ -112,13 +112,15 @@ unsigned
 work_complex_plan(kfft_scalar* in, state_t* st) {
     unsigned ret = KFA_RET_FAIL_INTRNL;
 
-    if (KFA_CHECK(st, SPARSE))
+    if (KFA_CHECK(st, SPARSE)) {
         ret = work_complex_sparse((kfft_cpx*)in, st);
-    if (KFA_CHECK(st, 2D))
-        ret = work_complex_2d((kfft_cpx*)in, st);
-
-    ret = work_complex_normal((kfft_cpx*)in, st);
-
+    } else {
+        if (KFA_CHECK(st, 2D)) {
+            ret = work_complex_2d((kfft_cpx*)in, st);
+        } else {
+            ret = work_complex_normal((kfft_cpx*)in, st);
+        }
+    }
     if (ret == KFA_RET_SUCCESS)
         write_stdout(in, st);
 
