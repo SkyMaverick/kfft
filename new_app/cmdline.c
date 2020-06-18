@@ -31,6 +31,8 @@ calculate_io(state_t* st, size_t in_size) {
     st->out_count = st->in_count;
     if (out_iscpx(st)) {
         st->out_len = st->in_count * 2;
+    } else {
+        st->out_len = st->in_count;
     }
 }
 
@@ -119,6 +121,9 @@ read_stdin_pipe(state_t* st) {
     char buf[KFA_BUF_SIZE];
     char* tmp = NULL;
 
+    if (stdin_check() == 0)
+        return NULL;
+
     size_t n = 0;
     while ((n = fread(buf, 1, KFA_BUF_SIZE, stdin)) > 0) {
         tmp = realloc(tmp, st->buf.lenght + n + 1);
@@ -132,8 +137,22 @@ read_stdin_pipe(state_t* st) {
     return parse_stdin_buffer(tmp, st);
 }
 
+static bool
+post_process_analize(state_t* st) {
+    if (KFA_CHECK(st, 2D))
+        if (st->in_count % st->dims.x)
+            return false;
+    st->dims.y = st->in_count / st->dims.x;
+    if (KFA_CHECK(st, SPARSE))
+        if ((st->in_count - st->sparse.sx) % (st->sparse.dx + st->sparse.sx))
+            return false;
+    return true;
+}
+
 static kfft_scalar*
 cmd_line_parse(int argc, char* argv[], state_t* st) {
+    kfft_scalar* ret = NULL;
+
     int opt = 0;
     while ((opt = getopt(argc, argv, FMT_OPTSTRING)) != -1) {
         switch (opt) {
@@ -177,5 +196,12 @@ cmd_line_parse(int argc, char* argv[], state_t* st) {
             exit(0);
         }
     }
-    return read_stdin_pipe(st);
+    ret = read_stdin_pipe(st);
+    if (ret)
+        if (post_process_analize(st)) {
+            return ret;
+        } else {
+            KRNL_FUNCS(st).cb_free_null((void**)&ret);
+        }
+    return ret;
 }
