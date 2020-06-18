@@ -1,3 +1,8 @@
+static unsigned
+work_scalar_sparse(kfft_scalar* in, state_t* st) {
+
+}
+
 static inline unsigned
 scalar_2d_forward(kfft_scalar* in, kfft_sclr2_t* plan, state_t* st) {
     unsigned ret = KFA_RET_FAIL_INTRNL;
@@ -61,8 +66,6 @@ work_scalar_2d(kfft_scalar* in, state_t* st) {
     }
     return KFA_RET_FAIL_INTRNL;
 }
-static unsigned
-work_scalar_sparse(kfft_scalar* in, state_t* st) {}
 
 static inline unsigned
 scalar_normal_forward(kfft_scalar* in, kfft_sclr_t* plan, state_t* st) {

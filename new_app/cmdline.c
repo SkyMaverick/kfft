@@ -156,9 +156,6 @@ cmd_line_parse(int argc, char* argv[], state_t* st) {
     int opt = 0;
     while ((opt = getopt(argc, argv, FMT_OPTSTRING)) != -1) {
         switch (opt) {
-        case 'b':
-            st->mode |= KFA_MODE_BINARY;
-            break;
         case 'g':
             st->mode |= KFA_MODE_GENERIC;
             break;
