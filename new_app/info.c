@@ -24,7 +24,7 @@ display_flags(kfft_info_t* info) {
 static void
 display_simd(state_t* st) {
 
-    kfft_callback_simd_analize cb_func = KFFT_CALLBACK(st, "simd_analize");
+    KCB_TYPE(simd_analize) cb_func = KFFT_CALLBACK(st, simd_analize);
     if (cb_func) {
         fprintf(stdout, "\n%s:\n", "Found CPU extensions");
 

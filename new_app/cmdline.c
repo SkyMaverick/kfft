@@ -139,10 +139,11 @@ read_stdin_pipe(state_t* st) {
 
 static bool
 post_process_analize(state_t* st) {
-    if (KFA_CHECK(st, 2D))
+    if (KFA_CHECK(st, 2D)) {
         if (st->in_count % st->dims.x)
             return false;
-    st->dims.y = st->in_count / st->dims.x;
+        st->dims.y = st->in_count / st->dims.x;
+    }
     if (KFA_CHECK(st, SPARSE))
         if ((st->in_count - st->sparse.sx) % (st->sparse.dx + st->sparse.sx))
             return false;
