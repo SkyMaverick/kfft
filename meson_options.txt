@@ -19,11 +19,11 @@ option ('enable_fastmath', type: 'boolean', value: 'true',
         description: 'use -ffast-math optimization (maybe dangerouse)')
 option ('enable_extended', type: 'boolean', value: 'true',
         description: 'enable extended algoritms (use generic algorithm for prime-lenght sequence)')
-option ('enable_memless', type: 'boolean', value: 'false',
+option ('enable_memless', type: 'boolean', value: 'true',
         description: 'use memory less mode (very slow)')
 option ('enable_half_scalar', type: 'boolean', value: 'false',
         description: 'use float data type without double (by default). This option disable SIMD build.')
-option ('enable_openmp', type: 'boolean', value: 'false',
+option ('enable_openmp', type: 'boolean', value: 'true',
         description: 'enable openmp parallel pragmas (uses 2d, sparse extensions)')
 
 option ('list_extensions', type: 'array', value: ['2d', 'sparse'],

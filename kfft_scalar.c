@@ -117,6 +117,7 @@ eval_func(kfft_sclr_t* stu, kfft_cpx* tmpbuf, const kfft_scalar* timedata, kfft_
     KFFT_TMP_ZEROMEM(tmpbuf, stu->substate->nfft * sizeof(kfft_cpx));
     for (uint32_t i = 0; i < ncfft; i++) {
         freqdata[i].r = timedata[i];
+        freqdata[i].i = 0;
     }
     ret = kfft_eval_cpx(stu->substate, freqdata, tmpbuf);
     if (ret == KFFT_RET_SUCCESS) {
