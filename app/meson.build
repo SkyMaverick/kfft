@@ -14,7 +14,18 @@ configure_file (
     }
 )
 
-app_fft = executable (app_name, 'fft_app.c',
+app_dep = []
+if not (osid == 'windows')
+    app_dep += cc.find_library('dl', required: true)
+endif
+app_rpath = ':'.join ([
+    '$ORIGIN'/'.',
+    '$ORIGIN'/'..'
+])
+
+app_fft = executable (app_name, 'kfft_main.c',
                        link_with: test_link,
                        include_directories: kfft_inc,
+                       dependencies: app_dep,
+                       build_rpath: app_rpath,
                        install: true)
