@@ -17,7 +17,7 @@ _TEST(negative) {
 
     srand(time(NULL));
     for (unsigned i = 0; i < TEST_CYCLE_COUNT; i++)
-        tsum += abs(kfft_math_sqrt(rand() * -1));
+        tsum += fabs(kfft_math_sqrt(rand() * -1));
 
     CU_ASSERT_EQUAL(0, tsum);
 }

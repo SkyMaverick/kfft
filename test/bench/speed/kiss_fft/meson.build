@@ -13,7 +13,7 @@ else
         -mtune=native
         -ffast-math
         -fomit-frame-pointer
-        -unroll-loops
+        -funroll-loops
         -dA
         -fverbose-asm
         -DFIXED_POINT=32

@@ -36,7 +36,7 @@ compare_spectr_inv(fft_scalar* fftw_buffer, fft_scalar* kfft_buffer, size_t size
 
             // COMPARE SEQUENCES
             for (size_t i = 0; i < size; i++) {
-                if (abs(fftw_buffer[i] - kfft_buffer[i]) > TEST_PRECISION) {
+                if (fabs(fftw_buffer[i] - kfft_buffer[i]) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
                     goto bailout;
                 }
@@ -68,11 +68,11 @@ compare_spectr_fwd(fft_scalar* fftw_buffer, fft_scalar* kfft_buffer, size_t size
 
             // COMPARE SEQUENCES
             for (size_t i = 0; i < size; i++) {
-                if (abs(fftw_out[i][0] - kfft_out[i].r) > TEST_PRECISION) {
+                if (fabs(fftw_out[i][0] - kfft_out[i].r) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
                     goto bailout;
                 }
-                if (abs(fftw_out[i][1] - kfft_out[i].i) > TEST_PRECISION) {
+                if (fabs(fftw_out[i][1] - kfft_out[i].i) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
                     goto bailout;
                 }
