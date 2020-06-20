@@ -93,7 +93,7 @@ parse_stdin_buffer(char* buf, state_t* st) {
     size_t count = 1;
 
     char* tmp = buf;
-    while (tmp = strchr(tmp, ' '))
+    while ((tmp = strchr(tmp, ' ')))
         count++, tmp++;
 
     calculate_io(st, count);
@@ -103,7 +103,7 @@ parse_stdin_buffer(char* buf, state_t* st) {
         tmp = old = buf;
 
         count = 0;
-        while (tmp = strchr(tmp, ' ')) {
+        while ((tmp = strchr(tmp, ' '))) {
             *tmp++ = '\0';
             ret[count] = (kfft_scalar)atof(old);
 
@@ -196,11 +196,12 @@ cmd_line_parse(int argc, char* argv[], state_t* st) {
         }
     }
     ret = read_stdin_pipe(st);
-    if (ret)
+    if (ret){
         if (post_process_analize(st)) {
             return ret;
         } else {
             KRNL_FUNCS(st).cb_free_null((void**)&ret);
         }
+    }
     return ret;
 }
