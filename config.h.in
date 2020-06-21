@@ -26,6 +26,7 @@
 // extensions enable/disable info
 #mesondefine KFFT_2D_ENABLE
 #mesondefine KFFT_SPARSE_ENABLE
+#mesondefine KFFT_CONV_ENABLE
 
 // vector CPU extensions info
 

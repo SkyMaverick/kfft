@@ -3,6 +3,16 @@
 #if defined(KFFT_RADER_ALGO)
 
 static inline kfft_return_t
+kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi) {
+    kfft_return_t ret = kfft_eval_cpx(P, Fout, Fout);
+    if (ret == KFFT_RET_SUCCESS) {
+        VEXFUNC(P, kfft_math_adamar_cpx, Fout, Fin, P->nfft);
+        ret = kfft_eval_cpx(Pi, Fout, Fout);
+    }
+    return ret;
+}
+
+static inline kfft_return_t
 rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
                   uint32_t u, uint32_t m, uint32_t p) {
     (void)fstride; // disable unused parameter
