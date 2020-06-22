@@ -50,6 +50,14 @@ kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
 }
 
 void
+kfft_math_adamar_scalar(kfft_scalar* Fout, kfft_scalar* Fin, uint32_t size) {
+    // FIXME Now primitive algorithm
+    for (uint32_t i = 0; i < size; i++) {
+        Fout[i] *= Fin[i];
+    }
+}
+
+void
 kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, const uint32_t y) {
     for (uint64_t n = 0; n < x * y; n++) {
         uint64_t i = n / y;
