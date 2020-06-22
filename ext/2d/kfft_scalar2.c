@@ -134,7 +134,7 @@ kfft_2transform_inverse_memless(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scal
         fbuf = ftmp + st->nfft;
 
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
+    #if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
         #pragma omp parallel for schedule(static)
     #endif
         for (uint32_t i = 0; i < st->y; i++) {
@@ -174,7 +174,7 @@ kfft_2transform_inverse_normal(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scala
         fbuf = ftps + st->nfft;
 
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
+    #if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
         #pragma omp parallel for schedule(static)
     #endif
         for (uint32_t i = 0; i < st->y; i++) {

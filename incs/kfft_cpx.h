@@ -43,12 +43,8 @@ typedef struct kfft_kstate {
 
 KFFT_API kfft_comp_t*
 kfft_config_cpx(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
-
 KFFT_API kfft_return_t
 kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
-
-KFFT_API kfft_return_t
-kfft_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi);
 
 #if defined(KFFT_DYNAPI_ENABLE)
 // clang-format off
@@ -56,7 +52,5 @@ typedef kfft_comp_t*
 (*kfft_callback_config_cpx)(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
 typedef kfft_return_t
 (*kfft_callback_eval_cpx)(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
-typedef kfft_return_t
-(*kfft_callback_convolution)(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi);
 // clang-format on
 #endif /* KFFT_DYNAPI_ENABLE */

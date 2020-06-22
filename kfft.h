@@ -40,6 +40,10 @@ extern "C" {
     #include "sparse/kfft_cpx_sparse.h"
     #include "sparse/kfft_scalar_sparse.h"
 #endif
+#if defined(KFFT_CONV_ENABLE)
+    #include "conv/kfft_cpx_conv.h"
+//    #include "conv/kfft_scalar_sparse.h"
+#endif
 
 #define KFFT_PLAN_MMGR(X) (*((kfft_pool_t**)(X)))
 
