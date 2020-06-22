@@ -16,10 +16,10 @@ typedef struct {
 } kfft_ccnv2_t;
 
 KFFT_API kfft_ccnv2_t*
-kfft_config_conv2_cpx(const uint32_t x, const uint32_t y, const uint32_t flags, kfft_pool_t* A,
+kfft_config2_conv_cpx(const uint32_t x, const uint32_t y, const uint32_t flags, kfft_pool_t* A,
                       size_t* lenmem);
 KFFT_API kfft_return_t
-kfft_eval_conv2_cpx(kfft_ccnv2_t* plan, const kfft_cpx* fin_A, const kfft_cpx* fin_B,
+kfft_eval2_conv_cpx(kfft_ccnv2_t* plan, const kfft_cpx* fin_A, const kfft_cpx* fin_B,
                     kfft_cpx* fout);
 
 #if defined(KFFT_DYNAPI_ENABLE)

@@ -74,7 +74,7 @@ kfft_calculate(const uint32_t x, const uint32_t y, const uint32_t flags) {
 }
 
 KFFT_API kfft_scnv2_t*
-kfft_config_conv2_scalar(const uint32_t x, const uint32_t y, const uint32_t flags, kfft_pool_t* A,
+kfft_config2_conv_scalar(const uint32_t x, const uint32_t y, const uint32_t flags, kfft_pool_t* A,
                          size_t* lenmem) {
     kfft_scnv2_t* st = NULL;
     size_t memneeded = kfft_calculate(x, y, flags);
@@ -98,7 +98,7 @@ kfft_config_conv2_scalar(const uint32_t x, const uint32_t y, const uint32_t flag
 }
 
 KFFT_API kfft_return_t
-kfft_eval_conv2_scalar(kfft_scnv2_t* plan, const kfft_scalar* fin_A, const kfft_scalar* fin_B,
+kfft_eval2_conv_scalar(kfft_scnv2_t* plan, const kfft_scalar* fin_A, const kfft_scalar* fin_B,
                        kfft_scalar* fout) {
 
     kfft_return_t ret, retA, retB;
