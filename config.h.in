@@ -30,6 +30,11 @@
 #mesondefine KFFT_2D_ENABLE
 #mesondefine KFFT_SPARSE_ENABLE
 #mesondefine KFFT_CONV_ENABLE
+#mesondefine KFFT_CONV2_ENABLE
+#if ( (defined (KFFT_CONV2_ENABLE)) && \
+      (defined (KFFT_2D_ENABLE)) )
+    #define KFFT_CONV2D_ENABLE
+#endif
 
 // vector CPU extensions info
 

@@ -42,7 +42,11 @@ extern "C" {
 #endif
 #if defined(KFFT_CONV_ENABLE)
     #include "conv/kfft_cpx_conv.h"
-//    #include "conv/kfft_scalar_sparse.h"
+    #include "conv/kfft_scalar_conv.h"
+#endif
+#if defined(KFFT_CONV2D_ENABLE)
+    #include "conv2d/kfft_cpx_conv.h"
+    #include "conv2d/kfft_scalar_conv.h"
 #endif
 
 #define KFFT_PLAN_MMGR(X) (*((kfft_pool_t**)(X)))

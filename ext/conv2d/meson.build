@@ -7,4 +7,4 @@ kfft_headers += files('''
     kfft_scalar_conv.h
 '''.split())
 
-kfft_config += {'KFFT_CONV_ENABLE': true}
+kfft_config += {'KFFT_CONV2_ENABLE': true}
