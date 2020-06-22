@@ -99,7 +99,7 @@ kfft_2transform(kfft_sclr2_t* st, const kfft_scalar* fin, kfft_cpx* fout) {
         kfft_math_transpose_cpx(ftmp, fout, st->x, st->y);
 
         kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
-#if !defined(KFFT_CC_MSVC)
+#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
     #pragma omp parallel for schedule(static)
 #endif
         for (uint32_t i = 0; i < st->x; i++) {
@@ -134,7 +134,7 @@ kfft_2transform_inverse_memless(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scal
         fbuf = ftmp + st->nfft;
 
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-    #if !defined(KFFT_CC_MSVC)
+#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
         #pragma omp parallel for schedule(static)
     #endif
         for (uint32_t i = 0; i < st->y; i++) {
@@ -174,7 +174,7 @@ kfft_2transform_inverse_normal(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scala
         fbuf = ftps + st->nfft;
 
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-    #if !defined(KFFT_CC_MSVC)
+#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
         #pragma omp parallel for schedule(static)
     #endif
         for (uint32_t i = 0; i < st->y; i++) {
@@ -221,7 +221,7 @@ void
 shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const uint32_t sz_y,
                const bool is_inverse, kfft_pool_t* mmgr) {
     kfft_trace_2d("%s\n", "X-axes shift transform");
-#if !defined(KFFT_CC_MSVC)
+#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
     #pragma omp parallel for schedule(static)
 #endif
     for (uint32_t i = 0; i < sz_y; i++) {
@@ -233,7 +233,7 @@ shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const u
         kfft_math_transpose_scalar(buf, ftmp, sz_x, sz_y);
 
         kfft_trace_2d("%s\n", "Y-axes shift transform");
-#if !defined(KFFT_CC_MSVC)
+#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
     #pragma omp parallel for schedule(static)
 #endif
         for (uint32_t i = 0; i < sz_x; i++) {
@@ -247,7 +247,7 @@ shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const u
         kfft_math_transpose_ip_scalar(buf, sz_x, sz_y);
 
         kfft_trace_2d("%s\n", "Y-axes shift transform");
-#if !defined(KFFT_CC_MSVC)
+#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
     #pragma omp parallel for schedule(static)
 #endif
         for (uint32_t i = 0; i < sz_x; i++) {

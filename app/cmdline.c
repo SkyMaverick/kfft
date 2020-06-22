@@ -196,7 +196,7 @@ cmd_line_parse(int argc, char* argv[], state_t* st) {
         }
     }
     ret = read_stdin_pipe(st);
-    if (ret){
+    if (ret) {
         if (post_process_analize(st)) {
             return ret;
         } else {

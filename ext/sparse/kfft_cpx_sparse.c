@@ -100,7 +100,7 @@ kfft_process(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->subst->nfft * sizeof(kfft_cpx);
 
-    #if !defined(KFFT_OS_WINDOWS)
+#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
         #pragma omp parallel for schedule(static)
     #endif
     for (uint32_t n = 0; n < plan->dims; n++) {
