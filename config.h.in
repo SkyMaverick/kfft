@@ -14,6 +14,9 @@
 #mesondefine KFFT_USE_ALLOCA
 #mesondefine KFFT_USE_SYSMATH
 #mesondefine KFFT_USE_OPENMP
+#if defined (KFFT_USE_OPENMP)
+    #define OMP_MINVER 201307
+#endif
 #mesondefine KFFT_RADER_ALGO
 #mesondefine KFFT_MEMLESS_MODE
 #mesondefine KFFT_HALF_SCALAR
