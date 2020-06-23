@@ -1,10 +1,6 @@
 #include "kfft.h"
 #include "kfft_trace.h"
 
-#if defined(KFFT_USE_OPENMP)
-    #include <omp.h>
-#endif
-
 // clang-format off
 #define kfft_trace_2d(fmt, ...)                                                           \
     kfft_trace("[SCLR_2D]"" " fmt, __VA_ARGS__)

@@ -145,3 +145,9 @@
 #else //__GNUC__ - may need other defines for different compilers
     #define WARN(exp) ("WARNING: " exp)
 #endif
+
+#if defined(KFFT_CC_MSVC)
+    #define KFFT_PRAGMA(X) __pragma(X)
+#else //__GNUC__ - may need other defines for different compilers
+    #define KFFT_PRAGMA(X) _Pragma(#X)
+#endif

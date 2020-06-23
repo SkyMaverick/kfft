@@ -1,10 +1,6 @@
 #include "kfft.h"
 #include "kfft_trace.h"
 
-#if defined(KFFT_USE_OPENMP)
-    #include <omp.h>
-#endif
-
 // clang-format off
 #define kfft_trace_scnv(fmt, ...)                                                           \
     kfft_trace("[CNV_SCR]"" " fmt, __VA_ARGS__)
@@ -21,21 +17,12 @@ kfft_trace_plan(kfft_scnv_t* P) {
 #endif /*KFFT_TRACE */
 static inline kfft_return_t
 kfft_init(kfft_scnv_t* st) {
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp parallel sections shared(st)
-#endif
-    {
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp section
-#endif
-        {
+    KFFT_OMP(omp parallel sections shared(st)) {
+        KFFT_OMP(omp section) {
             st->plan_fwd =
                 kfft_config_scalar(st->nfft, KFFT_CHECK_FLAGS(st->flags), KFFT_PLAN_MMGR(st), NULL);
         }
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp section
-#endif
-        {
+        KFFT_OMP(omp section) {
             st->plan_inv =
                 kfft_config_scalar(st->nfft, KFFT_CHECK_FLAGS(st->flags | KFFT_FLAG_INVERSE),
                                    KFFT_PLAN_MMGR(st), NULL);
@@ -48,21 +35,12 @@ static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
     size_t ret = sizeof(kfft_scnv_t);
     size_t delta = 0;
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp parallel sections shared(ret) private(delta)
-#endif
-    {
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp section
-#endif
-        {
+    KFFT_OMP(omp parallel sections shared(ret) private(delta)) {
+        KFFT_OMP(omp section) {
             kfft_config_scalar(nfft, KFFT_CHECK_FLAGS(flags), NULL, &delta);
             ret += delta;
         }
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp section
-#endif
-        {
+        KFFT_OMP(omp section) {
             kfft_config_scalar(nfft, KFFT_CHECK_FLAGS(flags | KFFT_FLAG_INVERSE), NULL, &delta);
             ret += delta;
         }
@@ -101,18 +79,9 @@ kfft_eval_conv_scalar(kfft_scnv_t* plan, const kfft_scalar* fin_A, const kfft_sc
     if (bufA) {
         kfft_cpx* bufB = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * plan->nfft, KFFT_PLAN_ALIGN(plan));
         if (bufB) {
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp parallel sections shared(plan)
-#endif
-            {
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp section
-#endif
-                { retA = kfft_eval_scalar(plan->plan_fwd, fin_A, bufA); }
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp section
-#endif
-                { retB = kfft_eval_scalar(plan->plan_fwd, fin_B, bufB); }
+            KFFT_OMP(omp parallel sections shared(plan)) {
+                KFFT_OMP(omp section) { retA = kfft_eval_scalar(plan->plan_fwd, fin_A, bufA); }
+                KFFT_OMP(omp section) { retB = kfft_eval_scalar(plan->plan_fwd, fin_B, bufB); }
             }
             if ((retA == KFFT_RET_SUCCESS) && (retB == KFFT_RET_SUCCESS)) {
                 VEXFUNC(plan, kfft_math_adamar_cpx, bufB, bufA, plan->nfft);

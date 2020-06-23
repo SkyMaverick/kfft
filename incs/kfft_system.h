@@ -89,3 +89,16 @@ __trace_malloc_aligned(size_t nmem, uint8_t align) {
         KFFT_TMP_FREE((X), (A));                                                                   \
         X = NULL;                                                                                  \
     } while (0)
+
+// OpenMP macroses
+
+#if defined(KFFT_USE_OPENMP)
+    #include <omp.h>
+    #if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
+        #define KFFT_OMP(X) KFFT_PRAGMA(X)
+    #else
+        #define KFFT_OMP(X)
+    #endif
+#else
+    #define KFFT_OMP(X)
+#endif

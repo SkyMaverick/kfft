@@ -1,10 +1,6 @@
 #include "kfft.h"
 #include "kfft_trace.h"
 
-#if defined(KFFT_USE_OPENMP)
-    #include <omp.h>
-#endif
-
 // clang-format off
 #define kfft_trace_spr(fmt, ...)                                                           \
     kfft_trace("[CPX_SPR]"" " fmt, __VA_ARGS__)
