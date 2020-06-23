@@ -23,16 +23,21 @@ kfft_trace_plan(kfft_sclr2_t* P) {
 
 static inline kfft_return_t
 kfft_init(kfft_sclr2_t* st) {
-    st->plan_x = kfft_config_scalar(st->x, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
-    if (st->plan_x) {
-        if (st->x != st->y) {
-            st->plan_y =
-                kfft_config_scalar(st->y, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
-        } else {
-            st->plan_y = st->plan_x;
+    if (st->x != st->y) {
+        KFFT_OMP(omp parallel sections shared(st)) {
+            KFFT_OMP(omp section) {
+                st->plan_x =
+                    kfft_config_scalar(st->x, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
+            }
+            KFFT_OMP(omp section) {
+                st->plan_y =
+                    kfft_config_scalar(st->y, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
+            }
         }
+    } else {
+        st->plan_y = st->plan_x =
+            kfft_config_scalar(st->x, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
     }
-
     return (st->plan_y && st->plan_x) ? KFFT_RET_SUCCESS : KFFT_RET_ALLOC_FAIL;
 }
 
@@ -41,14 +46,21 @@ kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
     size_t ret = sizeof(kfft_sclr2_t);
     size_t delta = 0;
 
-    kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags), NULL, &delta);
-    ret += delta;
-
     if ((szy != szx) || (szy > 1)) {
-        kfft_config_scalar(szy, KFFT_CHECK_FLAGS(flags), NULL, &delta);
+        KFFT_OMP(omp parallel sections shared(ret) private(delta)) {
+            KFFT_OMP(omp section) {
+                kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags), NULL, &delta);
+                ret += delta;
+            }
+            KFFT_OMP(omp section) {
+                kfft_config_scalar(szy, KFFT_CHECK_FLAGS(flags), NULL, &delta);
+                ret += delta;
+            }
+        }
+    } else {
+        kfft_config_cpx(szx, KFFT_CHECK_FLAGS(flags), NULL, &delta);
         ret += delta;
     }
-
     return ret;
 }
 
@@ -95,9 +107,8 @@ kfft_2transform(kfft_sclr2_t* st, const kfft_scalar* fin, kfft_cpx* fout) {
         kfft_math_transpose_cpx(ftmp, fout, st->x, st->y);
 
         kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp parallel for schedule(static)
-#endif
+        
+        KFFT_OMP(omp parallel for schedule(static))
         for (uint32_t i = 0; i < st->x; i++) {
             uint64_t bp = st->y * i;
             ret = kfft_eval_cpx(CPXSP(st->plan_y), &(fout[bp]), &(ftmp[bp]));
@@ -130,9 +141,8 @@ kfft_2transform_inverse_memless(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scal
         fbuf = ftmp + st->nfft;
 
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-    #if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-        #pragma omp parallel for schedule(static)
-    #endif
+        
+        KFFT_OMP( omp parallel for schedule(static))
         for (uint32_t i = 0; i < st->y; i++) {
             uint64_t bp = st->x * i;
             ret = kfft_eval_cpx(CPXSP(st->plan_x), &(fin[bp]), &(ftmp[bp]));
@@ -170,9 +180,8 @@ kfft_2transform_inverse_normal(kfft_sclr2_t* st, const kfft_cpx* fin, kfft_scala
         fbuf = ftps + st->nfft;
 
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
-    #if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-        #pragma omp parallel for schedule(static)
-    #endif
+        
+        KFFT_OMP( omp parallel for schedule(static))
         for (uint32_t i = 0; i < st->y; i++) {
             uint64_t bp = st->x * i;
             ret = kfft_eval_cpx(CPXSP(st->plan_x), &(fin[bp]), &(ftmp[bp]));
@@ -217,9 +226,8 @@ void
 shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const uint32_t sz_y,
                const bool is_inverse, kfft_pool_t* mmgr) {
     kfft_trace_2d("%s\n", "X-axes shift transform");
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp parallel for schedule(static)
-#endif
+    
+    KFFT_OMP(omp parallel for schedule(static))
     for (uint32_t i = 0; i < sz_y; i++) {
         uint64_t bp = sz_x * i;
         kfft_shift_scalar(&(buf[bp]), sz_x, is_inverse, mmgr);
@@ -229,9 +237,8 @@ shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const u
         kfft_math_transpose_scalar(buf, ftmp, sz_x, sz_y);
 
         kfft_trace_2d("%s\n", "Y-axes shift transform");
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp parallel for schedule(static)
-#endif
+        
+        KFFT_OMP( omp parallel for schedule(static))
         for (uint32_t i = 0; i < sz_x; i++) {
             uint64_t bp = sz_y * i;
             kfft_shift_scalar(&(ftmp[bp]), sz_y, is_inverse, mmgr);
@@ -243,9 +250,8 @@ shift_internal(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t sz_x, const u
         kfft_math_transpose_ip_scalar(buf, sz_x, sz_y);
 
         kfft_trace_2d("%s\n", "Y-axes shift transform");
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp parallel for schedule(static)
-#endif
+        
+        KFFT_OMP( omp parallel for schedule(static))
         for (uint32_t i = 0; i < sz_x; i++) {
             uint64_t bp = sz_y * i;
             kfft_shift_scalar(&(buf[bp]), sz_y, is_inverse, mmgr);

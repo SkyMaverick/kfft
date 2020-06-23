@@ -89,16 +89,14 @@ kfft_process_memless(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) 
     }
     return ret;
 }
-#else /* KFFT_MEMLESS_MODE */
+#else  /* KFFT_MEMLESS_MODE */
 
 static kfft_return_t
 kfft_process(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->subst->nfft * sizeof(kfft_cpx);
 
-    #if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-        #pragma omp parallel for schedule(static)
-    #endif
+    KFFT_OMP(omp parallel for schedule(static))
     for (uint32_t n = 0; n < plan->dims; n++) {
         kfft_cpx* fbuf = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
         if (fbuf) {

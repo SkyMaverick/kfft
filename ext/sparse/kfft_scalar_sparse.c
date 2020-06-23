@@ -96,9 +96,7 @@ kfft_eval_process(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* fout) 
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp parallel for schedule(static)
-#endif
+    KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t n = 0; n < plan->dims; n++) {
         kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
         if (fbuf_cpx) {
@@ -169,9 +167,7 @@ kfft_evali_process(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout)
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
-#if (defined(_OPENMP) && (_OPENMP >= OMP_MINVER))
-    #pragma omp parallel for schedule(static)
-#endif
+    KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t n = 0; n < plan->dims; n++) {
         kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
         if (fbuf_cpx) {
