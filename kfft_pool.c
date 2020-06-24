@@ -50,16 +50,19 @@ void*
 kfft_pool_alloc(kfft_pool_t* A, const size_t nmem) {
     uint8_t* ret = NULL;
 
-    if (A && (nmem > 0)) {
-        kfft_trace_kia("%s: %zu byte\n", "Allocate - ", nmem);
-        if (A->cur + nmem <= A->tail) {
-            ret = A->cur;
-            A->cur += nmem;
-        } else {
-            kfft_trace_kia("%s: %zu byte. Tail - %p, cur - %p\n", "Overflow - ",
-                           nmem - (A->tail - A->cur), (void*)A->tail, (void*)A->cur);
+    KFFT_OMP(omp critical(alloc_block)) {
+        if (A && (nmem > 0)) {
+            kfft_trace_kia("%s: %zu byte\n", "Allocate - ", nmem);
+            if (A->cur + nmem <= A->tail) {
+                ret = A->cur;
+                A->cur += nmem;
+            } else {
+                kfft_trace_kia("%s: %zu byte. Tail - %p, cur - %p\n", "Overflow - ",
+                               nmem - (A->tail - A->cur), (void*)A->tail, (void*)A->cur);
+            }
         }
     }
+
     return (void*)ret;
 }
 
