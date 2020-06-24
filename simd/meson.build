@@ -9,12 +9,13 @@ endif
 if ccfam.startswith('x86')
     kfft_config += {'KFFT_ARCH_X86': true}
     
+    if not get_option('enable_half_scalar')
+        if get_option('list_vex86').contains('avx')
+            subdir('avx')
+        endif
+    endif
     if get_option('list_vex86').contains('sse')
         subdir('sse')
-    endif
-
-    if get_option('list_vex86').contains('avx')
-        subdir('avx')
     endif
 endif # X86 architecture
 
@@ -32,8 +33,8 @@ kfft_headers += files('''
     kfft_simd_check.h
 '''.split())
 
-kfft_incdirs += '''
-    ./simd
-    ./simd/sse
-    ./simd/avx
-'''.split()
+kfft_inc += include_directories('''
+    .
+    sse
+    avx
+'''.split())

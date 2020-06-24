@@ -37,10 +37,13 @@ kfft_headers = files('''
     incs/kfft_types.h
 '''.split())
 
-kfft_incdirs='''
+kfft_inc=[]
+
+kfft_inc += include_directories('''
     .
-    ./incs
-'''.split()
+    incs
+    ext
+'''.split())
 
 cc = meson.get_compiler('c')
 ccid = cc.get_id()
@@ -157,7 +160,7 @@ endforeach
 
 # Validate system depends
 kfft_vex = []
-if get_option('enable_simd') and (not get_option('enable_half_scalar'))
+if get_option('enable_simd')
     subdir('simd')
 endif # Enable SIMD
 
@@ -177,7 +180,7 @@ if not (get_option('buildtype') == 'debug')
         ]
 endif
 
-kfft_inc = include_directories (kfft_incdirs)
+#kfft_inc = include_directories (kfft_incdirs)
 
 kfft_link = []
 foreach vex : kfft_vex

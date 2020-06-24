@@ -4,4 +4,4 @@ kfft_src += files('''
 kfft_headers += files('''
     kfft_custom_math.h
 '''.split())
-kfft_incdirs += './math'
+kfft_inc += include_directories('.')

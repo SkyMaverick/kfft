@@ -4,10 +4,15 @@
 
 #if defined(KFFT_SIMD_SSE_SUPPORT)
     #define FUNC_SSE(X) X##_sse
-
-    #include "sse/kfft_math_sse.h"
-    #include "sse/kfft_bfly.h"
-    #include "sse/kfft_generic.h"
+    #if defined(KFFT_HALF_SCALAR)
+        #include "sse/half/kfft_math_sse.h"
+        #include "sse/half/kfft_bfly.h"
+        #include "sse/half/kfft_generic.h"
+    #else
+        #include "sse/norm/kfft_math_sse.h"
+        #include "sse/norm/kfft_bfly.h"
+        #include "sse/norm/kfft_generic.h"
+    #endif
 #endif
 #if defined(KFFT_SIMD_AVX_SUPPORT)
     #define FUNC_AVX(X) X##_avx
