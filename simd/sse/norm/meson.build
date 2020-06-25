@@ -31,7 +31,6 @@ if cc.compiles('''
                 }''', args: sse_args, name: 'SSE3 instructions')
             kfft_config += {'KFFT_HAVE_SSE3': true}
         endif
-
     endif
 
     kfft_vex += {

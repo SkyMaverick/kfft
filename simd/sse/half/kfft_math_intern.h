@@ -12,38 +12,39 @@
    C_SUBFROM( res , a)  : res -= a
    C_ADDTO( res , a)    : res += a
  * */
-#define S_MOD_SSE(A, B) _mm_sub_pd(A, _mm_mul_pd(_mm_div_pd(A, B), B));
+#define S_MOD_SSE(A, B) _mm_sub_ps(A, _mm_mul_ps(_mm_div_ps(A, B), B));
 
-#define C_ADD_SSE(M, A, B) M = _mm_add_pd(A, B)
-#define C_SUB_SSE(M, A, B) M = _mm_sub_pd(A, B)
+#define C_ADD_SSE(M, A, B) M = _mm_add_ps(A, B)
+#define C_SUB_SSE(M, A, B) M = _mm_sub_ps(A, B)
 
 /* Split optional SSE3 functionality */
 
 #if defined(KFFT_HAVE_SSE3)
-    /* C_MULDUP_SSE use for A,B loaded with _mm_loaddup_pd() func */
-    #define C_MULDUP_SSE(M, A, B)                                                                  \
-        do {                                                                                       \
-            M = _mm_mul_pd(M, A);                                                                  \
-            M = _mm_shuffle_pd(M, M, 0x1);                                                         \
-            M = _mm_addsub_pd(_mm_mul_pd(_mm_move_sd(B, B), A), M);                                \
-        } while (0)
-
+    /* C_MULDUP_SSE use for A,B loaded with _mm_loaddup_ps() func */
     #define C_MUL_SSE(M, A, B)                                                                     \
         do {                                                                                       \
-            __m128d Tms = _mm_move_sd(B, B);                                                       \
-            M = _mm_move_sd(B, B);                                                                 \
-            M = _mm_unpackhi_pd(M, M);                                                             \
-            C_MULDUP_SSE(M, A, _mm_unpacklo_pd(Tms, Tms));                                         \
+            __m128 aa, bb, ml;                                                                     \
+                                                                                                   \
+            aa = _mm_shuffle_ps(_mm_load_ps1((float*)A), _mm_load_ps1(((float*)A) + 1), 0);        \
+            bb = _mm_unpackhi_ps(_mm_load_ps1((float*)B), _mm_load_ps1(((float*)B) + 1));          \
+            bb = _mm_shuffle_ps(bb, bb, 0x14);                                                     \
+                                                                                                   \
+            ml = _mm_mul_ps(aa, bb);                                                               \
+            M = _mm_addsub_ps(_mm_movelh_ps(ml, ml), _mm_movehl_ps(ml, ml));                       \
         } while (0)
 
 #else /* KFFT_HAVE_SSE3 */
     #define C_MUL_SSE(M, A, B)                                                                     \
         do {                                                                                       \
-            __m128d Tms = _mm_move_sd(B, B);                                                       \
-            M = _mm_move_sd(B, B);                                                                 \
-            M = _mm_unpackhi_pd(M, M);                                                             \
-            M = _mm_mul_pd(_mm_mul_pd(M, A), _mm_set_pd(-1, 1));                                   \
-            M = _mm_add_pd(_mm_shuffle_pd(M, M, 0x1), _mm_mul_pd(_mm_unpacklo_pd(Tms, Tms), A));   \
+            __m128 aa, bb, ml, as;                                                                 \
+                                                                                                   \
+            aa = _mm_shuffle_ps(_mm_load_ps1((float*)A), _mm_load_ps1(((float*)A) + 1), 0);        \
+            bb = _mm_unpackhi_ps(_mm_load_ps1((float*)B), _mm_load_ps1(((float*)B) + 1));          \
+            bb = _mm_shuffle_ps(bb, bb, 0x14);                                                     \
+                                                                                                   \
+            ml = _mm_mul_ps(aa, bb);                                                               \
+            M = _mm_add_ps(_mm_movelh_ps(ml, ml),                                                  \
+                           _mm_mul_ps(_mm_movehl_ps(ml, ml), _mm_setr_ps(-1, 1, -1, 1)));          \
         } while (0)
 
 #endif /* KFFT_HAVE_SSE3 */

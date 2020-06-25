@@ -39,8 +39,10 @@
 // vector CPU extensions info
 
 // x86-64 architecture extensions
+#mesondefine KFFT_HAVE_SSE
 #mesondefine KFFT_HAVE_SSE2
-#if defined (KFFT_HAVE_SSE2)
+#if (defined (KFFT_HAVE_SSE2) || \
+     defined (KFFT_HAVE_SSE) )
     #define KFFT_SIMD_SSE_SUPPORT
 #endif
 #mesondefine KFFT_HAVE_SSE3

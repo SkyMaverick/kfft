@@ -1,20 +1,19 @@
 # SSE2 check support
 sse_args = (ccid == 'msvc') ? '''
-                /arch:SSE2
+                /arch:SSE
             '''.split() : '''
                 -msse
-                -msse2
             '''.split()
 
 if cc.compiles('''
         #include <immintrin.h>
         int main () {
-            double x; __m128d xr;
-            xr = _mm_set1_pd(x);
+            float x; __m128 xr;
+            xr = _mm_set1_ps(x);
             return 0;
-        }''', args: sse_args, name: 'SSE2 instructions')
-    kfft_config += {'KFFT_HAVE_SSE2': true}
-
+        }''', args: sse_args, name: 'SSE instructions')
+    kfft_config += {'KFFT_HAVE_SSE': true}
+    
     # SSE3 check support
     if (get_option('enable_sse3'))
         sse_args = (ccid == 'msvc') ? '''
@@ -31,7 +30,6 @@ if cc.compiles('''
                 }''', args: sse_args, name: 'SSE3 instructions')
             kfft_config += {'KFFT_HAVE_SSE3': true}
         endif
-
     endif
 
     kfft_vex += {
