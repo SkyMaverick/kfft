@@ -5,29 +5,11 @@
 
 static inline void
 write_stdout(kfft_scalar* in, state_t* st) {
-    char buf[80];
-    size_t out_size = 1;
-
-    char* out = calloc(1, sizeof(STDOUT_BUF_SIZE));
-    if (out) {
-        out[0] = '\0';
-        for (size_t i = 0; i < st->out_len; i++) {
-            sprintf(buf, "%.3f ", in[i]);
-            out_size += strlen(buf);
-            char* old = out;
-            out = realloc(out, out_size);
-            if (out == NULL) {
-                free(old);
-            }
-            strcat(out, buf);
-        }
-        out[out_size - 2] = '\0'; // erase last space
-
-        fprintf(stdout, "%s\n", out);
-        fflush(stdout);
-
-        free(out);
-    } /* out allocated */
+    for (size_t i = 0; i < st->out_len; i++) {
+        (i > 0) ? fprintf(stdout, " %.3f", in[i]) : fprintf(stdout, "%.3f", in[i]);
+    }
+    fprintf(stdout, "%s\n", "");
+    fflush(stdout);
 }
 
 #include "complex.c"
