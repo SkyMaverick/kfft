@@ -42,7 +42,6 @@
 #mesondefine KFFT_HAVE_SSE
 #mesondefine KFFT_HAVE_SSE2
 #if ((defined (KFFT_HAVE_SSE2)) || (defined (KFFT_HAVE_SSE)) )
-    #warning "#################### Support"
     #define KFFT_SIMD_SSE_SUPPORT
 #endif
 #mesondefine KFFT_HAVE_SSE3

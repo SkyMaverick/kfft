@@ -86,7 +86,6 @@ extern "C" {
             ( VEX_CHECK_SSE(S) ) ? FUNC_SSE (F)(__VA_ARGS__) :                                  \
             F(__VA_ARGS__)
     #elif defined(KFFT_SIMD_SSE_SUPPORT)
-        #warning "********************************Support"
         #define VEXFUNC(S, F, ...)                                                              \
             ( VEX_CHECK_SSE(S) ) ? FUNC_SSE (F)(__VA_ARGS__) :                                  \
             F(__VA_ARGS__)
