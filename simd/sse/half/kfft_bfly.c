@@ -74,7 +74,6 @@ FUNC_SSE(kf_bfly4)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
             T4i = _mm_mul_ps(T4, _mm_set_ps(-1, 1, -1, 1));
             F2 = _mm_add_ps(T5, _mm_shuffle_ps(T4i, T4i, 0x1));
         } /* KFFT_FLAG_INVERSE */
-        //
 
         _mm_storel_pi((__m64*)Fout, mfout);
         _mm_storel_pi((__m64*)(&Fout[m]), F0);
