@@ -63,11 +63,21 @@ extern "C" {
     #define VEX_CHECK_AVX(S)                                                                    \
        kfft_simd_check(__VEXST((S)),HW_AVX)
     #if defined(KFFT_HAVE_SSE3)
-        #define VEX_CHECK_SSE(S)                                                                \
-            kfft_simd_check(__VEXST((S)),(HW_SSE2 | HW_SSE3))
+        #if defined(KFFT_HALF_SCALAR)
+            #define VEX_CHECK_SSE(S)                                                                \
+                kfft_simd_check(__VEXST((S)),(HW_SSE2 | HW_SSE3))
+        #else
+            #define VEX_CHECK_SSE(S)                                                                \
+                kfft_simd_check(__VEXST((S)),(HW_SSE | HW_SSE3))
+        #endif /*KFFT_HALF_SCALAR*/
     #else
-        #define VEX_CHECK_SSE(S)                                                                \
-           kfft_simd_check(__VEXST((S)),(HW_SSE2))
+        #if defined(KFFT_HALF_SCALAR)
+            #define VEX_CHECK_SSE(S)                                                                \
+                kfft_simd_check(__VEXST((S)),(HW_SSE2))
+        #else
+            #define VEX_CHECK_SSE(S)                                                                \
+                kfft_simd_check(__VEXST((S)),(HW_SSE))
+        #endif /*KFFT_HALF_SCALAR*/
     #endif
 
     #if defined(KFFT_SIMD_AVX_SUPPORT)
@@ -76,6 +86,7 @@ extern "C" {
             ( VEX_CHECK_SSE(S) ) ? FUNC_SSE (F)(__VA_ARGS__) :                                  \
             F(__VA_ARGS__)
     #elif defined(KFFT_SIMD_SSE_SUPPORT)
+        #warning "********************************Support"
         #define VEXFUNC(S, F, ...)                                                              \
             ( VEX_CHECK_SSE(S) ) ? FUNC_SSE (F)(__VA_ARGS__) :                                  \
             F(__VA_ARGS__)

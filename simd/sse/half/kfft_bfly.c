@@ -17,7 +17,7 @@ FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
         C_MUL_SSE(t, mf2, CLOAD1212(&tw));
         C_SUB_SSE(mf2, mf, t);
         C_ADD_SSE(mf, mf, t);
-        
+
         _mm_storel_pi((__m64*)Fout2, mf2);
         _mm_storel_pi((__m64*)Fout, mf);
 

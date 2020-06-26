@@ -5,6 +5,7 @@ if (not (osid == 'windows')) and (not cc.has_header('cpuid.h'))
     error ('Header <cpuid.h> not found. Disable enable_simd option. Maybe use fast-math optimization.')
 endif
 
+kfft_config += {'KFFT_USE_SIMD': true}
 
 if ccfam.startswith('x86')
     kfft_config += {'KFFT_ARCH_X86': true}

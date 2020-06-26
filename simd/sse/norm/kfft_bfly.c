@@ -3,7 +3,7 @@
 
 void
 FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
-    kfft_trace_core(st->level, "[BFLY2 (SSE)] fstride - %u | m - %u\n", fstride, m);
+    kfft_trace_core(st->level, "[BFLY2 (SSE2)] fstride - %u | m - %u\n", fstride, m);
 
     kfft_cpx* Fout2 = Fout + m;
     uint32_t twidx = 0;
@@ -35,7 +35,7 @@ FUNC_SSE(kf_bfly2)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
 void
 FUNC_SSE(kf_bfly4)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st,
                    const uint32_t m) {
-    kfft_trace_core(st->level, "[BFLY4 (SSE)] fstride - %u | m - %u\n", fstride, m);
+    kfft_trace_core(st->level, "[BFLY4 (SSE2)] fstride - %u | m - %u\n", fstride, m);
 
     uint32_t tw1, tw2, tw3;
     tw1 = tw2 = tw3 = 0;
@@ -113,7 +113,7 @@ FUNC_SSE(kf_bfly4)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
 
 void
 FUNC_SSE(kf_bfly3)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
-    kfft_trace_core(st->level, "[BFLY3 (SSE)] fstride - %u | m - %u\n", fstride, m);
+    kfft_trace_core(st->level, "[BFLY3 (SSE2)] fstride - %u | m - %u\n", fstride, m);
 
     uint32_t k = m;
     const uint32_t m2 = 2 * m;
@@ -173,7 +173,7 @@ FUNC_SSE(kf_bfly3)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st
 
 void
 FUNC_SSE(kf_bfly5)(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
-    kfft_trace_core(st->level, "[BFLY5 (SSE)] fstride - %u | m - %u\n", fstride, m);
+    kfft_trace_core(st->level, "[BFLY5 (SSE2)] fstride - %u | m - %u\n", fstride, m);
 
     uint32_t u;
 
