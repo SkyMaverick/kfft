@@ -18,16 +18,18 @@
 #define C_SUB_SSE(M, A, B) M = _mm_sub_ps(A, B)
 
 /* Split optional SSE3 functionality */
+#define CLOAD1122(Ptr)                                                                             \
+    _mm_shuffle_ps(_mm_load_ps1((float*)(Ptr)), _mm_load_ps1(((float*)(Ptr)) + 1), 0)
+#define CLOAD1212(Ptr)                                                                             \
+    _mm_unpackhi_ps(_mm_load_ps1((float*)(Ptr)), _mm_load_ps1(((float*)(Ptr)) + 1))
 
 #if defined(KFFT_HAVE_SSE3)
     /* C_MULDUP_SSE use for A,B loaded with _mm_loaddup_ps() func */
     #define C_MUL_SSE(M, A, B)                                                                     \
         do {                                                                                       \
             __m128 aa, bb, ml;                                                                     \
-                                                                                                   \
-            aa = _mm_shuffle_ps(_mm_load_ps1((float*)A), _mm_load_ps1(((float*)A) + 1), 0);        \
-            bb = _mm_unpackhi_ps(_mm_load_ps1((float*)B), _mm_load_ps1(((float*)B) + 1));          \
-            bb = _mm_shuffle_ps(bb, bb, 0x14);                                                     \
+            aa = _mm_shuffle_ps(A, A, 0x52);                                                       \
+            bb = _mm_shuffle_ps(B, B, 0x14);                                                       \
                                                                                                    \
             ml = _mm_mul_ps(aa, bb);                                                               \
             M = _mm_addsub_ps(_mm_movelh_ps(ml, ml), _mm_movehl_ps(ml, ml));                       \
@@ -36,11 +38,9 @@
 #else /* KFFT_HAVE_SSE3 */
     #define C_MUL_SSE(M, A, B)                                                                     \
         do {                                                                                       \
-            __m128 aa, bb, ml, as;                                                                 \
-                                                                                                   \
-            aa = _mm_shuffle_ps(_mm_load_ps1((float*)A), _mm_load_ps1(((float*)A) + 1), 0);        \
-            bb = _mm_unpackhi_ps(_mm_load_ps1((float*)B), _mm_load_ps1(((float*)B) + 1));          \
-            bb = _mm_shuffle_ps(bb, bb, 0x14);                                                     \
+            __m128 aa, bb, ml;                                                                     \
+            aa = _mm_shuffle_ps(A, A, 0x52);                                                       \
+            bb = _mm_shuffle_ps(B, B, 0x14);                                                       \
                                                                                                    \
             ml = _mm_mul_ps(aa, bb);                                                               \
             M = _mm_add_ps(_mm_movelh_ps(ml, ml),                                                  \
