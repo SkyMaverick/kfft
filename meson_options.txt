@@ -7,13 +7,13 @@ option ('build_with_native', type: 'boolean', value: 'false',
 
 option ('enable_app', type: 'boolean', value: 'true',
         description: 'build with demo applications')
-option ('enable_traces', type: 'boolean', value: 'true',
+option ('enable_traces', type: 'boolean', value: 'false',
         description: 'use stdio messages in kfft lib')
 option ('enable_simd', type: 'boolean', value: 'false',
         description: 'use SIMD optimized code')
 option ('enable_alloca', type: 'boolean', value: 'false',
         description: 'use alloca for temporary buffers (dangerouse)')
-option ('enable_sysmath', type: 'boolean', value: 'false',
+option ('enable_sysmath', type: 'boolean', value: 'true',
         description: 'use system (or custom) defines and math functions')
 option ('enable_fastmath', type: 'boolean', value: 'true',
         description: 'use -ffast-math optimization (maybe dangerouse)')
@@ -21,14 +21,14 @@ option ('enable_extended', type: 'boolean', value: 'true',
         description: 'enable extended algoritms (use generic algorithm for prime-lenght sequence)')
 option ('enable_memless', type: 'boolean', value: 'false',
         description: 'use memory less mode (very slow)')
-option ('enable_half_scalar', type: 'boolean', value: 'true',
+option ('enable_half_scalar', type: 'boolean', value: 'false',
         description: 'use float data type without double (by default). This option disable SIMD build.')
 option ('enable_openmp', type: 'boolean', value: 'true',
         description: 'enable openmp parallel pragmas (uses 2d, sparse extensions)')
 
 option ('list_extensions', type: 'array', value: ['2d', 'conv', 'conv2d', 'sparse'],
         description: 'enable extensions')
-option ('list_vex86', type: 'array', choices: ['sse', 'avx', 'avx2'], value: ['sse'],
+option ('list_vex86', type: 'array', choices: ['sse', 'avx'], value: ['sse'],
         description: 'enable vector extensioins support')
 option ('enable_sse3', type: 'boolean', value: 'true',
         description: 'enable SSE3 along with SSE2 (any CPU don\'t support this, but it\'s faster)')

@@ -60,8 +60,6 @@ extern "C" {
 #if defined(KFFT_USE_SIMD)
     #define __VEXST(S) KFFT_PLAN_VEX((S))
     // clang-format off
-    #define VEX_CHECK_AVX(S)                                                                    \
-       kfft_simd_check(__VEXST((S)),HW_AVX)
     #if defined(KFFT_HAVE_SSE3)
         #if defined(KFFT_HALF_SCALAR)
             #define VEX_CHECK_SSE(S)                                                                \
@@ -80,12 +78,7 @@ extern "C" {
         #endif /*KFFT_HALF_SCALAR*/
     #endif
 
-    #if defined(KFFT_SIMD_AVX_SUPPORT)
-        #define VEXFUNC(S, F, ...)                                                              \
-            ( VEX_CHECK_AVX(S) ) ? FUNC_AVX (F)(__VA_ARGS__) :                                  \
-            ( VEX_CHECK_SSE(S) ) ? FUNC_SSE (F)(__VA_ARGS__) :                                  \
-            F(__VA_ARGS__)
-    #elif defined(KFFT_SIMD_SSE_SUPPORT)
+    #if defined(KFFT_SIMD_SSE_SUPPORT)
         #define VEXFUNC(S, F, ...)                                                              \
             ( VEX_CHECK_SSE(S) ) ? FUNC_SSE (F)(__VA_ARGS__) :                                  \
             F(__VA_ARGS__)

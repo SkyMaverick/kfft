@@ -37,5 +37,4 @@ kfft_headers += files('''
 kfft_inc += include_directories('''
     .
     sse
-    avx
 '''.split())
