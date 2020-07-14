@@ -5,8 +5,6 @@ option ('build_with_pgo', type: 'boolean', value: 'false',
 option ('build_with_native', type: 'boolean', value: 'false',
         description: 'build with native CPU instructions')
 
-option ('enable_app', type: 'boolean', value: 'true',
-        description: 'build with demo applications')
 option ('enable_traces', type: 'boolean', value: 'false',
         description: 'use stdio messages in kfft lib')
 option ('enable_simd', type: 'boolean', value: 'false',
