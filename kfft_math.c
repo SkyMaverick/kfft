@@ -117,3 +117,8 @@ kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t
         }
     }
 }
+
+// void
+// kfft_cpx2sclr_normal (const kfft_cpx* in, kfft_scalar* out, ) {
+//     for (size_t i = 0; i < )
+// }
