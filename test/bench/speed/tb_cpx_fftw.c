@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <inttypes.h>
 
 #include <fftw3.h>
 
@@ -69,7 +70,7 @@ main(int argc, char* argv[]) {
         if (fft_spectr) {
             FFTW(complex)* temp = fft_spectr + size;
 
-            for (int32_t i = 0; i < TEST_COUNT; i++) {
+            for (uint32_t i = 0; i < TEST_COUNT; i++) {
                 memset(fft_spectr, 0, size * sizeof(FFTW(complex)));
 
                 srand(time(NULL));

@@ -84,8 +84,8 @@ kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y) {
         return;
 
     for (uint32_t ind_last = r * c - 2; c > 1; --ind_last, --c) {
-        for (ssize_t i = r - 2; i != -1; --i) {
-            uint32_t ind = i * c + (c - 1);
+        for (int64_t i = r - 2; i >= 0; --i) {
+            uint64_t ind = i * c + (c - 1);
             kfft_cpx buf = {0, 0};
             C_CPY(buf, Fin[ind]);
             while (ind < ind_last) {
@@ -105,8 +105,8 @@ kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t
         return;
 
     for (uint32_t ind_last = r * c - 2; c > 1; --ind_last, --c) {
-        for (ssize_t i = r - 2; i != -1; --i) {
-            uint32_t ind = i * c + (c - 1);
+        for (int64_t i = r - 2; i >= 0; --i) {
+            uint64_t ind = i * c + (c - 1);
             kfft_scalar buf = Fin[ind];
             while (ind < ind_last) {
                 Fin[ind] = Fin[ind + 1];
