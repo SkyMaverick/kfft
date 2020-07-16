@@ -210,12 +210,13 @@ if get_option('enable_tests')
                               include_directories: kfft_inc,
                               link_with: kfft_link,
                               install: false)
+
     subdir('test')
 endif
 
 if meson.is_subproject()
     kfft_lib = declare_dependency (
-                link_with: libkfft_static,
+                link_with: libkfft,
                 include_directories: kfft_inc
             )
 endif
