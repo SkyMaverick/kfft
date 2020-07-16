@@ -10,4 +10,5 @@ fi
 meson . ${BUILD_DIR} \
           -Dbuildtype=debug \
           -Denable_tests=true \
+          -Denable_traces=true \
           && ninja -C ${BUILD_DIR}
