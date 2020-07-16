@@ -7,4 +7,8 @@ if [ -d ${BUILD_DIR} ]; then
         ninja -C ${BUILD_DIR} && exit 
     fi
 fi
-meson . ${BUILD_DIR} -Dbuildtype=debug && ninja -C ${BUILD_DIR}
+meson . ${BUILD_DIR} \
+          -Dbuildtype=debug \
+          -Denable_simd=false \
+          -Denable_tests=true \
+&& ninja -C ${BUILD_DIR}

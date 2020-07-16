@@ -43,7 +43,7 @@ option ('level_plan_max', type: 'integer', value: '7',
 option ('level_bfly_max', type: 'integer', value: '5',
         description: 'max butterfly level')
 # === TESTS options ===
-option ('enable_tests', type: 'boolean', value: 'true',
+option ('enable_tests', type: 'boolean', value: 'false',
         description: 'build with tests applications')
 option ('speed_test_sequence_limit', type: 'integer', value: 100000,
         description: 'sequence limit parameter for speed test')

@@ -12,4 +12,5 @@ meson . ${BUILD_DIR} \
     -Dbuild_with_lto=true \
     -Dbuild_with_pgo=true \
     -Denable_traces=false \
+    -Denable_simd=false \
 && ninja -C ${BUILD_DIR}
