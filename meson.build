@@ -2,8 +2,8 @@ project ('kfft', 'c',
          version: '0.5.0',
          license: 'Zlib',
          default_options:[
-            'c_std=gnu99',
-            'warning_level=2',
+            'c_std=gnu11',
+            'warning_level=3',
             'strip=true',
             'b_pie=true'
          ],
