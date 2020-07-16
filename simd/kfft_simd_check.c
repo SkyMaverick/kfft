@@ -6,7 +6,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#if defined(KFFT_ARCH_X86)
+#if defined(KFFT_ARCH_INTEL)
     #ifdef KFFT_OS_WINDOWS
         #define cpuid(info, x) __cpuidex(info, x, 0)
 static inline __int64
@@ -142,4 +142,33 @@ kfft_simd_analize(void) {
     S.arch = HW_ARCH_UKNW;
 #endif
     return S;
+}
+
+KFFT_API kfft_simd_t
+kfft_simd_info(void) {
+    kfft_simd_t ret = {0, 0};
+#if defined(KFFT_ARCH_INTEL)
+    #if defined(KFFT_ARCH_X86)
+    ret.arch = HW_ARCH_X86;
+    #elif defined(KFFT_ARCH_X64)
+    ret.arch = HW_ARCH_X64;
+    #else
+    ret.arch = HW_ARCH_UKNW;
+    #endif
+
+    #if defined(KFFT_SIMD_SSE_SUPPORT)
+        #if defined(KFFT_HALF_SCALAR)
+    ret.ext |= HW_SSE;
+        #else
+    ret.ext |= HW_SSE2;
+        #endif /* KFFT_HALF_SCALAR */
+    #endif     /* KFFT_SIMD_SSE_SUPPORT */
+    #if defined(KFFT_SIMD_SSE_SUPPORT)
+    ret.ext |= HW_SSE3;
+    #endif
+#endif /* KFFT_ARCH_X86 */
+#if defined(KFFT_ARCH_ARM)
+    // TODO
+#endif
+    return ret;
 }

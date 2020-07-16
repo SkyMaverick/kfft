@@ -14,7 +14,7 @@ enum {
 };
 
 /* x86 architecture extensions */
-#if defined(KFFT_ARCH_X86)
+#if defined(KFFT_ARCH_INTEL)
 
     #define HW_MMX 1u << 0
     #define HW_x64 1u << 1
@@ -92,6 +92,10 @@ kfft_simd_align(const kfft_simd_t S) {
     return 0;
 }
 
+KFFT_API kfft_simd_t
+kfft_simd_info(void);
+
 #if defined(KFFT_DYNAPI_ENABLE)
 typedef kfft_simd_t (*kfft_callback_simd_analize)(void);
+typedef kfft_simd_t (*kfft_callback_simd_info)(void);
 #endif /* KFFT_DYNAPI_ENABLE */

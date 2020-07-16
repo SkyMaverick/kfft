@@ -52,6 +52,10 @@
 // #endif
 
 #mesondefine KFFT_ARCH_X86
+#mesondefine KFFT_ARCH_X64
+#if defined (KFFT_ARCH_X86) || defined (KFFT_ARCH_X64)
+    #define KFFT_ARCH_INTEL
+#endif
 
 // ARM architecture extensions
 #mesondefine KFFT_HAVE_NEON

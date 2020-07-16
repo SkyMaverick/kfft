@@ -8,7 +8,8 @@ endif
 kfft_config += {'KFFT_USE_SIMD': true}
 
 if ccfam.startswith('x86')
-    kfft_config += {'KFFT_ARCH_X86': true}
+    kfft_config += {'KFFT_ARCH_X64': ccfam.endswith('64')}
+    kfft_config += {'KFFT_ARCH_X86': not ccfam.endswith('64')}
     
     if not get_option('enable_half_scalar')
         if get_option('list_vex86').contains('avx')
