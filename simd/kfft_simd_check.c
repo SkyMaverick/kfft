@@ -1,6 +1,7 @@
-#include "kfft_macro.h"
 #include "kfft_config.h"
 
+#include "kfft_macro.h"
+#include "kfft_types.h"
 #include "kfft_simd.h"
 
 #include <inttypes.h>
