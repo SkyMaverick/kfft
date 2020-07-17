@@ -2,7 +2,9 @@
 
 #define KFFT_MALLOC_UNALIGN(X) calloc(1, (X))
 #if defined(KFFT_USE_SIMD)
-    #include <immintrin.h>
+    #if defined(KFFT_ARCH_INTEL)
+        #include <immintrin.h>
+    #endif
 
     #if defined(KFFT_OS_WINDOWS)
         #include <malloc.h>

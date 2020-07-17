@@ -146,8 +146,6 @@ main(int argc, char* argv[]) {
         } else
             suites_list = NULL;
 
-        //        fprintf(stdout, "Free module: %s\n", tmp_suites->module_path);
-
         dlclose(tmp_suites->handle);
         free(tmp_suites->module_path);
         free(tmp_suites);

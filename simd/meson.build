@@ -1,13 +1,13 @@
-if not cc.has_header('immintrin.h')
-    error ('Header <immintrin.h> not found. Disable enable_simd option. Maybe use fast-math optimization.')
-endif
-if (not (osid == 'windows')) and (not cc.has_header('cpuid.h'))
-    error ('Header <cpuid.h> not found. Disable enable_simd option. Maybe use fast-math optimization.')
-endif
-
-kfft_config += {'KFFT_USE_SIMD': true}
-
 if ccfam.startswith('x86')
+    if not cc.has_header('immintrin.h')
+        error ('Header <immintrin.h> not found. Disable enable_simd option. Maybe use fast-math optimization.')
+    endif
+    if (not (osid == 'windows')) and (not cc.has_header('cpuid.h'))
+        error ('Header <cpuid.h> not found. Disable enable_simd option. Maybe use fast-math optimization.')
+    endif
+
+    kfft_config += {'KFFT_USE_SIMD': true}
+
     kfft_config += {'KFFT_ARCH_X64': ccfam.endswith('64')}
     kfft_config += {'KFFT_ARCH_X86': not ccfam.endswith('64')}
     
