@@ -50,6 +50,7 @@ extern "C" {
 #endif
 
 #define KFFT_PLAN_MMGR(X) (*((kfft_pool_t**)(X)))
+#define KFFT_PLAN_NULL_MMGR(X) ((X != NULL) ? (*((kfft_pool_t**)(X))) : NULL)
 
 #define KFFT_PLAN_ALIGN(X) KFFT_PLAN_MMGR((X))->align
 #define KFFT_PLAN_VEX(X) KFFT_PLAN_MMGR((X))->vex
