@@ -10,8 +10,8 @@ static inline kfft_cpx
 kfft_sclr_twiddle(uint32_t i, const kfft_sclr_t* P) {
     kfft_cpx ret;
 
-    kfft_scalar phase = -KFFT_CONST_PI * ((kfft_scalar)(i + 1) / P->substate->nfft + .5);
-    if (P->substate->flags & KFFT_FLAG_INVERSE)
+    kfft_scalar phase = -KFFT_CONST_PI * ((kfft_scalar)(i + 1) / P->nfft + .5);
+    if (P->flags & KFFT_FLAG_INVERSE)
         phase *= -1;
     kf_cexp(&ret, phase);
     return ret;
@@ -40,6 +40,8 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
 static void
 kfft_trace_plan(kfft_sclr_t* P) {
     kfft_trace_scalar("%s: %p", "Create KFFT scalar plan", (void*)P);
+    kfft_trace("\n\t %s - %u", "nfft", P->nfft);
+    kfft_trace("\n\t %s - %u : ", "flags", P->flags);
     kfft_trace("\n\t %s - %p", "Uses complex plan", (void*)(P->substate));
     kfft_trace("\n\t %s - %p\n", "scalar twiddles", (void*)(P->super_twiddles));
 }
@@ -62,6 +64,10 @@ kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, si
             KFFT_ALGO_PLAN_TERMINATE(st, A);
             return NULL;
         }
+
+        st->nfft = st->substate->nfft;
+        st->flags = st->substate->flags;
+
 #if !defined(KFFT_MEMLESS_MODE)
         if (nfft > 1) {
             st->super_twiddles = kfft_pool_alloc(st->object.mmgr, sizeof(kfft_cpx) * (nfft / 2));
@@ -87,7 +93,7 @@ eval_forward_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
     kfft_return_t ret = KFFT_RET_SUCCESS;
     kfft_cpx fpnk, fpk, f1k, f2k, tw;
 
-    uint32_t k, ncfft = st->substate->nfft;
+    uint32_t k, ncfft = st->nfft;
 
     C_CPY(Fout[0], Fin[0]);
 
@@ -112,9 +118,9 @@ eval_forward_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
 static kfft_return_t
 eval_func(kfft_sclr_t* stu, kfft_cpx* tmpbuf, const kfft_scalar* timedata, kfft_cpx* freqdata) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
-    uint32_t ncfft = stu->substate->nfft;
+    uint32_t ncfft = stu->nfft;
 
-    KFFT_TMP_ZEROMEM(tmpbuf, stu->substate->nfft * sizeof(kfft_cpx));
+    KFFT_TMP_ZEROMEM(tmpbuf, ncfft * sizeof(kfft_cpx));
     for (uint32_t i = 0; i < ncfft; i++) {
         freqdata[i].r = timedata[i];
         freqdata[i].i = 0;
@@ -138,7 +144,7 @@ kfft_eval_scalar_internal(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cp
         return KFFT_RET_IMPROPER_PLAN;
     }
 
-    uint32_t ncfft = stu->substate->nfft;
+    uint32_t ncfft = stu->nfft;
     if (tmpbuf == NULL) {
         kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft, KFFT_PLAN_ALIGN(stu));
         if (tbuf) {
@@ -164,7 +170,7 @@ eval_inverse_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
     kfft_return_t ret = KFFT_RET_SUCCESS;
     kfft_cpx fk, fnkc, fek, fok, tmp;
 
-    uint32_t k, ncfft = st->substate->nfft;
+    uint32_t k, ncfft = st->nfft;
 
     C_CPY(Fout[0], Fin[0]);
     C_MULBYSCALAR(Fout[0], 2);
@@ -187,7 +193,7 @@ eval_inverse_internal(const kfft_sclr_t* st, const kfft_cpx* Fin, kfft_cpx* Fout
 static kfft_return_t
 evali_func(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata, kfft_cpx* tmpbuf) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
-    uint32_t ncfft = stu->substate->nfft;
+    uint32_t ncfft = stu->nfft;
 
     KFFT_TMP_ZEROMEM(tmpbuf, sizeof(kfft_cpx) * ncfft);
 
@@ -213,7 +219,7 @@ kfft_evali_scalar_internal(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scal
         return KFFT_RET_IMPROPER_PLAN;
     }
 
-    uint32_t ncfft = st->substate->nfft;
+    uint32_t ncfft = st->nfft;
 
     if (tmpbuf == NULL) {
         kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft, KFFT_PLAN_ALIGN(stu));

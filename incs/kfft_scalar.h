@@ -9,7 +9,9 @@
 
 typedef struct kfft_state {
     kfft_object_t object;
-    bool pad;
+
+    uint32_t nfft;
+    uint32_t flags;
 
     kfft_comp_t* substate;
     kfft_cpx* super_twiddles;
