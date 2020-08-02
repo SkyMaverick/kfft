@@ -8,7 +8,7 @@
 
 #if defined(KFFT_TRACE)
 static void
-kfft_trace_plan(kfft_scnv_t* P) {
+kfft_trace_plan(kfft_plan_scnv* P) {
     kfft_trace_scnv("%s: %p", "Create KFFT convolution scalar plan", (void*)P);
     kfft_trace("\n\t %s - %u", "Total lenght", P->nfft);
     kfft_trace("\n\t %s - %p", "Plan for one lenght", (void*)P->plan_fwd);
@@ -16,7 +16,7 @@ kfft_trace_plan(kfft_scnv_t* P) {
 }
 #endif /*KFFT_TRACE */
 static inline kfft_return_t
-kfft_init(kfft_scnv_t* st) {
+kfft_init(kfft_plan_scnv* st) {
     KFFT_OMP(omp parallel sections shared(st)) {
         KFFT_OMP(omp section) {
             st->plan_fwd =
@@ -33,7 +33,7 @@ kfft_init(kfft_scnv_t* st) {
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
-    size_t ret = sizeof(kfft_scnv_t);
+    size_t ret = sizeof(kfft_plan_scnv);
     size_t delta = 0;
     KFFT_OMP(omp parallel sections shared(ret) private(delta)) {
         KFFT_OMP(omp section) {
@@ -49,11 +49,11 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
     return ret;
 }
 
-KFFT_API kfft_scnv_t*
+KFFT_API kfft_plan_scnv*
 kfft_config_conv_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem) {
-    kfft_scnv_t* st = NULL;
+    kfft_plan_scnv* st = NULL;
     size_t memneeded = kfft_calculate(nfft, flags);
-    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_scnv_t, memneeded, A, lenmem);
+    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_plan_scnv, memneeded, A, lenmem);
     if (st) {
         st->nfft = nfft;
         st->flags = flags;
@@ -69,7 +69,7 @@ kfft_config_conv_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* 
 }
 
 KFFT_API kfft_return_t
-kfft_eval_conv_scalar(kfft_scnv_t* plan, const kfft_scalar* fin_A, const kfft_scalar* fin_B,
+kfft_eval_conv_scalar(kfft_plan_scnv* plan, const kfft_scalar* fin_A, const kfft_scalar* fin_B,
                       kfft_scalar* fout) {
 
     kfft_return_t ret, retA, retB;
