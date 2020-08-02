@@ -119,15 +119,15 @@ kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t
 }
 
 void
-kfft_math_magnitude(const kfft_cpx* in, kfft_scalar* out, uint32_t size) {
+kfft_math_magnitude(const kfft_cpx* Fin, kfft_scalar* Fout, uint32_t size) {
     for (uint32_t i = 0; i < size; i++) {
-        out[i] = kfft_math_mgnt(&in[i]);
+        Fout[i] = kfft_math_mgnt(&Fin[i]);
     }
 }
 
 void
-kfft_math_magnitude_ip(kfft_cpx* in, uint32_t size) {
+kfft_math_magnitude_ip(kfft_cpx* Fin, uint32_t size) {
     for (uint32_t i = 0; i < size; i++) {
-        ((kfft_scalar*)in)[i] = kfft_math_mgnt(&in[i]);
+        ((kfft_scalar*)Fin)[i] = kfft_math_mgnt(&Fin[i]);
     }
 }

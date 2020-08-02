@@ -199,7 +199,7 @@ evali_func(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scalar* fout, kfft_cp
 
     ret = eval_inverse_internal(plan, fin, ftmp);
     if (ret == KFFT_RET_SUCCESS) {
-        //TODO Use one allocation in twice-size buffer
+        // TODO Use one allocation in twice-size buffer
         ret = kfft_eval_cpx(plan->basis, ftmp, ftmp);
         if (ret == KFFT_RET_SUCCESS) {
             for (uint32_t i = 0; i < ncfft; i++) {

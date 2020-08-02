@@ -1,13 +1,13 @@
 static void
-kf_bfly2(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, uint32_t m) {
-    kfft_trace_core(st->level, "[BFLY2] fstride - %u | m - %u\n", fstride, m);
+kf_bfly2(kfft_cpx* Fout, const uint32_t fplanride, const kfft_plan_cpx* plan, uint32_t m) {
+    kfft_trace_core(plan->level, "[BFLY2] fplanride - %u | m - %u\n", fplanride, m);
     kfft_cpx* Fout2;
     uint32_t twidx = 0;
     kfft_cpx t;
     Fout2 = Fout + m;
     do {
-        C_MUL(t, *Fout2, TWIDDLE(twidx, st));
-        twidx += fstride;
+        C_MUL(t, *Fout2, TWIDDLE(twidx, plan));
+        twidx += fplanride;
         C_SUB(*Fout2, *Fout, t);
         C_ADDTO(*Fout, t);
         ++Fout2;
@@ -16,8 +16,8 @@ kf_bfly2(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, uint32
 }
 
 static void
-kf_bfly4(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, const uint32_t m) {
-    kfft_trace_core(st->level, "[BFLY4] fstride - %u | m - %u\n", fstride, m);
+kf_bfly4(kfft_cpx* Fout, const uint32_t fplanride, const kfft_plan_cpx* plan, const uint32_t m) {
+    kfft_trace_core(plan->level, "[BFLY4] fplanride - %u | m - %u\n", fplanride, m);
     uint32_t tw1, tw2, tw3;
     kfft_cpx scratch[6];
     uint32_t k = m;
@@ -27,21 +27,21 @@ kf_bfly4(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, const 
     tw1 = tw2 = tw3 = 0;
 
     do {
-        C_MUL(scratch[0], Fout[m], TWIDDLE(tw1, st));
-        C_MUL(scratch[1], Fout[m2], TWIDDLE(tw2, st));
-        C_MUL(scratch[2], Fout[m3], TWIDDLE(tw3, st));
+        C_MUL(scratch[0], Fout[m], TWIDDLE(tw1, plan));
+        C_MUL(scratch[1], Fout[m2], TWIDDLE(tw2, plan));
+        C_MUL(scratch[2], Fout[m3], TWIDDLE(tw3, plan));
 
         C_SUB(scratch[5], *Fout, scratch[1]);
         C_ADDTO(*Fout, scratch[1]);
         C_ADD(scratch[3], scratch[0], scratch[2]);
         C_SUB(scratch[4], scratch[0], scratch[2]);
         C_SUB(Fout[m2], *Fout, scratch[3]);
-        tw1 += fstride;
-        tw2 += fstride * 2;
-        tw3 += fstride * 3;
+        tw1 += fplanride;
+        tw2 += fplanride * 2;
+        tw3 += fplanride * 3;
         C_ADDTO(*Fout, scratch[3]);
 
-        if (st->flags & KFFT_FLAG_INVERSE) {
+        if (plan->flags & KFFT_FLAG_INVERSE) {
             Fout[m].r = scratch[5].r - scratch[4].i;
             Fout[m].i = scratch[5].i + scratch[4].r;
             Fout[m3].r = scratch[5].r + scratch[4].i;
@@ -57,25 +57,25 @@ kf_bfly4(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, const 
 }
 
 static void
-kf_bfly3(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, uint32_t m) {
-    kfft_trace_core(st->level, "[BFLY3] fstride - %u | m - %u\n", fstride, m);
+kf_bfly3(kfft_cpx* Fout, const uint32_t fplanride, const kfft_plan_cpx* plan, uint32_t m) {
+    kfft_trace_core(plan->level, "[BFLY3] fplanride - %u | m - %u\n", fplanride, m);
     uint32_t k = m;
     const uint32_t m2 = 2 * m;
     uint32_t tw1, tw2;
     kfft_cpx scratch[5];
     kfft_cpx epi3;
-    epi3 = TWIDDLE(fstride * m, st);
+    epi3 = TWIDDLE(fplanride * m, plan);
 
     tw1 = tw2 = 0;
 
     do {
-        C_MUL(scratch[1], Fout[m], TWIDDLE(tw1, st));
-        C_MUL(scratch[2], Fout[m2], TWIDDLE(tw2, st));
+        C_MUL(scratch[1], Fout[m], TWIDDLE(tw1, plan));
+        C_MUL(scratch[2], Fout[m2], TWIDDLE(tw2, plan));
 
         C_ADD(scratch[3], scratch[1], scratch[2]);
         C_SUB(scratch[0], scratch[1], scratch[2]);
-        tw1 += fstride;
-        tw2 += fstride * 2;
+        tw1 += fplanride;
+        tw2 += fplanride * 2;
 
         Fout[m].r = Fout->r - HALF_OF(scratch[3].r);
         Fout[m].i = Fout->i - HALF_OF(scratch[3].i);
@@ -95,14 +95,14 @@ kf_bfly3(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, uint32
 }
 
 static void
-kf_bfly5(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, uint32_t m) {
-    kfft_trace_core(st->level, "[BFLY5] fstride - %u | m - %u\n", fstride, m);
+kf_bfly5(kfft_cpx* Fout, const uint32_t fplanride, const kfft_plan_cpx* plan, uint32_t m) {
+    kfft_trace_core(plan->level, "[BFLY5] fplanride - %u | m - %u\n", fplanride, m);
     kfft_cpx *Fout0, *Fout1, *Fout2, *Fout3, *Fout4;
     uint32_t u;
     kfft_cpx scratch[13];
     kfft_cpx ya, yb;
-    ya = TWIDDLE(fstride * m, st);
-    yb = TWIDDLE(fstride * 2 * m, st);
+    ya = TWIDDLE(fplanride * m, plan);
+    yb = TWIDDLE(fplanride * 2 * m, plan);
 
     Fout0 = Fout;
     Fout1 = Fout0 + m;
@@ -113,10 +113,10 @@ kf_bfly5(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, uint32
     for (u = 0; u < m; ++u) {
         scratch[0] = *Fout0;
 
-        C_MUL(scratch[1], *Fout1, TWIDDLE(u * fstride, st));
-        C_MUL(scratch[2], *Fout2, TWIDDLE(2 * u * fstride, st));
-        C_MUL(scratch[3], *Fout3, TWIDDLE(3 * u * fstride, st));
-        C_MUL(scratch[4], *Fout4, TWIDDLE(4 * u * fstride, st));
+        C_MUL(scratch[1], *Fout1, TWIDDLE(u * fplanride, plan));
+        C_MUL(scratch[2], *Fout2, TWIDDLE(2 * u * fplanride, plan));
+        C_MUL(scratch[3], *Fout3, TWIDDLE(3 * u * fplanride, plan));
+        C_MUL(scratch[4], *Fout4, TWIDDLE(4 * u * fplanride, plan));
 
         C_ADD(scratch[7], scratch[1], scratch[4]);
         C_SUB(scratch[10], scratch[1], scratch[4]);
