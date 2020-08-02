@@ -15,7 +15,8 @@ typedef struct {
 KFFT_API kfft_plan_ccnv*
 kfft_config_conv_cpx(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
 KFFT_API kfft_return_t
-kfft_eval_conv_cpx(kfft_plan_ccnv* plan, const kfft_cpx* fin_A, const kfft_cpx* fin_B, kfft_cpx* fout);
+kfft_eval_conv_cpx(kfft_plan_ccnv* plan, const kfft_cpx* fin_A, const kfft_cpx* fin_B,
+                   kfft_cpx* fout);
 
 #if defined(KFFT_DYNAPI_ENABLE)
 // clang-format off

@@ -22,7 +22,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     kfft_cpx x0 = {0, 0};
 
     // Find needed subplan
-    const kfft_splan_t* sP = st->primes;
+    const kfft_plan_rader* sP = st->primes;
     while ((sP->prime > 0) && (sP->prime != p))
         sP++;
 
@@ -40,7 +40,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
         C_ADDTO(Ftmp[0], Fout[k]);
     }
 
-    ret = kfft_part_convolution(&Ftmp[1], sP->shuffle_twiddles, sP->splan, sP->splani);
+    ret = kfft_part_convolution(&Ftmp[1], sP->shuffle_twiddles, sP->plan, sP->plan_inv);
     if (ret == KFFT_RET_SUCCESS) {
         // Reshuffle buffer
         k = u;

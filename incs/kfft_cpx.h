@@ -20,9 +20,9 @@ typedef struct {
 
     kfft_cpx* shuffle_twiddles;
 
-    struct kfft_kstate* splan;
-    struct kfft_kstate* splani;
-} kfft_splan_t;
+    struct kfft_kstate* plan;
+    struct kfft_kstate* plan_inv;
+} kfft_plan_rader;
 
 typedef struct kfft_kstate {
     kfft_object_t object;
@@ -36,7 +36,7 @@ typedef struct kfft_kstate {
     uint32_t factors[2 * MAX_FACTORS]; // factor values
 
     uint8_t prm_count;
-    kfft_splan_t primes[MAX_ROOTS]; //
+    kfft_plan_rader primes[MAX_ROOTS]; //
 
     kfft_cpx* twiddles; // twiddles
 } kfft_plan_cpx;
@@ -44,13 +44,13 @@ typedef struct kfft_kstate {
 KFFT_API kfft_plan_cpx*
 kfft_config_cpx(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
 KFFT_API kfft_return_t
-kfft_eval_cpx(kfft_plan_cpx* cfg, const kfft_cpx* fin, kfft_cpx* fout);
+kfft_eval_cpx(kfft_plan_cpx* plan, const kfft_cpx* fin, kfft_cpx* fout);
 
 #if defined(KFFT_DYNAPI_ENABLE)
 // clang-format off
 typedef kfft_plan_cpx*
 (*kfft_callback_config_cpx)(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
 typedef kfft_return_t
-(*kfft_callback_eval_cpx)(kfft_plan_cpx* cfg, const kfft_cpx* fin, kfft_cpx* fout);
+(*kfft_callback_eval_cpx)(kfft_plan_cpx* plan, const kfft_cpx* fin, kfft_cpx* fout);
 // clang-format on
 #endif /* KFFT_DYNAPI_ENABLE */
