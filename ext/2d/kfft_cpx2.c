@@ -8,7 +8,7 @@
 
 #if defined(KFFT_TRACE)
 static void
-kfft_trace_plan(kfft_comp2_t* P) {
+kfft_trace_plan(kfft_plan_c2d* P) {
     kfft_trace_2d("%s: %p", "Create KFFT complex plan", (void*)P);
     kfft_trace("\n\t %s - %u", "Total lenght", P->nfft);
     kfft_trace("\n\t %s - %u", "Size X", P->x);
@@ -20,7 +20,7 @@ kfft_trace_plan(kfft_comp2_t* P) {
 #endif /*KFFT_TRACE */
 
 static inline kfft_return_t
-kfft_init(kfft_comp2_t* st) {
+kfft_init(kfft_plan_c2d* st) {
     if (st->x != st->y) {
         KFFT_OMP(omp parallel sections shared(st)) {
             KFFT_OMP(omp section) {
@@ -41,7 +41,7 @@ kfft_init(kfft_comp2_t* st) {
 
 static inline size_t
 kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
-    size_t ret = sizeof(kfft_comp2_t);
+    size_t ret = sizeof(kfft_plan_c2d);
     size_t delta = 0;
 
     if ((szy != szx) || (szy > 1)) {
@@ -62,13 +62,13 @@ kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
     return ret;
 }
 
-KFFT_API kfft_comp2_t*
+KFFT_API kfft_plan_c2d*
 kfft_config2_cpx(const uint32_t x_size, const uint32_t y_size, const uint32_t flags, kfft_pool_t* A,
                  size_t* lenmem) {
-    kfft_comp2_t* st = NULL;
+    kfft_plan_c2d* st = NULL;
     size_t memneeded = kfft_calculate(x_size, y_size, flags);
 
-    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_comp2_t, memneeded, A, lenmem);
+    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_plan_c2d, memneeded, A, lenmem);
     if (st) {
         st->nfft = x_size * y_size;
         st->x = x_size;
@@ -87,7 +87,7 @@ kfft_config2_cpx(const uint32_t x_size, const uint32_t y_size, const uint32_t fl
 }
 
 static inline kfft_return_t
-kfft_2transform_normal(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
+kfft_2transform_normal(kfft_plan_c2d* st, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_cpx* ftmp = KFFT_TMP_ALLOC(st->nfft * sizeof(kfft_cpx), KFFT_PLAN_ALIGN(st));
@@ -122,7 +122,7 @@ kfft_2transform_normal(kfft_comp2_t* st, const kfft_cpx* fin, kfft_cpx* fout) {
 
 #if defined(KFFT_MEMLESS_MODE)
 static inline kfft_return_t
-kfft_2transform_memless(kfft_comp2_t* st, kfft_cpx* fin) {
+kfft_2transform_memless(kfft_plan_c2d* st, kfft_cpx* fin) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
@@ -151,7 +151,7 @@ kfft_2transform_memless(kfft_comp2_t* st, kfft_cpx* fin) {
 #endif /* KFFT_MEMLESS_MODE */
 
 KFFT_API kfft_return_t
-kfft_eval2_cpx(kfft_comp2_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
+kfft_eval2_cpx(kfft_plan_c2d* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     size_t memneeded = cfg->nfft * sizeof(kfft_cpx);

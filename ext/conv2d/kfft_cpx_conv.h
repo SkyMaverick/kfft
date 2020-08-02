@@ -11,8 +11,8 @@ typedef struct {
 
     uint32_t flags;
 
-    kfft_comp2_t* plan_fwd;
-    kfft_comp2_t* plan_inv;
+    kfft_plan_c2d* plan_fwd;
+    kfft_plan_c2d* plan_inv;
 } kfft_ccnv2_t;
 
 KFFT_API kfft_ccnv2_t*
