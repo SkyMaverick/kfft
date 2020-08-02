@@ -35,7 +35,6 @@
       (defined (KFFT_2D_ENABLE)) )
     #define KFFT_CONV2D_ENABLE
 #endif
-
 // vector CPU extensions info
 
 // x86-64 architecture extensions

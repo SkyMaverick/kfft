@@ -81,7 +81,6 @@ kfft_config2_scalar(const uint32_t x_size, const uint32_t y_size, const uint32_t
             KFFT_ALGO_PLAN_TERMINATE(st, A);
             return NULL;
         }
-
 #ifdef KFFT_TRACE
         kfft_trace_plan(st);
 #endif

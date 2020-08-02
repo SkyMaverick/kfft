@@ -240,6 +240,35 @@ kfft_evali_scalar(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timed
     /* input buffer timedata is stored row-wise */
     return kfft_evali_scalar_internal(stu, freqdata, timedata, NULL);
 }
+
+kfft_return_t
+kfft_eval_scalar_norm_internal(kfft_sclr_t* cfg, const kfft_scalar* fin, kfft_scalar* fout,
+                               kfft_cpx* ftemp) {
+    kfft_return_t ret = KFFT_RET_SUCCESS;
+    size_t memneed = 2 * sizeof(kfft_cpx) * cfg->nfft;
+
+    kfft_cpx* fbuf = (ftemp == NULL) ? KFFT_TMP_ALLOC(memneed, KFFT_MMGR_ALIGN(cfg)) : ftemp;
+    if (fbuf) {
+        KFFT_TMP_ZEROMEM(fbuf, memneed);
+        kfft_cpx* ftmp = fbuf + cfg->nfft;
+
+        ret = kfft_eval_scalar_internal((kfft_sclr_t*)cfg, fin, fbuf, ftmp);
+        if (ret == KFFT_RET_SUCCESS) {
+            kfft_math_magnitude(fbuf, fout, cfg->nfft);
+        }
+
+        KFFT_TMP_FREE(fbuf, KFFT_MMGR_ALIGN(cfg));
+    } else {
+        ret = KFFT_RET_BUFFER_FAIL;
+    }
+    return ret;
+}
+
+KFFT_API kfft_return_t
+kfft_eval_scalar_norm(kfft_sclr_t* cfg, const kfft_scalar* timedata, kfft_scalar* data) {
+    return kfft_eval_scalar_norm_internal(cfg, timedata, data, NULL);
+}
+
 /* ********************************************************************************
       TODO  Functionality
 ******************************************************************************** */

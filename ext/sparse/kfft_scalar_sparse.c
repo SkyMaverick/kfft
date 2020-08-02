@@ -133,7 +133,7 @@ kfft_eval_sparse_scalar(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* 
 }
 
 #if defined(KFFT_MEMLESS_MODE)
-KFFT_API kfft_return_t
+static kfft_return_t
 kfft_evali_process_memless(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
@@ -162,7 +162,7 @@ kfft_evali_process_memless(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scala
 }
 #endif /* KFFT_MEMLESS_MODE */
 
-KFFT_API kfft_return_t
+static kfft_return_t
 kfft_evali_process(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));

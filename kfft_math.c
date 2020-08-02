@@ -118,7 +118,22 @@ kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t
     }
 }
 
-// void
-// kfft_cpx2sclr_normal (const kfft_cpx* in, kfft_scalar* out, ) {
-//     for (size_t i = 0; i < )
-// }
+void
+kfft_math_magnitude(const kfft_cpx* in, kfft_scalar* out, uint32_t size) {
+    for (uint32_t i = 0; i < size; i++) {
+        kfft_scalar x = in[i].r;
+        kfft_scalar y = in[i].i;
+
+        out[i] = KFFT_SQRT(x * x + y * y);
+    }
+}
+
+void
+kfft_math_magnitude_ip(kfft_cpx* in, uint32_t size) {
+    for (uint32_t i = 0; i < size; i++) {
+        kfft_scalar x = in[i].r;
+        kfft_scalar y = in[i].i;
+
+        ((kfft_scalar*)in)[i] = KFFT_SQRT(x * x + y * y);
+    }
+}

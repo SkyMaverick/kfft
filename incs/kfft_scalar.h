@@ -22,6 +22,8 @@ kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, si
 KFFT_API kfft_return_t
 kfft_eval_scalar(kfft_sclr_t* cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
 KFFT_API kfft_return_t
+kfft_eval_scalar_norm(kfft_sclr_t* cfg, const kfft_scalar* timedata, kfft_scalar* data);
+KFFT_API kfft_return_t
 kfft_evali_scalar(kfft_sclr_t* cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
 
 /*Internal use functions (NOT provide KFFT_API) for optimize extensions */
@@ -31,6 +33,9 @@ kfft_eval_scalar_internal(kfft_sclr_t* stu, const kfft_scalar* timedata, kfft_cp
 kfft_return_t
 kfft_evali_scalar_internal(kfft_sclr_t* stu, const kfft_cpx* freqdata, kfft_scalar* timedata,
                            kfft_cpx* tmpbuf);
+kfft_return_t
+kfft_eval_scalar_norm_internal(kfft_sclr_t* cfg, const kfft_scalar* timedata, kfft_scalar* data,
+                               kfft_cpx* fbuf);
 
 #if defined(KFFT_DYNAPI_ENABLE)
 // clang-format off
@@ -39,6 +44,8 @@ typedef kfft_sclr_t*
                                kfft_pool_t* A, size_t* lenmem);
 typedef kfft_return_t
 (*kfft_callback_eval_scalar)(kfft_sclr_t* cfg, const kfft_scalar* timedata, kfft_cpx* freqdata);
+typedef kfft_return_t
+(*kfft_callback_eval_scalar_norm)(kfft_sclr_t* cfg, const kfft_scalar* timedata, kfft_scalar* data);
 typedef kfft_return_t
 (*kfft_callback_evali_scalar)(kfft_sclr_t* cfg, const kfft_cpx* freqdata, kfft_scalar* timedata);
 // clang-format on

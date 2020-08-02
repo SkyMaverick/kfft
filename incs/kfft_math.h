@@ -161,3 +161,7 @@ void
 kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y);
 void
 kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t y);
+void
+kfft_math_magnitude(const kfft_cpx* in, kfft_scalar* out, uint32_t size);
+void
+kfft_math_magnitude_ip(kfft_cpx* in, uint32_t size);
