@@ -137,6 +137,11 @@ kfft_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
     return ret;
 }
 
+static inline kfft_scalar
+kfft_math_mgnt(const kfft_cpx* A) {
+    return KFFT_SQRT(A->r * A->r + A->i * A->i);
+}
+
 #if defined(KFFT_MEMLESS_MODE)
     #define TWIDDLE(i, P) kfft_kernel_twiddle(i, (P)->nfft, ((P)->flags & KFFT_FLAG_INVERSE))
 #else
