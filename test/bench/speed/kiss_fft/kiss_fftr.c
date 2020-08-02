@@ -10,7 +10,7 @@
 #include "_kiss_fft_guts.h"
 
 struct kiss_fftr_state {
-    kiss_fft_cfg substate;
+    kiss_fft_cfg basis;
     kiss_fft_cpx* tmpbuf;
     kiss_fft_cpx* super_twiddles;
 #ifdef USE_SIMD
@@ -45,10 +45,10 @@ kiss_fftr_alloc(int nfft, int inverse_fft, void* mem, size_t* lenmem) {
     if (!st)
         return NULL;
 
-    st->substate = (kiss_fft_cfg)(st + 1); /*just beyond kiss_fftr_state struct */
-    st->tmpbuf = (kiss_fft_cpx*)(((char*)st->substate) + subsize);
+    st->basis = (kiss_fft_cfg)(st + 1); /*just beyond kiss_fftr_state struct */
+    st->tmpbuf = (kiss_fft_cpx*)(((char*)st->basis) + subsize);
     st->super_twiddles = st->tmpbuf + nfft;
-    kiss_fft_alloc(nfft, inverse_fft, st->substate, &subsize);
+    kiss_fft_alloc(nfft, inverse_fft, st->basis, &subsize);
 
     for (i = 0; i < nfft / 2; ++i) {
         double phase = -3.14159265358979323846264338327 * ((double)(i + 1) / nfft + .5);
@@ -65,15 +65,15 @@ kiss_fftr(kiss_fftr_cfg st, const kiss_fft_scalar* timedata, kiss_fft_cpx* freqd
     int k, ncfft;
     kiss_fft_cpx fpnk, fpk, f1k, f2k, tw, tdc;
 
-    if (st->substate->inverse) {
+    if (st->basis->inverse) {
         fprintf(stderr, "kiss fft usage error: improper alloc\n");
         exit(1);
     }
 
-    ncfft = st->substate->nfft;
+    ncfft = st->basis->nfft;
 
     /*perform the parallel fft of two real signals packed in real,imag*/
-    kiss_fft(st->substate, (const kiss_fft_cpx*)timedata, st->tmpbuf);
+    kiss_fft(st->basis, (const kiss_fft_cpx*)timedata, st->tmpbuf);
     /* The real part of the DC element of the frequency spectrum in st->tmpbuf
      * contains the sum of the even-numbered elements of the input time sequence
      * The imag part is the sum of the odd-numbered elements
@@ -120,12 +120,12 @@ kiss_fftri(kiss_fftr_cfg st, const kiss_fft_cpx* freqdata, kiss_fft_scalar* time
     /* input buffer timedata is stored row-wise */
     int k, ncfft;
 
-    if (st->substate->inverse == 0) {
+    if (st->basis->inverse == 0) {
         fprintf(stderr, "kiss fft usage error: improper alloc\n");
         exit(1);
     }
 
-    ncfft = st->substate->nfft;
+    ncfft = st->basis->nfft;
 
     st->tmpbuf[0].r = freqdata[0].r + freqdata[ncfft].r;
     st->tmpbuf[0].i = freqdata[0].r - freqdata[ncfft].r;
@@ -150,5 +150,5 @@ kiss_fftri(kiss_fftr_cfg st, const kiss_fft_cpx* freqdata, kiss_fft_scalar* time
         st->tmpbuf[ncfft - k].i *= -1;
 #endif
     }
-    kiss_fft(st->substate, st->tmpbuf, (kiss_fft_cpx*)timedata);
+    kiss_fft(st->basis, st->tmpbuf, (kiss_fft_cpx*)timedata);
 }

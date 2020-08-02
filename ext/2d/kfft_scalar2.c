@@ -6,7 +6,7 @@
     kfft_trace("[SCLR_2D]"" " fmt, __VA_ARGS__)
 // clang-format on
 
-#define CPXSP(X) ((X)->substate)
+#define CPXSP(X) ((X)->basis)
 
 #if defined(KFFT_TRACE)
 static void
