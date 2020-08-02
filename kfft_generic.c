@@ -3,7 +3,7 @@
 #if defined(KFFT_RADER_ALGO)
 
 static inline kfft_return_t
-kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t* Pi) {
+kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_plan_cpx* P, kfft_plan_cpx* Pi) {
     kfft_return_t ret = kfft_eval_cpx(P, Fout, Fout);
     if (ret == KFFT_RET_SUCCESS) {
         VEXFUNC(P, kfft_math_adamar_cpx, Fout, Fin, P->nfft);
@@ -13,7 +13,7 @@ kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_comp_t* P, kfft_comp_t
 }
 
 static inline kfft_return_t
-rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
+rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_plan_cpx* st,
                   uint32_t u, uint32_t m, uint32_t p) {
     (void)fstride; // disable unused parameter
     kfft_return_t ret = KFFT_RET_SUCCESS;
@@ -63,7 +63,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
 #endif /* KFFT_RADER_ALGO */
 
 static inline kfft_return_t
-std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_comp_t* st,
+std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft_plan_cpx* st,
                 uint32_t u, uint32_t m, uint32_t p) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
@@ -92,7 +92,7 @@ std_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kfft
 }
 
 static kfft_return_t
-kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_comp_t* st, uint32_t m,
+kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_plan_cpx* st, uint32_t m,
                 uint32_t p) {
     kfft_trace_core(st->level, "[Generic] m - %d | p - %d | stride - %zu\n", m, p, fstride);
 

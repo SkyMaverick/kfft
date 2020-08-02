@@ -29,7 +29,7 @@ compare_spectr_inv(FFTW(complex) * fftw_buffer, kfft_cpx* kfft_buffer, size_t si
     FFTW(plan)
     fftw_plan = FFTW(plan_dft_1d)(size, fftw_in, fftw_buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
     if (fftw_plan) {
-        kfft_comp_t* kfft_plan = kfft_config_cpx(size, KFFT_FLAG_INVERSE, NULL, NULL);
+        kfft_plan_cpx* kfft_plan = kfft_config_cpx(size, KFFT_FLAG_INVERSE, NULL, NULL);
         if (kfft_plan) {
             // processing FFTW
             FFTW(execute)(fftw_plan);
@@ -68,7 +68,7 @@ compare_spectr_fwd(FFTW(complex) * fftw_buffer, kfft_cpx* kfft_buffer, size_t si
     FFTW(plan)
     fftw_plan = FFTW(plan_dft_1d)(size, fftw_buffer, fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
     if (fftw_plan) {
-        kfft_comp_t* kfft_plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
+        kfft_plan_cpx* kfft_plan = kfft_config_cpx(size, KFFT_FLAG_NORMAL, NULL, NULL);
         if (kfft_plan) {
             // processing FFTW
             FFTW(execute)(fftw_plan);

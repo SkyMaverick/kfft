@@ -27,7 +27,7 @@ compare_spectr_inv(fft_scalar* fftw_buffer, fft_scalar* kfft_buffer, size_t size
 
     FFTW(plan) fftw_plan = FFTW(plan_dft_c2r_1d)(size, fftw_in, fftw_buffer, FFTW_ESTIMATE);
     if (fftw_plan) {
-        kfft_sclr_t* kfft_plan = kfft_config_scalar(size, KFFT_FLAG_INVERSE, NULL, NULL);
+        kfft_plan_sclr* kfft_plan = kfft_config_scalar(size, KFFT_FLAG_INVERSE, NULL, NULL);
         if (kfft_plan) {
             // processing FFTW
             FFTW(execute)(fftw_plan);
@@ -59,7 +59,7 @@ compare_spectr_fwd(fft_scalar* fftw_buffer, fft_scalar* kfft_buffer, size_t size
 
     FFTW(plan) fftw_plan = FFTW(plan_dft_r2c_1d)(size, fftw_buffer, fftw_out, FFTW_ESTIMATE);
     if (fftw_plan) {
-        kfft_sclr_t* kfft_plan = kfft_config_scalar(size, KFFT_FLAG_NORMAL, NULL, NULL);
+        kfft_plan_sclr* kfft_plan = kfft_config_scalar(size, KFFT_FLAG_NORMAL, NULL, NULL);
         if (kfft_plan) {
             // processing FFTW
             FFTW(execute)(fftw_plan);

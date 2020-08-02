@@ -6,8 +6,8 @@ typedef struct {
     uint32_t nfft, x, y;
     uint32_t flags;
 
-    kfft_comp_t* plan_x;
-    kfft_comp_t* plan_y;
+    kfft_plan_cpx* plan_x;
+    kfft_plan_cpx* plan_y;
 } kfft_comp2_t;
 
 KFFT_API kfft_comp2_t*

@@ -1,5 +1,5 @@
 static void
-kf_bfly2(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
+kf_bfly2(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY2] fstride - %u | m - %u\n", fstride, m);
     kfft_cpx* Fout2;
     uint32_t twidx = 0;
@@ -16,7 +16,7 @@ kf_bfly2(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t
 }
 
 static void
-kf_bfly4(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, const uint32_t m) {
+kf_bfly4(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, const uint32_t m) {
     kfft_trace_core(st->level, "[BFLY4] fstride - %u | m - %u\n", fstride, m);
     uint32_t tw1, tw2, tw3;
     kfft_cpx scratch[6];
@@ -57,7 +57,7 @@ kf_bfly4(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, const ui
 }
 
 static void
-kf_bfly3(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
+kf_bfly3(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY3] fstride - %u | m - %u\n", fstride, m);
     uint32_t k = m;
     const uint32_t m2 = 2 * m;
@@ -95,7 +95,7 @@ kf_bfly3(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t
 }
 
 static void
-kf_bfly5(kfft_cpx* Fout, const uint32_t fstride, const kfft_comp_t* st, uint32_t m) {
+kf_bfly5(kfft_cpx* Fout, const uint32_t fstride, const kfft_plan_cpx* st, uint32_t m) {
     kfft_trace_core(st->level, "[BFLY5] fstride - %u | m - %u\n", fstride, m);
     kfft_cpx *Fout0, *Fout1, *Fout2, *Fout3, *Fout4;
     uint32_t u;

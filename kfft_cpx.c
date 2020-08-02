@@ -8,14 +8,14 @@
     #define CHECK_PLAN_NOTPRIME(S) true
 #endif
 
-static kfft_comp_t*
+static kfft_plan_cpx*
 kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
                    size_t* lenmem); /* forward declaration configure function */
 
 #ifdef KFFT_TRACE
 
 static void
-kfft_trace_plan(kfft_comp_t* P) {
+kfft_trace_plan(kfft_plan_cpx* P) {
     kfft_trace_core(P->level, "%s: %p", "Create KFFT complex plan", (void*)P);
     kfft_trace("\n\t %s - %u", "nfft", P->nfft);
     kfft_trace("\n\t %s - %u", "level", P->level);
@@ -103,7 +103,7 @@ kfft_rader_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
     p[i] * m[i] = m[i-1]
     m0 = n                  */
 static inline void
-kf_factor(kfft_comp_t* st) {
+kf_factor(kfft_plan_cpx* st) {
     uint32_t p = 4, n = st->nfft, *facbuf = st->factors;
 #if defined(KFFT_RADER_ALGO)
     kfft_splan_t* pbuf = st->primes;
@@ -145,7 +145,7 @@ kf_factor(kfft_comp_t* st) {
 }
 
 static inline kfft_return_t
-kfft_kinit(kfft_comp_t* st) {
+kfft_kinit(kfft_plan_cpx* st) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     /* Generate twiddles  */
 #if defined(KFFT_MEMLESS_MODE)
@@ -210,8 +210,8 @@ kfft_kinit(kfft_comp_t* st) {
 }
 
 static inline size_t
-kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_comp_t* st) {
-    size_t ret = sizeof(kfft_comp_t);
+kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_plan_cpx* st) {
+    size_t ret = sizeof(kfft_plan_cpx);
 
 #if !defined(KFFT_RADER_ALGO)
     KFFT_UNUSED_VAR(level);
@@ -255,13 +255,13 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
  * It can be freed with free(), rather than a kfft-specific function.
  * */
 
-static kfft_comp_t*
+static kfft_plan_cpx*
 kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t level, kfft_pool_t* A,
                    size_t* lenmem) {
-    kfft_comp_t* st = NULL;
+    kfft_plan_cpx* st = NULL;
 
-    kfft_comp_t tmp;
-    KFFT_ZEROMEM(&tmp, sizeof(kfft_comp_t));
+    kfft_plan_cpx tmp;
+    KFFT_ZEROMEM(&tmp, sizeof(kfft_plan_cpx));
 
     tmp.nfft = nfft;
     tmp.flags = flags;
@@ -270,10 +270,10 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
     kf_factor(&tmp);
     size_t memneeded = kfft_calculate(nfft, flags, level, &tmp);
 
-    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_comp_t, memneeded, A, lenmem);
+    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_plan_cpx, memneeded, A, lenmem);
     if (st) {
         memcpy(&(tmp.object), &(st->object), sizeof(kfft_object_t));
-        memcpy(st, &tmp, sizeof(kfft_comp_t));
+        memcpy(st, &tmp, sizeof(kfft_plan_cpx));
 
 #if !defined(KFFT_MEMLESS_MODE)
 
@@ -304,13 +304,13 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
     return st;
 }
 
-kfft_comp_t*
+kfft_plan_cpx*
 kfft_config_cpx(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem) {
     return kfft_config_lvlcpx(nfft, flags, 0, A, lenmem);
 }
 
 kfft_return_t
-kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
+kfft_eval_cpx(kfft_plan_cpx* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     if (cfg->flags & KFFT_FLAG_GENERIC_ONLY) {

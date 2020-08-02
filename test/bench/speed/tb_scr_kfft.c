@@ -15,7 +15,7 @@ kfft_ktest(kfft_scalar* tbuf, kfft_cpx* ftmp, size_t size) {
 #ifdef CHECK_WITH_PLAN
     clock_t t_start = clock();
 
-    kfft_sclr_t* plan = kfft_config_scalar(size, KFFT_FLAG_NORMAL, NULL, NULL);
+    kfft_plan_sclr* plan = kfft_config_scalar(size, KFFT_FLAG_NORMAL, NULL, NULL);
     if (plan == NULL) {
         free(ftmp);
         return -1;
@@ -26,7 +26,7 @@ kfft_ktest(kfft_scalar* tbuf, kfft_cpx* ftmp, size_t size) {
 
     clock_t t_ret = clock();
 #else
-    kfft_sclr_t* plan = kfft_config_scalar(size, KFFT_FLAG_NORMAL, NULL, NULL);
+    kfft_plan_sclr* plan = kfft_config_scalar(size, KFFT_FLAG_NORMAL, NULL, NULL);
     if (plan == NULL) {
         kfft_free(ftmp);
         return -1;

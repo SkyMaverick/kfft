@@ -11,7 +11,7 @@ typedef struct {
     /* Step. Ex.: x1,y1,z1,a,a,a,x2,y2,z2,b,b,b, ... ,xn,yn,zn */
     uint32_t step;
 
-    kfft_comp_t* subst;
+    kfft_plan_cpx* subst;
 } kfft_csparse_t;
 
 KFFT_API kfft_csparse_t*

@@ -39,18 +39,18 @@ typedef struct kfft_kstate {
     kfft_splan_t primes[MAX_ROOTS]; //
 
     kfft_cpx* twiddles; // twiddles
-} kfft_comp_t;
+} kfft_plan_cpx;
 
-KFFT_API kfft_comp_t*
+KFFT_API kfft_plan_cpx*
 kfft_config_cpx(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
 KFFT_API kfft_return_t
-kfft_eval_cpx(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
+kfft_eval_cpx(kfft_plan_cpx* cfg, const kfft_cpx* fin, kfft_cpx* fout);
 
 #if defined(KFFT_DYNAPI_ENABLE)
 // clang-format off
-typedef kfft_comp_t*
+typedef kfft_plan_cpx*
 (*kfft_callback_config_cpx)(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
 typedef kfft_return_t
-(*kfft_callback_eval_cpx)(kfft_comp_t* cfg, const kfft_cpx* fin, kfft_cpx* fout);
+(*kfft_callback_eval_cpx)(kfft_plan_cpx* cfg, const kfft_cpx* fin, kfft_cpx* fout);
 // clang-format on
 #endif /* KFFT_DYNAPI_ENABLE */

@@ -4,7 +4,7 @@
 
 kfft_return_t
 FUNC_SSE(std_method_eval)(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride,
-                          const kfft_comp_t* st, uint32_t u, uint32_t m, uint32_t p) {
+                          const kfft_plan_cpx* st, uint32_t u, uint32_t m, uint32_t p) {
     kfft_trace_core(st->level, "[GenStd (SSE2)] fstride - %zu | m - %u | p - %u\n", fstride, m, p);
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t k = u, q1, q;

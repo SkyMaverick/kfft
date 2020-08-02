@@ -8,8 +8,8 @@ typedef struct {
     uint32_t nfft;
     uint32_t flags;
 
-    kfft_sclr_t* plan_fwd;
-    kfft_sclr_t* plan_inv;
+    kfft_plan_sclr* plan_fwd;
+    kfft_plan_sclr* plan_inv;
 } kfft_scnv_t;
 
 KFFT_API kfft_scnv_t*

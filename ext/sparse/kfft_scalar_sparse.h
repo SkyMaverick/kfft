@@ -9,7 +9,7 @@ typedef struct {
     /* Step. Ex.: x1,y1,z1,a,a,a,x2,y2,z2,b,b,b, ... ,xn,yn,zn */
     uint32_t step;
 
-    kfft_sclr_t* subst;
+    kfft_plan_sclr* subst;
 } kfft_ssparse_t;
 
 KFFT_API kfft_ssparse_t*
