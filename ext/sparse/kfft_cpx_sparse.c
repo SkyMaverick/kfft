@@ -8,7 +8,7 @@
 
 #if defined(KFFT_TRACE)
 static void
-kfft_trace_plan(kfft_csparse_t* P) {
+kfft_trace_plan(kfft_plan_csparse* P) {
     kfft_trace_spr("%s: %p", "Create KFFT complex plan", (void*)P);
     kfft_trace("\n\t %s - %u", "Total lenght", P->nfft);
     kfft_trace("\n\t %s - %u", "Dim lenght", P->dnfft);
@@ -20,7 +20,7 @@ kfft_trace_plan(kfft_csparse_t* P) {
 #endif /*KFFT_TRACE */
 
 static inline kfft_return_t
-kfft_init(kfft_csparse_t* st) {
+kfft_init(kfft_plan_csparse* st) {
     st->subst = kfft_config_cpx(st->dnfft, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
     return (st->subst) ? KFFT_RET_SUCCESS : KFFT_RET_ALLOC_FAIL;
 }
@@ -29,20 +29,20 @@ static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
     size_t ret;
     kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags), NULL, &ret);
-    ret += sizeof(kfft_csparse_t);
+    ret += sizeof(kfft_plan_csparse);
 
     return ret;
 }
 
-KFFT_API kfft_csparse_t*
+KFFT_API kfft_plan_csparse*
 kfft_config_sparse_cpx(const uint32_t nfft, const uint32_t flags, const uint32_t dims,
                        uint32_t step, kfft_pool_t* A, size_t* lenmem) {
-    kfft_csparse_t* st = NULL;
+    kfft_plan_csparse* st = NULL;
 
     size_t dim_nfft = (nfft + step) / (dims + step);
     size_t memneeded = kfft_calculate(dim_nfft, flags);
 
-    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_csparse_t, memneeded, A, lenmem);
+    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_plan_csparse, memneeded, A, lenmem);
     if (st) {
         st->nfft = nfft;
         st->dnfft = dim_nfft;
@@ -64,7 +64,7 @@ kfft_config_sparse_cpx(const uint32_t nfft, const uint32_t flags, const uint32_t
 
 #if defined(KFFT_MEMLESS_MODE)
 static kfft_return_t
-kfft_process_memless(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) {
+kfft_process_memless(kfft_plan_csparse* plan, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->subst->nfft * sizeof(kfft_cpx);
 
@@ -92,7 +92,7 @@ kfft_process_memless(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) 
 #else  /* KFFT_MEMLESS_MODE */
 
 static kfft_return_t
-kfft_process(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) {
+kfft_process(kfft_plan_csparse* plan, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->subst->nfft * sizeof(kfft_cpx);
 
@@ -121,7 +121,7 @@ kfft_process(kfft_csparse_t* plan, const kfft_cpx* fin, kfft_cpx* fout) {
 #endif /* KFFT_MEMLESS_MODE */
 
 KFFT_API kfft_return_t
-kfft_eval_sparse_cpx(kfft_csparse_t* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
+kfft_eval_sparse_cpx(kfft_plan_csparse* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
     if ((cfg->dims < 2) && (!(cfg->step)))
         return kfft_eval_cpx(cfg->subst, fin, fout);
 

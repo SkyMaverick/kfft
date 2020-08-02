@@ -8,7 +8,7 @@
 
 #if defined(KFFT_TRACE)
 static void
-kfft_trace_plan(kfft_ssparse_t* P) {
+kfft_trace_plan(kfft_plan_ssparse* P) {
     kfft_trace_spr("%s: %p", "Create KFFT scalar plan", (void*)P);
     kfft_trace("\n\t %s - %u", "Total lenght", P->nfft);
     kfft_trace("\n\t %s - %u", "Dims", P->dims);
@@ -19,7 +19,7 @@ kfft_trace_plan(kfft_ssparse_t* P) {
 #endif /*KFFT_TRACE */
 
 static inline kfft_return_t
-kfft_init(kfft_ssparse_t* st) {
+kfft_init(kfft_plan_ssparse* st) {
     st->subst = kfft_config_scalar(st->nfft, KFFT_CHECK_FLAGS(st->flags), st->object.mmgr, NULL);
     return (st->subst) ? KFFT_RET_SUCCESS : KFFT_RET_ALLOC_FAIL;
 }
@@ -28,20 +28,20 @@ static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
     size_t ret;
     kfft_config_scalar(nfft, KFFT_CHECK_FLAGS(flags), NULL, &ret);
-    ret += sizeof(kfft_ssparse_t);
+    ret += sizeof(kfft_plan_ssparse);
 
     return ret;
 }
 
-KFFT_API kfft_ssparse_t*
+KFFT_API kfft_plan_ssparse*
 kfft_config_sparse_scalar(const uint32_t nfft, const uint32_t flags, const uint32_t dims,
                           uint32_t step, kfft_pool_t* A, size_t* lenmem) {
-    kfft_ssparse_t* st = NULL;
+    kfft_plan_ssparse* st = NULL;
 
     size_t dim_nfft = (nfft + step) / (dims + step);
     size_t memneeded = kfft_calculate(dim_nfft, flags);
 
-    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_ssparse_t, memneeded, A, lenmem);
+    KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_plan_ssparse, memneeded, A, lenmem);
     if (st) {
         st->nfft = dim_nfft;
         st->dims = dims;
@@ -62,7 +62,7 @@ kfft_config_sparse_scalar(const uint32_t nfft, const uint32_t flags, const uint3
 
 #if defined(KFFT_MEMLESS_MODE)
 static inline kfft_return_t
-kfft_eval_process_memless(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* fout) {
+kfft_eval_process_memless(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
@@ -92,7 +92,7 @@ kfft_eval_process_memless(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx
 #endif /* KFFT_MEMLESS_MODE */
 
 static inline kfft_return_t
-kfft_eval_process(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* fout) {
+kfft_eval_process(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
@@ -121,7 +121,7 @@ kfft_eval_process(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* fout) 
 }
 
 KFFT_API kfft_return_t
-kfft_eval_sparse_scalar(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* fout) {
+kfft_eval_sparse_scalar(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_cpx* fout) {
     if ((plan->dims < 2) && (plan->step))
         return kfft_eval_scalar(plan->subst, fin, fout);
 
@@ -134,7 +134,7 @@ kfft_eval_sparse_scalar(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_cpx* 
 
 #if defined(KFFT_MEMLESS_MODE)
 static kfft_return_t
-kfft_evali_process_memless(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout) {
+kfft_evali_process_memless(kfft_plan_ssparse* plan, const kfft_cpx* fin, kfft_scalar* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
@@ -163,7 +163,7 @@ kfft_evali_process_memless(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scala
 #endif /* KFFT_MEMLESS_MODE */
 
 static kfft_return_t
-kfft_evali_process(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout) {
+kfft_evali_process(kfft_plan_ssparse* plan, const kfft_cpx* fin, kfft_scalar* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
@@ -192,7 +192,7 @@ kfft_evali_process(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout)
 }
 
 KFFT_API kfft_return_t
-kfft_evali_sparse_scalar(kfft_ssparse_t* plan, const kfft_cpx* fin, kfft_scalar* fout) {
+kfft_evali_sparse_scalar(kfft_plan_ssparse* plan, const kfft_cpx* fin, kfft_scalar* fout) {
     if ((plan->dims < 2) && (plan->step))
         return kfft_evali_scalar(plan->subst, fin, fout);
 
@@ -237,7 +237,7 @@ kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nff
 
 #if defined(KFFT_MEMLESS_MODE)
 static inline kfft_return_t
-kfft_eval_norm_process_memless(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_scalar* fout) {
+kfft_eval_norm_process_memless(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_scalar* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
@@ -267,7 +267,7 @@ kfft_eval_norm_process_memless(kfft_ssparse_t* plan, const kfft_scalar* fin, kff
 #endif /* KFFT_MEMLESS_MODE */
 
 static inline kfft_return_t
-kfft_eval_norm_process(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_scalar* fout) {
+kfft_eval_norm_process(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_scalar* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
@@ -296,7 +296,7 @@ kfft_eval_norm_process(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_scalar
 }
 
 KFFT_API kfft_return_t
-kfft_eval_sparse_scalar_norm(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_scalar* fout) {
+kfft_eval_sparse_scalar_norm(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_scalar* fout) {
     if ((plan->dims < 2) && (plan->step))
         return kfft_eval_scalar_norm(plan->subst, fin, fout);
 

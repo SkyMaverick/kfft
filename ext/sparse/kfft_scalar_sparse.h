@@ -10,17 +10,17 @@ typedef struct {
     uint32_t step;
 
     kfft_plan_sclr* subst;
-} kfft_ssparse_t;
+} kfft_plan_ssparse;
 
-KFFT_API kfft_ssparse_t*
+KFFT_API kfft_plan_ssparse*
 kfft_config_sparse_scalar(const uint32_t nfft, const uint32_t flags, const uint32_t dims,
                           uint32_t step, kfft_pool_t* A, size_t* lenmem);
 KFFT_API kfft_return_t
-kfft_eval_sparse_scalar(kfft_ssparse_t* cfg, const kfft_scalar* fin, kfft_cpx* fout);
+kfft_eval_sparse_scalar(kfft_plan_ssparse* cfg, const kfft_scalar* fin, kfft_cpx* fout);
 KFFT_API kfft_return_t
-kfft_eval_sparse_scalar_norm(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_scalar* fout);
+kfft_eval_sparse_scalar_norm(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_scalar* fout);
 KFFT_API kfft_return_t
-kfft_evali_sparse_scalar(kfft_ssparse_t* cfg, const kfft_cpx* fin, kfft_scalar* fout);
+kfft_evali_sparse_scalar(kfft_plan_ssparse* cfg, const kfft_cpx* fin, kfft_scalar* fout);
 KFFT_API void
 kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nfft,
                          const uint32_t dims, uint32_t step, const bool is_inverse,
@@ -28,15 +28,15 @@ kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nff
 
 #if defined(KFFT_DYNAPI_ENABLE)
 // clang-format off
-typedef kfft_ssparse_t*
+typedef kfft_plan_ssparse*
 (*kfft_callback_config_sparse_scalar)(const uint32_t nfft, const uint32_t flags,
         const uint32_t dims, uint32_t step, kfft_pool_t* A, size_t* lenmem);
 typedef kfft_return_t
-(*kfft_callback_eval_sparse_scalar)(kfft_ssparse_t* cfg, const kfft_scalar* fin, kfft_cpx* fout);
+(*kfft_callback_eval_sparse_scalar)(kfft_plan_ssparse* cfg, const kfft_scalar* fin, kfft_cpx* fout);
 typedef kfft_return_t
-(*kfft_callback_eval_sparse_scalar_norm)(kfft_ssparse_t* plan, const kfft_scalar* fin, kfft_scalar* fout);
+(*kfft_callback_eval_sparse_scalar_norm)(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_scalar* fout);
 typedef kfft_return_t
-(*kfft_callback_evali_sparse_scalar)(kfft_ssparse_t* cfg, const kfft_cpx* fin, kfft_scalar* fout);
+(*kfft_callback_evali_sparse_scalar)(kfft_plan_ssparse* cfg, const kfft_cpx* fin, kfft_scalar* fout);
 typedef void (*kfft_callback_shift_sparse_scalar)(kfft_scalar* buf, kfft_scalar* ftmp,
         const uint32_t nfft, const uint32_t dims, uint32_t step, const bool is_inverse, 
         kfft_pool_t* mmgr);
