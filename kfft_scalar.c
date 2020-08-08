@@ -199,11 +199,11 @@ evali_func(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scalar* fout, kfft_cp
 
     ret = eval_inverse_internal(plan, fin, ftmp);
     if (ret == KFFT_RET_SUCCESS) {
-        // TODO Use one allocation in twice-size buffer
-        ret = kfft_eval_cpx(plan->basis, ftmp, ftmp);
+        kfft_cpx* fbuf = ftmp + plan->nfft;
+        ret = kfft_eval_cpx(plan->basis, ftmp, fbuf);
         if (ret == KFFT_RET_SUCCESS) {
             for (uint32_t i = 0; i < ncfft; i++) {
-                fout[i] = ftmp[i].r / 2;
+                fout[i] = fbuf[i].r / 2;
             }
         }
     }
@@ -223,7 +223,7 @@ kfft_evali_scalar_internal(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scala
     uint32_t ncfft = P->nfft;
 
     if (ftmp == NULL) {
-        kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft, KFFT_PLAN_ALIGN(plan));
+        kfft_cpx* tbuf = KFFT_TMP_ALLOC(2 * sizeof(kfft_cpx) * ncfft, KFFT_PLAN_ALIGN(plan));
         if (tbuf) {
             ret = evali_func(plan, fin, fout, tbuf);
             KFFT_TMP_FREE(tbuf, KFFT_PLAN_ALIGN(plan));
@@ -248,7 +248,7 @@ kfft_eval_scalar_norm_internal(kfft_plan_sclr* plan, const kfft_scalar* fin, kff
     kfft_return_t ret = KFFT_RET_SUCCESS;
     size_t memneed = 2 * sizeof(kfft_cpx) * plan->nfft;
 
-    kfft_cpx* fbuf = (ftmp == NULL) ? KFFT_TMP_ALLOC(memneed, KFFT_MMGR_ALIGN(plan)) : ftmp;
+    kfft_cpx* fbuf = (ftmp == NULL) ? KFFT_TMP_ALLOC(memneed, KFFT_PLAN_ALIGN(plan)) : ftmp;
     if (fbuf) {
         KFFT_TMP_ZEROMEM(fbuf, memneed);
         kfft_cpx* ftemp = fbuf + plan->nfft;

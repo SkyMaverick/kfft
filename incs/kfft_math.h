@@ -107,6 +107,19 @@ __kfft_sincos_float(kfft_cpx* X, float num) {
 #define HALF_OF(x) ((x)*.5)
 // #endif
 
+#define S_MAX(X, Y) ((X) > (Y)) ? (X) : (Y)
+#define S_MIN(X, Y) ((X) < (Y)) ? (X) : (Y)
+#define S_EQUAL(X, Y) ((X) == (Y)) ? true : false
+
+static inline kfft_scalar
+kfft_math_mgnt(const kfft_cpx* A) {
+    return KFFT_SQRT(A->r * A->r + A->i * A->i);
+}
+
+#define C_MAX_ABS(X, Y) (kfft_math_mgnt((X)) > kfft_math_mgnt((Y))) ? (X) : (Y)
+#define C_MIN_ABS(X, Y) (kfft_math_mgnt((X)) < kfft_math_mgnt((Y))) ? (X) : (Y)
+#define C_EQUAL(X, Y) (((X.r) == (Y.r)) && ((X.i) == (Y.i))) ? true : false
+
 /* Define as static inline because it's very hot functions */
 static inline uint32_t
 kfft_math_modpow(uint32_t x, uint32_t y, uint32_t m) {
@@ -135,11 +148,6 @@ kfft_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
 
     kf_cexp(&ret, phase);
     return ret;
-}
-
-static inline kfft_scalar
-kfft_math_mgnt(const kfft_cpx* A) {
-    return KFFT_SQRT(A->r * A->r + A->i * A->i);
 }
 
 #if defined(KFFT_MEMLESS_MODE)
