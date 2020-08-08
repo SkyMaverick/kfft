@@ -48,7 +48,7 @@ if fftw_dep.found()
                               depends: [libkfft,fft_scr_app],
                               command: [rt_python,
                                         valide_bench,
-                                        fft_cpx_app,
+                                        fft_scr_app,
                                         get_option('valide_test_limit').to_string(),
                                         get_option('valide_test_round').to_string()])
 
