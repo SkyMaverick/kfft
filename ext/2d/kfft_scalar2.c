@@ -124,9 +124,9 @@ kfft_2transform(kfft_plan_s2d* plan, const kfft_scalar* fin, kfft_cpx* fout) {
 }
 
 KFFT_API kfft_return_t
-kfft_eval2_scalar(kfft_plan_s2d* cfg, const kfft_scalar* fin, kfft_cpx* fout) {
-    return (cfg->flags & KFFT_FLAG_INVERSE) ? KFFT_RET_IMPROPER_PLAN
-                                            : kfft_2transform(cfg, fin, fout);
+kfft_eval2_scalar(kfft_plan_s2d* plan, const kfft_scalar* fin, kfft_cpx* fout) {
+    return (plan->flags & KFFT_FLAG_INVERSE) ? KFFT_RET_IMPROPER_PLAN
+                                            : kfft_2transform(plan, fin, fout);
 }
 
 #if defined(KFFT_MEMLESS_MODE)
@@ -222,8 +222,8 @@ kfft_2transform_inverse(kfft_plan_s2d* plan, const kfft_cpx* fin, kfft_scalar* f
 }
 
 KFFT_API kfft_return_t
-kfft_evali2_scalar(kfft_plan_s2d* cfg, const kfft_cpx* fin, kfft_scalar* fout) {
-    return (cfg->flags & KFFT_FLAG_INVERSE) ? kfft_2transform_inverse(cfg, fin, fout)
+kfft_evali2_scalar(kfft_plan_s2d* plan, const kfft_cpx* fin, kfft_scalar* fout) {
+    return (plan->flags & KFFT_FLAG_INVERSE) ? kfft_2transform_inverse(plan, fin, fout)
                                             : KFFT_RET_IMPROPER_PLAN;
 }
 
@@ -318,9 +318,9 @@ kfft_2transform_norm(kfft_plan_s2d* plan, const kfft_scalar* fin, kfft_scalar* f
 }
 
 KFFT_API kfft_return_t
-kfft_eval2_scalar_norm(kfft_plan_s2d* cfg, const kfft_scalar* fin, kfft_scalar* fout) {
-    return (cfg->flags & KFFT_FLAG_INVERSE) ? KFFT_RET_IMPROPER_PLAN
-                                            : kfft_2transform_norm(cfg, fin, fout);
+kfft_eval2_scalar_norm(kfft_plan_s2d* plan, const kfft_scalar* fin, kfft_scalar* fout) {
+    return (plan->flags & KFFT_FLAG_INVERSE) ? KFFT_RET_IMPROPER_PLAN
+                                            : kfft_2transform_norm(plan, fin, fout);
 }
 
 #undef kfft_trace_2d
