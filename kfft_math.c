@@ -43,6 +43,7 @@ void
 kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
     // FIXME Now primitive algorithm
     kfft_cpx tmp;
+    KFFT_OMP( omp parallel for schedule(static) private(tmp))
     for (uint32_t i = 0; i < size; i++) {
         C_MUL(tmp, Fout[i], Fin[i]);
         C_CPY(Fout[i], tmp);
@@ -51,7 +52,7 @@ kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
 
 void
 kfft_math_adamar_scalar(kfft_scalar* Fout, kfft_scalar* Fin, uint32_t size) {
-    // FIXME Now primitive algorithm
+    KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t i = 0; i < size; i++) {
         Fout[i] *= Fin[i];
     }
@@ -59,6 +60,7 @@ kfft_math_adamar_scalar(kfft_scalar* Fout, kfft_scalar* Fin, uint32_t size) {
 
 void
 kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, const uint32_t y) {
+    KFFT_OMP( omp parallel for schedule(static))
     for (uint64_t n = 0; n < x * y; n++) {
         uint64_t i = n / y;
         uint64_t j = n % y;
@@ -68,6 +70,7 @@ kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, c
 void
 kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint32_t x,
                            const uint32_t y) {
+    KFFT_OMP( omp parallel for schedule(static))
     for (uint64_t n = 0; n < x * y; n++) {
         uint64_t i = n / y;
         uint64_t j = n % y;
@@ -120,6 +123,7 @@ kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t
 
 void
 kfft_math_magnitude(const kfft_cpx* Fin, kfft_scalar* Fout, uint32_t size) {
+    KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t i = 0; i < size; i++) {
         Fout[i] = kfft_math_mgnt(&Fin[i]);
     }
@@ -127,6 +131,7 @@ kfft_math_magnitude(const kfft_cpx* Fin, kfft_scalar* Fout, uint32_t size) {
 
 void
 kfft_math_magnitude_ip(kfft_cpx* Fin, uint32_t size) {
+    KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t i = 0; i < size; i++) {
         ((kfft_scalar*)Fin)[i] = kfft_math_mgnt(&Fin[i]);
     }
