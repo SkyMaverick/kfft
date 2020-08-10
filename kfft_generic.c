@@ -4,12 +4,18 @@
 
 static inline kfft_return_t
 kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_plan_cpx* P, kfft_plan_cpx* Pi) {
-    kfft_return_t ret = kfft_eval_cpx(P, Fout, Fout);
-    if (ret == KFFT_RET_SUCCESS) {
-        VEXFUNC(P, kfft_math_adamar_cpx, Fout, Fin, P->nfft);
-        ret = kfft_eval_cpx(Pi, Fout, Fout);
+    kfft_cpx* Fbuf = KFFT_TMP_ALLOC(P->nfft * sizeof(kfft_cpx), KFFT_PLAN_ALIGN(P));
+    if (Fbuf) {
+        kfft_return_t ret = kfft_eval_cpx(P, Fout, Fbuf);
+        if (ret == KFFT_RET_SUCCESS) {
+            VEXFUNC(P, kfft_math_adamar_cpx, Fbuf, Fin, P->nfft);
+            ret = kfft_eval_cpx(Pi, Fbuf, Fout);
+        }
+
+        KFFT_TMP_FREE(Fbuf, KFFT_PLAN_ALIGN(P));
+        return ret;
     }
-    return ret;
+    return KFFT_RET_BUFFER_FAIL;
 }
 
 static inline kfft_return_t
