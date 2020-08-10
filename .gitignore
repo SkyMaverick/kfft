@@ -10,6 +10,7 @@
 ~*
 *.out.*
 
+doxy/
 exp/
 build/
 find.sh
