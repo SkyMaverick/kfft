@@ -41,7 +41,6 @@ kfft_math_prmni(uint32_t a, uint32_t m) {
 
 void
 kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
-    // FIXME Now primitive algorithm
     kfft_cpx tmp;
     KFFT_OMP( omp parallel for schedule(static) private(tmp))
     for (uint32_t i = 0; i < size; i++) {
