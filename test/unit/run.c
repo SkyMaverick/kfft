@@ -43,45 +43,46 @@ lookup_suites(char* lookup_dir, module_t** found_suites) {
             continue;
 
         char buf_path[PATH_MAX];
-        snprintf(buf_path, PATH_MAX, "%s/%s", lookup_dir, ls->d_name);
+        if (snprintf(buf_path, PATH_MAX, "%s/%s", lookup_dir, ls->d_name) > 0) {
 
-        void* h_module = dlopen(buf_path, RTLD_LAZY);
-        char* error = NULL;
-        error = dlerror();
-        if (!h_module) {
-            fprintf(stderr, "Couldn't load module: %s\n", error);
-            continue;
-        }
+            void* h_module = dlopen(buf_path, RTLD_LAZY);
+            char* error = NULL;
+            error = dlerror();
+            if (!h_module) {
+                fprintf(stderr, "Couldn't load module: %s\n", error);
+                continue;
+            }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic" /*ignore dlsym (void*) casting warning */
-        func_suite = dlsym(h_module, "_run_suite");
+            func_suite = dlsym(h_module, "_run_suite");
 #pragma GCC diagnostic pop
 
-        error = dlerror();
-        if (error) {
-            fprintf(stderr, "Couldn't load module: %s\n", error);
-            dlclose(h_module);
-            continue;
+            error = dlerror();
+            if (error) {
+                fprintf(stderr, "Couldn't load module: %s\n", error);
+                dlclose(h_module);
+                continue;
+            }
+
+            module_t* new_module = (module_t*)malloc(sizeof(module_t));
+            memset(new_module, 0, sizeof(module_t));
+            if (tmp_module) {
+                tmp_module->next = new_module;
+                tmp_module = new_module;
+            } else {
+                tmp_module = new_module;
+                *found_suites = new_module;
+            }
+
+            //        fprintf(stdout, "Found test suite: %s\n", ls->d_name);
+
+            new_module->handle = h_module;
+            new_module->start_func = func_suite;
+            new_module->module_path = strdup(buf_path);
+
+            suites_count++;
         }
-
-        module_t* new_module = (module_t*)malloc(sizeof(module_t));
-        memset(new_module, 0, sizeof(module_t));
-        if (tmp_module) {
-            tmp_module->next = new_module;
-            tmp_module = new_module;
-        } else {
-            tmp_module = new_module;
-            *found_suites = new_module;
-        }
-
-        //        fprintf(stdout, "Found test suite: %s\n", ls->d_name);
-
-        new_module->handle = h_module;
-        new_module->start_func = func_suite;
-        new_module->module_path = strdup(buf_path);
-
-        suites_count++;
     }
 
     closedir(suites_path);
@@ -103,7 +104,8 @@ main(int argc, char* argv[]) {
     if (e)
         *e = 0;
 
-    snprintf(suites_path, PATH_MAX, "%s/%s", app_path, "suites");
+    if (snprintf(suites_path, PATH_MAX, "%s/%s", app_path, "suites") <= 0)
+        return 1;
 
     struct stat d_info;
     module_t* suites_list = NULL;
