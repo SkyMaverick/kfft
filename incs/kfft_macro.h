@@ -137,6 +137,11 @@
 #endif
 
 #define KFFT_UNUSED_VAR(X) (void)(X)
+#if defined(KFFT_CC_MSVC)
+// TODO
+#else //__GNUC__ - may need other defines for different compilers
+    #define KFFT_UNUSED_FUNC __attribute__((__unused__))
+#endif
 
 // Use: #pragma message WARN("My message")
 #if defined(KFFT_CC_MSVC)

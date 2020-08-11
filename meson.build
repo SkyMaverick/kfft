@@ -200,6 +200,7 @@ libkfft = shared_library (meson.project_name(), kfft_src,
                           install: true)
 
 install_headers('kfft.h', subdir: 'kfft')
+install_headers('kfft_tiny.h', subdir: 'kfft')
 install_headers(kfft_headers, subdir: 'kfft/incs')
 install_headers(kfft_cfg, subdir: 'kfft/incs')
 
