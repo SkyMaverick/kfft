@@ -212,7 +212,7 @@ kfft_tiny_conv(const kfft_plan plan, const kfft_scalar* fin1, const kfft_scalar*
 static void KFFT_UNUSED_FUNC
 kfft_tiny_release(kfft_plan* plan) {
     kfft_cleanup((void*)((*plan)->state));
-    kfft_free_null((void**)plan);
+    kfft_free(*plan);
 }
 #define kfft_finalization(P) kfft_tiny_release(&(P))
 
