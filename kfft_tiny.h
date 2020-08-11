@@ -13,12 +13,13 @@ enum {
     KFFT_PLAN_COMPLEX_2D,
     KFFT_PLAN_SCALAR_2D,
     KFFT_PLAN_SCALAR_2D_NORM,
-    KFFT_PLAN_COMPLEX_CONV2D,
-    KFFT_PLAN_SCALAR_CONV2D,
     KFFT_PLAN_COMPLEX_SPARSE,
+    KFFT_PLAN_SCALAR_SPARSE,
     KFFT_PLAN_SCALAR_SPARSE_NORM,
     KFFT_PLAN_COMPLEX_CONV,
     KFFT_PLAN_SCALAR_CONV,
+    KFFT_PLAN_COMPLEX_CONV2D,
+    KFFT_PLAN_SCALAR_CONV2D,
 };
 
 struct kfft_plan_s {
@@ -51,39 +52,89 @@ typedef struct {
 
 static kfft_plan
 kfft_tiny_config(unsigned type, uint32_t flags, uintptr_t args) {
-    switch (type) {
-    case KFFT_PLAN_COMPLEX:
-        return NULL;
-    case KFFT_PLAN_SCALAR:
-        return NULL;
-    case KFFT_PLAN_SCALAR_NORM:
-        return NULL;
-    case KFFT_PLAN_COMPLEX_2D:
-        return NULL;
-    case KFFT_PLAN_SCALAR_2D:
-        return NULL;
-    case KFFT_PLAN_SCALAR_2D_NORM:
-        return NULL;
-    case KFFT_PLAN_COMPLEX_CONV2D:
-        return NULL;
-    case KFFT_PLAN_SCALAR_CONV2D:
-        return NULL;
-    case KFFT_PLAN_COMPLEX_SPARSE:
-        return NULL;
-    case KFFT_PLAN_SCALAR_SPARSE_NORM:
-        return NULL;
-    case KFFT_PLAN_COMPLEX_CONV:
-        return NULL;
-    case KFFT_PLAN_SCALAR_CONV:
-        return NULL;
+    kfft_plan plan = kfft_malloc(sizeof(kfft_paln_s));
+    if (plan) {
+        switch (type) {
+
+        case KFFT_PLAN_COMPLEX:
+            kfft_args_norm* A = (kfft_args_norm*)args;
+            plan->state = (uintptr_t)kfft_config_cpx(A->nfft, flags, NULL, NULL);
+            break;
+
+        case KFFT_PLAN_SCALAR:
+        case KFFT_PLAN_SCALAR_NORM:
+            kfft_args_norm* A = (kfft_args_norm*)args;
+            plan->state = (uintptr_t)kfft_config_scalar(A->nfft, flags, NULL, NULL);
+            break;
+
+#if defined(KFFT_2D_ENABLE)
+        case KFFT_PLAN_COMPLEX_2D:
+            kfft_args_2d* A = (kfft_args_2d*)args;
+            plan->state = (uintptr_t)kfft_config2_cpx(A->x, A->y, flags, NULL, NULL);
+            break;
+
+        case KFFT_PLAN_SCALAR_2D:
+        case KFFT_PLAN_SCALAR_2D_NORM:
+            kfft_args_2d* A = (kfft_args_2d*)args;
+            plan->state = (uintptr_t)kfft_config2_scalar(A->x, A->y, flags, NULL, NULL);
+            break;
+#endif /* KFFT_2D_ENABLE */
+
+#if defined(KFFT_SPARSE_ENABLE)
+        case KFFT_PLAN_COMPLEX_SPARSE:
+            kfft_args_sparse* A = (kfft_args_sparse*)args;
+            plan->state =
+                (uintptr_t)kfft_config_sparse_cpx(A->nfft, flags, A->dims, A->step, NULL, NULL);
+            break;
+
+        case KFFT_PLAN_SCALAR_SPARSE:
+        case KFFT_PLAN_SCALAR_SPARSE_NORM:
+            plan->state =
+                (uintptr_t)kfft_config_sparse_scalar(A->nfft, flags, A->dims, A->step, NULL, NULL);
+            break;
+#endif /* KFFT_SPARSE_ENABLE */
+
+#if defined(KFFT_CONV_ENABLE)
+        case KFFT_PLAN_COMPLEX_CONV:
+            kfft_args_norm* A = (kfft_args_norm*)args;
+            plan->state = (uintptr_t)kfft_config_conv_cpx(A->nfft, flags, NULL, NULL);
+            break;
+
+        case KFFT_PLAN_SCALAR_CONV:
+            kfft_args_norm* A = (kfft_args_norm*)args;
+            plan->state = (uintptr_t)kfft_config_conv_scalar(A->nfft, flags, NULL, NULL);
+            break;
+#endif /* KFFT_CONV_ENABLE */
+
+#if defined(KFFT_CONV2D_ENABLE)
+        case KFFT_PLAN_COMPLEX_CONV2D:
+            kfft_args_2d* A = (kfft_args_2d*)args;
+            plan->state = (uintptr_t)kfft_config2_conv_cpx(A->nfft, flags, NULL, NULL);
+            break;
+
+        case KFFT_PLAN_SCALAR_CONV2D:
+            kfft_args_2d* A = (kfft_args_2d*)args;
+            plan->state = (uintptr_t)kfft_config2_conv_scalar(A->nfft, flags, NULL, NULL);
+            break;
+#endif /* KFFT_CONV2D_ENABLE */
+
+        default:
+            return KFFT_RET_IMPROPER_PLAN;
+        };
+
+        if (plan->state) {
+            plan->type = type;
+        } else {
+            kfft_free_null((void**)&plan);
+        }
     };
-    return NULL;
+    return plan;
 }
 #define kfft_configuration(T, F, A) kfft_tiny_config((T), (F), (uintptr_t)(A))
 
 static kfft_return_t
 kfft_tiny_eval(const kfft_plan plan, const kfft_scalar* fin, kfft_scalar* fout) {
-    switch (type) {
+    switch (plan->type) {
 
     case KFFT_PLAN_COMPLEX:
         return kfft_eval_cpx(KTINY_CAST(cpx, plan), KTINY_CPX(fin), KTINY_CPX(fout));
@@ -97,6 +148,7 @@ kfft_tiny_eval(const kfft_plan plan, const kfft_scalar* fin, kfft_scalar* fout) 
 
     case KFFT_PLAN_SCALAR_NORM:
         return kfft_eval_scalar_norm(KTINY_CAST(sclr, plan), fin, fout);
+
 #if defined(KFFT_2D_ENABLE)
     case KFFT_PLAN_COMPLEX_2D:
         return kfft_eval2_cpx(KTINY_CAST(c2d, plan), KTINY_CPX(fin), KTINY_CPX(fout));
@@ -111,6 +163,7 @@ kfft_tiny_eval(const kfft_plan plan, const kfft_scalar* fin, kfft_scalar* fout) 
     case KFFT_PLAN_SCALAR_2D_NORM:
         return kfft_eval2_scalar_norm(KTINY_CAST(s2d, plan), fin, fout);
 #endif /* KFFT_2D_ENABLE */
+
 #if defined(KFFT_SPARSE_ENABLE)
     case KFFT_PLAN_COMPLEX_SPARSE:
         return kfft_eval_sparse_cpx(KTINY_CAST(csparse, plan), KTINY_CPX(fin), KTINY_CPX(fout));
@@ -150,6 +203,13 @@ kfft_tiny_conv(const kfft_plan plan, const kfft_scalar* fin1, const kfft_scalar*
 }
 #define kfft_convolution(P, Fi, Fo)                                                                \
     kfft_tiny_conv(P, (kfft_scalar*)(Fi1), (kfft_scalar*)(Fi2), (kfft_scalar*)(Fo))
+
+static void
+kfft_tiny_release(kfft_plan* plan) {
+    kfft_cleanup((void*)(*plan));
+    kfft_free_null(plan);
+}
+#define kfft_finalization(P) kfft_tiny_release(&(P))
 
 #ifdef __cplusplus
 }

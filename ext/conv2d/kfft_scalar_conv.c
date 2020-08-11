@@ -22,12 +22,12 @@ kfft_init(kfft_plan_s2cnv* plan) {
     KFFT_OMP(omp parallel sections shared(plan)) {
         KFFT_OMP(omp section) {
             plan->plan_fwd = kfft_config2_scalar(plan->x, plan->y, KFFT_CHECK_FLAGS(plan->flags),
-                                               KFFT_PLAN_MMGR(plan), NULL);
+                                                 KFFT_PLAN_MMGR(plan), NULL);
         }
         KFFT_OMP(omp section) {
-            plan->plan_inv =
-                kfft_config2_scalar(plan->x, plan->y, KFFT_CHECK_FLAGS(plan->flags | KFFT_FLAG_INVERSE),
-                                    KFFT_PLAN_MMGR(plan), NULL);
+            plan->plan_inv = kfft_config2_scalar(plan->x, plan->y,
+                                                 KFFT_CHECK_FLAGS(plan->flags | KFFT_FLAG_INVERSE),
+                                                 KFFT_PLAN_MMGR(plan), NULL);
         }
     }
     return ((plan->plan_fwd) && (plan->plan_inv)) ? KFFT_RET_SUCCESS : KFFT_RET_ALLOC_FAIL;
