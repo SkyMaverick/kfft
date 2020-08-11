@@ -139,20 +139,24 @@
 #define KFFT_UNUSED_VAR(X) (void)(X)
 #if defined(KFFT_CC_MSVC)
 // TODO
+    #define KFFT_UNUSED_FUNC
 #else //__GNUC__ - may need other defines for different compilers
     #define KFFT_UNUSED_FUNC __attribute__((__unused__))
-#endif
-
-// Use: #pragma message WARN("My message")
-#if defined(KFFT_CC_MSVC)
-    #define FILE_LINE_LINK __FILE__ "(" STRINGISE(__LINE__) ") : "
-    #define WARN(exp) (FILE_LINE_LINK "WARNING: " exp)
-#else //__GNUC__ - may need other defines for different compilers
-    #define WARN(exp) ("WARNING: " exp)
 #endif
 
 #if defined(KFFT_CC_MSVC)
     #define KFFT_PRAGMA(X) __pragma(X)
 #else //__GNUC__ - may need other defines for different compilers
     #define KFFT_PRAGMA(X) _Pragma(#X)
+#endif
+
+#define KFFT_STRINGIZE_DETAIL(X) #X
+#define KFFT_STRINGIZE(X) KFFT_STRINGIZE_DETAIL(X)
+
+#if defined(KFFT_CC_MSVC)
+    #define KFFT_BUILD_MSG(exp)                                                                    \
+        KFFT_PRAGMA(message("WARNING: " #exp " ( in: "__FILE__                                     \
+                            " | str: " KFFT_STRINGIZE(__LINE__) " )"))
+#else //__GNUC__ - may need other defines for different compilers
+    #define KFFT_BUILD_MSG(exp) KFFT_PRAGMA(message "WARNING: " #exp)
 #endif

@@ -258,7 +258,7 @@ kfft_eval_scalar_norm_internal(kfft_plan_sclr* plan, const kfft_scalar* fin, kff
             kfft_math_magnitude(fbuf, fout, plan->nfft);
         }
 
-        KFFT_TMP_FREE(fbuf, KFFT_MMGR_ALIGN(plan));
+        KFFT_TMP_FREE(fbuf, KFFT_PLAN_ALIGN(plan));
     } else {
         ret = KFFT_RET_BUFFER_FAIL;
     }
