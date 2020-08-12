@@ -76,7 +76,7 @@ main(int argc, char* argv[]) {
             }
             stdout_time(ivals);
 
-            kfft_free(&kfft_spectr);
+            kfft_free(kfft_spectr);
         }
         return 0;
     } else {

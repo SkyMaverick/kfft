@@ -117,7 +117,7 @@ main(int argc, char* argv[]) {
                 ret = compare_spectr_fwd(fftw_buffer, kfft_buffer, size);
                 if (ret == RETURN_EQUAL)
                     ret = compare_spectr_inv(fftw_buffer, kfft_buffer, size);
-                kfft_free(&kfft_buffer);
+                kfft_free(kfft_buffer);
             }
             FFTW(free)(fftw_buffer);
         }
