@@ -159,7 +159,7 @@ kfft_tiny_eval(const kfft_plan plan, const kfft_scalar* fin, kfft_scalar* fout) 
         return kfft_eval2_cpx(KTINY_CAST(c2d, plan), KTINY_CPX(fin), KTINY_CPX(fout));
 
     case KFFT_PLAN_SCALAR_2D:
-        if (KTINY_FLAGS(sclr, plan) & KFFT_FLAG_INVERSE) {
+        if (KTINY_FLAGS(s2d, plan) & KFFT_FLAG_INVERSE) {
             return kfft_evali2_scalar(KTINY_CAST(s2d, plan), KTINY_CPX(fin), fout);
         } else {
             return kfft_eval2_scalar(KTINY_CAST(s2d, plan), fin, KTINY_CPX(fout));
@@ -174,7 +174,7 @@ kfft_tiny_eval(const kfft_plan plan, const kfft_scalar* fin, kfft_scalar* fout) 
         return kfft_eval_sparse_cpx(KTINY_CAST(csparse, plan), KTINY_CPX(fin), KTINY_CPX(fout));
 
     case KFFT_PLAN_SCALAR_SPARSE:
-        if (KTINY_FLAGS(sclr, plan) & KFFT_FLAG_INVERSE) {
+        if (KTINY_FLAGS(ssparse, plan) & KFFT_FLAG_INVERSE) {
             return kfft_evali_sparse_scalar(KTINY_CAST(ssparse, plan), KTINY_CPX(fin), fout);
         } else {
             return kfft_eval_sparse_scalar(KTINY_CAST(ssparse, plan), fin, KTINY_CPX(fout));
