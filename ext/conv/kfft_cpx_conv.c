@@ -33,18 +33,18 @@ kfft_init(kfft_plan_ccnv* st) {
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
-    size_t ret = sizeof(kfft_plan_ccnv);
-    size_t delta = 0;
-    KFFT_OMP(omp parallel sections shared(ret) private(delta)) {
+    size_t r1,r2,ret = sizeof(kfft_plan_ccnv);
+    r1 = r2 = 0;
+
+    KFFT_OMP(omp parallel sections ) {
         KFFT_OMP(omp section) {
-            kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags), NULL, &delta);
-            ret += delta;
+            kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags), NULL, &r1);
         }
         KFFT_OMP(omp section) {
-            kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags | KFFT_FLAG_INVERSE), NULL, &delta);
-            ret += delta;
+            kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags | KFFT_FLAG_INVERSE), NULL, &r2);
         }
     }
+    ret += r1 + r2;
 
     return ret;
 }
