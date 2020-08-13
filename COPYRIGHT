@@ -1,6 +1,6 @@
 Libkfft - fast fourier transform library (fork KISS FFT library)
 
-Copyright (c) 2019-2020 Mark Borgerding
+Copyright (c) 2019-2020 Alexander Smirnov (https://github.com/SkyMaverick)
 All rights reserved.
 
 Provided under Zlib license
@@ -22,7 +22,7 @@ Provided under Zlib license
   3. This notice may not be removed or altered from any source distribution.
 
 ********************************************************************************
-Libkfft based on KissFFT project
+Libkfft is fork KissFFT project
 Copyright (c) 2003-2019 Mark Borgerding
 
 KISS FFT is provided under BSD-3-Clause license

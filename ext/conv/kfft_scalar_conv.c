@@ -33,13 +33,11 @@ kfft_init(kfft_plan_scnv* st) {
 
 static inline size_t
 kfft_calculate(const uint32_t nfft, const uint32_t flags) {
-    size_t r1,r2,ret = sizeof(kfft_plan_scnv);
+    size_t r1, r2, ret = sizeof(kfft_plan_scnv);
     r1 = r2 = 0;
 
     KFFT_OMP(omp parallel sections) {
-        KFFT_OMP(omp section) {
-            kfft_config_scalar(nfft, KFFT_CHECK_FLAGS(flags), NULL, &r1);
-        }
+        KFFT_OMP(omp section) { kfft_config_scalar(nfft, KFFT_CHECK_FLAGS(flags), NULL, &r1); }
         KFFT_OMP(omp section) {
             kfft_config_scalar(nfft, KFFT_CHECK_FLAGS(flags | KFFT_FLAG_INVERSE), NULL, &r2);
         }
