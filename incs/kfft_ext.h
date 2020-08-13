@@ -8,7 +8,7 @@ KFFT_API void*
 kfft_malloc(uint32_t sz);
 KFFT_API void
 kfft_free_null(void** mem);
-#define kfft_free(X) (kfft_free_null((void**)(X)))
+#define kfft_free(X) (kfft_free_null((void**)(&(X))))
 KFFT_API kfft_return_t
 kfft_cleanup(void* mem);
 KFFT_API const char*

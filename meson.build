@@ -1,5 +1,5 @@
 project ('kfft', 'c',
-         version: '0.7.0',
+         version: '0.7.2',
          license: 'Zlib',
          default_options:[
             'c_std=gnu11',
@@ -200,6 +200,7 @@ libkfft = shared_library (meson.project_name(), kfft_src,
                           install: true)
 
 install_headers('kfft.h', subdir: 'kfft')
+install_headers('kfft_tiny.h', subdir: 'kfft')
 install_headers(kfft_headers, subdir: 'kfft/incs')
 install_headers(kfft_cfg, subdir: 'kfft/incs')
 
