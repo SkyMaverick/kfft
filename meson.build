@@ -221,3 +221,7 @@ if meson.is_subproject()
                 include_directories: kfft_inc
             )
 endif
+
+if get_option('build_with_docs')
+    subdir('docs')
+endif

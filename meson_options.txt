@@ -1,3 +1,6 @@
+option ('build_with_docs', type: 'boolean', value: 'true',
+        description: 'build with doxygen documentation')
+
 option ('build_with_lto', type: 'boolean', value: 'false',
         description: 'build with link time optimization')
 option ('build_with_pgo', type: 'boolean', value: 'false',
