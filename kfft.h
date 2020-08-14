@@ -8,7 +8,7 @@
 
 /*!
  * @mainpage
- * 
+ *
  * \author Alexander Smirnov (https://github.com/SkyMaverick)
  * \version 0.7.1
  *
@@ -124,10 +124,10 @@ extern "C" {
 
 /*!
   Macro to get the acceleration info of a plan object
-  
+
   \param[in] X plan object
-  \warning argument (X) mustn't NULL 
-  
+  \warning argument (X) mustn't NULL
+
   \return kfft_simd_t vector extension information
  */
 #define KFFT_PLAN_VEX(X) KFFT_PLAN_MMGR((X))->vex
@@ -142,11 +142,11 @@ extern "C" {
 /*!
   Macro for compile- and run-time selection
   vectorized optimization functions
-    
+
     \param[in] S plan object
     \param[in] F function name
     \param[in] ... __VA_ARGS__ function arguments
-    
+
     \return function name (arg 2) return value
  */
 #if defined(KFFT_USE_SIMD)

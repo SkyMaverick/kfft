@@ -1,5 +1,12 @@
 #pragma once
 
+/** @file */
+
+/*!
+    Get all build and runtime information of library
+    \param[in] info pointer of ::kfft_info_t structure
+    \result None
+ */
 KFFT_API void
 kfft_info(kfft_info_t* info);
 KFFT_API uint32_t
