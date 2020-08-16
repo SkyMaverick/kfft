@@ -102,7 +102,7 @@ extern "C" {
 
 /*!
   Macro to get the memory manager of a plan object
-  \param[in] X plan object
+  \param[in] X - plan object
   \return plan memory manager pointer (kfft_pool_t*)
  */
 #define KFFT_PLAN_MMGR(X) (*((kfft_pool_t**)(X)))
@@ -110,14 +110,14 @@ extern "C" {
 /*!
   Macro to get the memory manager of a plan object if it's enabled
   or NULL if plan is NULL. Required for the assignment operation.
-  \param[in] X plan object
+  \param[in] X - plan object
   \return plan memory manager pointer (kfft_pool_t*) or NULL
  */
 #define KFFT_PLAN_MMGR_NULL(X) ((X != NULL) ? KFFT_PLAN_MMGR((X)) : NULL)
 
 /*!
   Macro to get the align information of a plan object
-  \param[in] X plan object
+  \param[in] X - plan object
   \return uint8_t number memory align for plan (0, 16, 32)
  */
 #define KFFT_PLAN_ALIGN(X) ((X != NULL) ? KFFT_PLAN_MMGR((X))->align : 0)
@@ -125,7 +125,7 @@ extern "C" {
 /*!
   Macro to get the acceleration info of a plan object
 
-  \param[in] X plan object
+  \param[in] X - plan object
   \warning argument (X) mustn't NULL
 
   \return kfft_simd_t vector extension information
@@ -134,7 +134,7 @@ extern "C" {
 
 /*!
   Macro to protecting nested plans from destructive operations
-  \param[in] X plan object
+  \param[in] X - plan object
   \return None
  */
 #define KFFT_CHECK_FLAGS(X) ((X) & (~KFFT_FLAG_RENEW))
@@ -143,9 +143,9 @@ extern "C" {
   Macro for compile- and run-time selection
   vectorized optimization functions
 
-    \param[in] S plan object
-    \param[in] F function name
-    \param[in] ... __VA_ARGS__ function arguments
+    \param[in] S - plan object
+    \param[in] F - function name
+    \param[in] ... - __VA_ARGS__ function arguments
 
     \return function name (arg 2) return value
  */

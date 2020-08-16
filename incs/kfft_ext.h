@@ -4,7 +4,7 @@
 
 /*!
     Get all build and runtime information of library
-    \param[in] info pointer of ::kfft_info_t structure
+    \param[in] info - pointer of ::kfft_info_t structure
     \result None
  */
 KFFT_API void
