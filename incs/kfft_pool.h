@@ -9,7 +9,7 @@
 
   Use this fast allocator for internal plan configuration structures.
   This MUST have each plan object (or group).
-  \hint Estimate the amount of space needed before creating the pool.
+  \note Estimate the amount of space needed before creating the pool.
   */
 typedef struct {
     size_t allocated; ///< pool area size
@@ -22,7 +22,6 @@ typedef struct {
 
     uint8_t area[1]; ///< pool data
 } kfft_pool_t;
-
 /*!
     Create new allocator object
     \param[in] size - pool size in byte
@@ -30,7 +29,6 @@ typedef struct {
   */
 kfft_pool_t*
 kfft_pool_create(const size_t size);
-
 /*!
     Allocate memory area with pool allocator
     \param[in] A - pool object
@@ -39,7 +37,6 @@ kfft_pool_create(const size_t size);
  */
 void*
 kfft_pool_alloc(kfft_pool_t* A, const size_t nmem);
-
 /*!
     Estimates the amount of free space in the allocator
     \param[in] A - pool object pointer (maybe NULL)
@@ -47,7 +44,6 @@ kfft_pool_alloc(kfft_pool_t* A, const size_t nmem);
  */
 size_t
 kfft_pool_empty(const kfft_pool_t* A);
-
 /*!
     Zero memory block in the allocator
     \param[in] A - pool object pointer
@@ -56,7 +52,6 @@ kfft_pool_empty(const kfft_pool_t* A);
  */
 void
 kfft_pool_zmem(const kfft_pool_t* A, void* ptr, const size_t size);
-
 /*!
     Renew allocator. Zero all memory and clear pointers
     \param[in] A - pool object pointer
@@ -69,7 +64,6 @@ kfft_pool_clear(kfft_pool_t* A);
  */
 void
 kfft_pool_free(kfft_pool_t* A);
-
 /*!
     Release allocator and NULL variable.
     \param[in] A - pool object pointer

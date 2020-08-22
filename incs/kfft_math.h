@@ -118,7 +118,8 @@ kfft_math_mgnt(const kfft_cpx* A) {
 
 #define C_MAX_ABS(X, Y) (kfft_math_mgnt((X)) > kfft_math_mgnt((Y))) ? (X) : (Y)
 #define C_MIN_ABS(X, Y) (kfft_math_mgnt((X)) < kfft_math_mgnt((Y))) ? (X) : (Y)
-#define C_EQUAL(X, Y) (((X.r) == (Y.r)) && ((X.i) == (Y.i))) ? true : false
+#define C_EQU_ABS(X, Y) (kfft_math_mgnt((X)) == kfft_math_mgnt((Y))) ? true : false
+#define C_EQU(X, Y) (((X.r) == (Y.r)) && ((X.i) == (Y.i))) ? true : false
 
 /* Define as static inline because it's very hot functions */
 static inline uint32_t
