@@ -11,13 +11,14 @@
 #if defined(KFFT_TRACE)
 static void
 kfft_trace_plan(kfft_plan_s2d* P) {
-    kfft_trace_2d("%s: %p", "Create KFFT complex plan", (void*)P);
-    kfft_trace("\n\t %s - %u", "Total lenght", P->nfft);
-    kfft_trace("\n\t %s - %u", "Size X", P->x);
-    kfft_trace("\n\t %s - %u", "Size Y", P->y);
-
-    kfft_trace("\n\t %s - %p", "Plan for X dim", (void*)P->plan_x);
-    kfft_trace("\n\t %s - %p\n", "Plan for Y dim", (void*)P->plan_y);
+    KFFT_OMP(omp critical(trace_log)) {
+        kfft_trace_2d("%s: %p", "Create KFFT complex plan", (void*)P);
+        kfft_trace_raw("\n\t %s - %u", "Total lenght", P->nfft);
+        kfft_trace_raw("\n\t %s - %u", "Size X", P->x);
+        kfft_trace_raw("\n\t %s - %u", "Size Y", P->y);
+        kfft_trace_raw("\n\t %s - %p", "Plan for X dim", (void*)P->plan_x);
+        kfft_trace_raw("\n\t %s - %p\n", "Plan for Y dim", (void*)P->plan_y);
+    }
 }
 #endif /*KFFT_TRACE */
 

@@ -9,12 +9,14 @@
 #if defined(KFFT_TRACE)
 static void
 kfft_trace_plan(kfft_plan_c2cnv* P) {
-    kfft_trace_ccnv2("%s: %p", "Create KFFT 2D convolution complex plan", (void*)P);
-    kfft_trace("\n\t %s - %u", "Total lenght", P->nfft);
-    kfft_trace("\n\t %s - %u", "Size X", P->x);
-    kfft_trace("\n\t %s - %u", "Size Y", P->y);
-    kfft_trace("\n\t %s - %p", "Plan for one lenght", (void*)P->plan_fwd);
-    kfft_trace("\n\t %s - %p\n", "Plan inverse for one lenght", (void*)P->plan_inv);
+    KFFT_OMP(omp critical(trace_log)) {
+        kfft_trace_ccnv2("%s: %p", "Create KFFT 2D convolution complex plan", (void*)P);
+        kfft_trace_raw("\n\t %s - %u", "Total lenght", P->nfft);
+        kfft_trace_raw("\n\t %s - %u", "Size X", P->x);
+        kfft_trace_raw("\n\t %s - %u", "Size Y", P->y);
+        kfft_trace_raw("\n\t %s - %p", "Plan for one lenght", (void*)P->plan_fwd);
+        kfft_trace_raw("\n\t %s - %p\n", "Plan inverse for one lenght", (void*)P->plan_inv);
+    }
 }
 #endif /*KFFT_TRACE */
 

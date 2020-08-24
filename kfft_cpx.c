@@ -16,56 +16,58 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
 
 static void
 kfft_trace_plan(kfft_plan_cpx* P) {
-    kfft_trace_core(P->level, "%s: %p", "Create KFFT complex plan", (void*)P);
-    kfft_trace("\n\t %s - %u", "nfft", P->nfft);
-    kfft_trace("\n\t %s - %u", "level", P->level);
-    kfft_trace("\n\t %s - %u : ", "flags", P->flags);
+    KFFT_OMP(omp critical(trace_log)) {
+        kfft_trace_core(P->level, "%s: %p", "Create KFFT complex plan", (void*)P);
+        kfft_trace_raw("\n\t %s - %u", "nfft", P->nfft);
+        kfft_trace_raw("\n\t %s - %u", "level", P->level);
+        kfft_trace_raw("\n\t %s - %u : ", "flags", P->flags);
 
-    if (P->flags) {
-        for (uint8_t i = 0; i < sizeof(uint32_t); i++) {
-            if (P->flags & (1 << i)) {
-                switch (i) {
-                case 0:
-                    kfft_trace("| %s ", "KFFT_FLAG_INVERSE");
-                    break;
-                case 1:
-                    kfft_trace("| %s ", "KFFT_FLAG_RENEW");
-                    break;
-                case 2:
-                    kfft_trace("| %s ", "KFFT_FLAG_GENERIC");
-                    break;
-                case 3:
-                    kfft_trace("| %s ", "KFFT_FLAG_GENERIC_ONLY");
-                    break;
+        if (P->flags) {
+            for (uint8_t i = 0; i < sizeof(uint32_t); i++) {
+                if (P->flags & (1 << i)) {
+                    switch (i) {
+                    case 0:
+                        kfft_trace_raw("| %s ", "KFFT_FLAG_INVERSE");
+                        break;
+                    case 1:
+                        kfft_trace_raw("| %s ", "KFFT_FLAG_RENEW");
+                        break;
+                    case 2:
+                        kfft_trace_raw("| %s ", "KFFT_FLAG_GENERIC");
+                        break;
+                    case 3:
+                        kfft_trace_raw("| %s ", "KFFT_FLAG_GENERIC_ONLY");
+                        break;
+                    }
                 }
             }
+        } else {
+            kfft_trace_raw("| %s ", "KFFT_FLAG_NORMAL");
         }
-    } else {
-        kfft_trace("| %s ", "KFFT_FLAG_NORMAL");
-    }
 
-    kfft_trace("\n\t %s - %d", "factors count", P->fac_count);
-    if (P->fac_count)
-        kfft_trace("\n\t %u %s", P->nfft, "fac -");
+        kfft_trace_raw("\n\t %s - %d", "factors count", P->fac_count);
+        if (P->fac_count)
+            kfft_trace_raw("\n\t %u %s", P->nfft, "fac -");
 
-    for (uint32_t i = 0; i < P->fac_count; i++)
-        kfft_trace(" %u", P->factors[i]);
+        for (uint32_t i = 0; i < P->fac_count; i++)
+            kfft_trace_raw(" %u", P->factors[i]);
 
-    kfft_trace("\n\t %s - %u", "primes count", P->prm_count);
+        kfft_trace_raw("\n\t %s - %u", "primes count", P->prm_count);
 
     #if !defined(KFFT_MEMLESS_MODE)
-    for (uint32_t i = 0; i < P->prm_count; i++) {
-        kfft_trace("\n\t %d %s", P->primes[i].prime, "qidx -");
-        for (uint32_t j = 0; j < P->primes[i].prime - 1; j++)
-            kfft_trace(" %u", P->primes[i].qidx[j]);
-        kfft_trace("\n\t %d %s", P->primes[i].prime, "pidx -");
-        for (uint32_t j = 0; j < P->primes[i].prime - 1; j++)
-            kfft_trace(" %u", P->primes[i].pidx[j]);
-    }
+        for (uint32_t i = 0; i < P->prm_count; i++) {
+            kfft_trace_raw("\n\t %d %s", P->primes[i].prime, "qidx -");
+            for (uint32_t j = 0; j < P->primes[i].prime - 1; j++)
+                kfft_trace_raw(" %u", P->primes[i].qidx[j]);
+            kfft_trace_raw("\n\t %d %s", P->primes[i].prime, "pidx -");
+            for (uint32_t j = 0; j < P->primes[i].prime - 1; j++)
+                kfft_trace_raw(" %u", P->primes[i].pidx[j]);
+        }
 
-    kfft_trace("\n\t %s - %p", "twiddles", (void*)(P->twiddles));
+        kfft_trace_raw("\n\t %s - %p", "twiddles", (void*)(P->twiddles));
     #endif /* KFFT_MEMLESS_MODE */
-    kfft_trace("%s\n", "");
+        kfft_trace_raw("%s\n", "");
+    }
 }
 
 #endif /* KFFT_TRACE */

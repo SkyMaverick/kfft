@@ -9,13 +9,14 @@
 #if defined(KFFT_TRACE)
 static void
 kfft_trace_plan(kfft_plan_csparse* P) {
-    kfft_trace_spr("%s: %p", "Create KFFT complex plan", (void*)P);
-    kfft_trace("\n\t %s - %u", "Total lenght", P->nfft);
-    kfft_trace("\n\t %s - %u", "Dim lenght", P->dnfft);
-    kfft_trace("\n\t %s - %u", "Dims", P->dims);
-    kfft_trace("\n\t %s - %u", "Steps", P->step);
-
-    kfft_trace("\n\t %s - %p\n", "Plan for one lenght", (void*)P->subst);
+    KFFT_OMP(omp critical(trace_log)) {
+        kfft_trace_spr("%s: %p", "Create KFFT complex plan", (void*)P);
+        kfft_trace_raw("\n\t %s - %u", "Total lenght", P->nfft);
+        kfft_trace_raw("\n\t %s - %u", "Dim lenght", P->dnfft);
+        kfft_trace_raw("\n\t %s - %u", "Dims", P->dims);
+        kfft_trace_raw("\n\t %s - %u", "Steps", P->step);
+        kfft_trace_raw("\n\t %s - %p\n", "Plan for one lenght", (void*)P->subst);
+    }
 }
 #endif /*KFFT_TRACE */
 

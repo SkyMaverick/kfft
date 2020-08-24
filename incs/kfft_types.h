@@ -43,7 +43,7 @@ enum kfft_info_flags {
 };
 
 /// Configuration plan modificators. @see kfft_eval_cpx
-enum kfft_eval_mods {
+enum kfft_eval_flags {
     KFFT_FLAG_NORMAL = 0,       ///< Standart evaluation flag
     KFFT_FLAG_INVERSE = 1 << 0, ///< Inverse evaluation flag
     KFFT_FLAG_RENEW = 1 << 1,

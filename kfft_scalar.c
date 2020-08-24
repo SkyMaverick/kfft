@@ -39,11 +39,13 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
 
 static void
 kfft_trace_plan(kfft_plan_sclr* P) {
-    kfft_trace_scalar("%s: %p", "Create KFFT scalar plan", (void*)P);
-    kfft_trace("\n\t %s - %u", "nfft", P->nfft);
-    kfft_trace("\n\t %s - %u : ", "flags", P->flags);
-    kfft_trace("\n\t %s - %p", "Uses complex plan", (void*)(P->basis));
-    kfft_trace("\n\t %s - %p\n", "scalar twiddles", (void*)(P->super_twiddles));
+    KFFT_OMP(omp critical(trace_log)) {
+        kfft_trace_scalar("%s: %p", "Create KFFT scalar plan", (void*)P);
+        kfft_trace_raw("\n\t %s - %u", "nfft", P->nfft);
+        kfft_trace_raw("\n\t %s - %u : ", "flags", P->flags);
+        kfft_trace_raw("\n\t %s - %p", "Uses complex plan", (void*)(P->basis));
+        kfft_trace_raw("\n\t %s - %p\n", "scalar twiddles", (void*)(P->super_twiddles));
+    }
 }
 
 #endif /* KFFT_TRACE */
