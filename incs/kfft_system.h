@@ -100,6 +100,7 @@ __trace_malloc_aligned(size_t nmem, uint8_t align) {
         #define KFFT_OMP(X) KFFT_PRAGMA(X)
     #else
         #define KFFT_OMP(X)
+        #define KFFT_OMP_ISBLOCKED 1
     #endif
 #else
     #define KFFT_OMP(X)

@@ -51,11 +51,15 @@ kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
             kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1);
             ret += r1;
         } else {
-        KFFT_OMP(omp parallel sections) {
-            KFFT_OMP(omp section) { kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1); }
-            KFFT_OMP(omp section) { kfft_config_scalar(szy, KFFT_CHECK_FLAGS(flags), NULL, &r2); }
-        }
-        ret += r1 + r2;
+            KFFT_OMP(omp parallel sections) {
+                KFFT_OMP(omp section) {
+                    kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1);
+                }
+                KFFT_OMP(omp section) {
+                    kfft_config_scalar(szy, KFFT_CHECK_FLAGS(flags), NULL, &r2);
+                }
+            }
+            ret += r1 + r2;
         }
     } else {
         KFFT_UNUSED_VAR(r2);

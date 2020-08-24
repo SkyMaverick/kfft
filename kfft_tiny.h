@@ -112,7 +112,7 @@ typedef struct {
     \note output buffer must be allocation with ::kfft_malloc or ::KFFT_MALLOC functions.
     \warning The function does not check the type and correctness of the data buffer.
  */
-#define kfft_convolution(P, Fi1, Fi2, Fo)                                                                \
+#define kfft_convolution(P, Fi1, Fi2, Fo)                                                          \
     kfft_tiny_conv(P, (kfft_scalar*)(Fi1), (kfft_scalar*)(Fi2), (kfft_scalar*)(Fo))
 
 /*!
@@ -258,7 +258,6 @@ kfft_tiny_eval(const kfft_plan plan, const kfft_scalar* fin, kfft_scalar* fout) 
 #endif /* KFFT_SPARSE_ENABLE */
     return KFFT_RET_IMPROPER_PLAN;
 }
-
 
 static kfft_return_t KFFT_UNUSED_FUNC
 kfft_tiny_conv(const kfft_plan plan, const kfft_scalar* fin1, const kfft_scalar* fin2,
