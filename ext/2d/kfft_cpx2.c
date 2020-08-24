@@ -42,17 +42,22 @@ kfft_init(kfft_plan_c2d* st) {
 static inline size_t
 kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
     size_t ret = sizeof(kfft_plan_c2d);
-    size_t r1, r2;
-    r1 = r2 = 0;
+    size_t r1 = 0;
 
-    if ((szy != szx) || (szy > 1)) {
-        KFFT_OMP(omp parallel sections) {
-            KFFT_OMP(omp section) { kfft_config_cpx(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1); }
-            KFFT_OMP(omp section) { kfft_config_cpx(szy, KFFT_CHECK_FLAGS(flags), NULL, &r2); }
+    if (szy > 1) {
+        if (szx == szy) {
+            kfft_config_cpx(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1);
+            ret += r1;
+        } else {
+            size_t r2 = 0;
+
+            KFFT_OMP(omp parallel sections) {
+                KFFT_OMP(omp section) { kfft_config_cpx(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1); }
+                KFFT_OMP(omp section) { kfft_config_cpx(szy, KFFT_CHECK_FLAGS(flags), NULL, &r2); }
+            }
+            ret += r1 + r2;
         }
-        ret += r1 + r2;
     } else {
-        KFFT_UNUSED_VAR(r2);
         kfft_config_cpx(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1);
         ret += r1;
     }

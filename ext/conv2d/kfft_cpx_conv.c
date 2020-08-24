@@ -58,8 +58,8 @@ kfft_config2_conv_cpx(const uint32_t x, const uint32_t y, const uint32_t flags, 
     if (plan) {
 
         plan->nfft = x * y;
-        plan->x = x * y;
-        plan->y = x * y;
+        plan->x = x;
+        plan->y = x;
         plan->flags = flags;
 
         if (kfft_init(plan) != KFFT_RET_SUCCESS) {
