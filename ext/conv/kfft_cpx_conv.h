@@ -12,6 +12,8 @@ typedef struct {
     kfft_plan_cpx* plan_inv;
 } kfft_plan_ccnv;
 
+#define KFFT_CHECK_FLAGS_CCNV(X) (KFFT_CHECK_FLAGS(X) & (~KFFT_FLAG_INVERSE))
+
 KFFT_API kfft_plan_ccnv*
 kfft_config_conv_cpx(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
 KFFT_API kfft_return_t

@@ -17,16 +17,19 @@ kfft_trace_plan(kfft_plan_ccnv* P) {
     }
 }
 #endif /*KFFT_TRACE */
+
+#define KFFT_CHECK_FLAGS_CNV(X) (KFFT_CHECK_FLAGS(X) & (~KFFT_FLAG_INVERSE))
+
 static inline kfft_return_t
 kfft_init(kfft_plan_ccnv* st) {
     KFFT_OMP(omp parallel sections shared(st)) {
         KFFT_OMP(omp section) {
-            st->plan_fwd =
-                kfft_config_cpx(st->nfft, KFFT_CHECK_FLAGS(st->flags), KFFT_PLAN_MMGR(st), NULL);
+            st->plan_fwd = kfft_config_cpx(st->nfft, KFFT_CHECK_FLAGS_CNV(st->flags),
+                                           KFFT_PLAN_MMGR(st), NULL);
         }
         KFFT_OMP(omp section) {
             st->plan_inv =
-                kfft_config_cpx(st->nfft, KFFT_CHECK_FLAGS(st->flags | KFFT_FLAG_INVERSE),
+                kfft_config_cpx(st->nfft, KFFT_CHECK_FLAGS_CNV(st->flags) | KFFT_FLAG_INVERSE,
                                 KFFT_PLAN_MMGR(st), NULL);
         }
     }
@@ -39,9 +42,9 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags) {
     r1 = r2 = 0;
 
     KFFT_OMP(omp parallel sections) {
-        KFFT_OMP(omp section) { kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags), NULL, &r1); }
+        KFFT_OMP(omp section) { kfft_config_cpx(nfft, KFFT_CHECK_FLAGS_CNV(flags), NULL, &r1); }
         KFFT_OMP(omp section) {
-            kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags | KFFT_FLAG_INVERSE), NULL, &r2);
+            kfft_config_cpx(nfft, KFFT_CHECK_FLAGS_CNV(flags) | KFFT_FLAG_INVERSE, NULL, &r2);
         }
     }
     ret += r1 + r2;

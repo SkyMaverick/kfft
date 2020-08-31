@@ -19,17 +19,20 @@ kfft_trace_plan(kfft_plan_s2cnv* P) {
     }
 }
 #endif /*KFFT_TRACE */
+
+#define KFFT_CHECK_FLAGS_CNV(X) (KFFT_CHECK_FLAGS(X) & (~KFFT_FLAG_INVERSE))
+
 static inline kfft_return_t
 kfft_init(kfft_plan_s2cnv* plan) {
     KFFT_OMP(omp parallel sections shared(plan)) {
         KFFT_OMP(omp section) {
-            plan->plan_fwd = kfft_config2_scalar(plan->x, plan->y, KFFT_CHECK_FLAGS(plan->flags),
-                                                 KFFT_PLAN_MMGR(plan), NULL);
+            plan->plan_fwd = kfft_config2_scalar(
+                plan->x, plan->y, KFFT_CHECK_FLAGS_CNV(plan->flags), KFFT_PLAN_MMGR(plan), NULL);
         }
         KFFT_OMP(omp section) {
-            plan->plan_inv = kfft_config2_scalar(plan->x, plan->y,
-                                                 KFFT_CHECK_FLAGS(plan->flags | KFFT_FLAG_INVERSE),
-                                                 KFFT_PLAN_MMGR(plan), NULL);
+            plan->plan_inv = kfft_config2_scalar(
+                plan->x, plan->y, KFFT_CHECK_FLAGS_CNV(plan->flags) | KFFT_FLAG_INVERSE,
+                KFFT_PLAN_MMGR(plan), NULL);
         }
     }
     return ((plan->plan_fwd) && (plan->plan_inv)) ? KFFT_RET_SUCCESS : KFFT_RET_ALLOC_FAIL;
@@ -41,9 +44,9 @@ kfft_calculate(const uint32_t x, const uint32_t y, const uint32_t flags) {
     r1 = r2 = 0;
 
     KFFT_OMP(omp parallel sections) {
-        KFFT_OMP(omp section) { kfft_config2_scalar(x, y, KFFT_CHECK_FLAGS(flags), NULL, &r1); }
+        KFFT_OMP(omp section) { kfft_config2_scalar(x, y, KFFT_CHECK_FLAGS_CNV(flags), NULL, &r1); }
         KFFT_OMP(omp section) {
-            kfft_config2_scalar(x, y, KFFT_CHECK_FLAGS(flags | KFFT_FLAG_INVERSE), NULL, &r2);
+            kfft_config2_scalar(x, y, KFFT_CHECK_FLAGS_CNV(flags) | KFFT_FLAG_INVERSE, NULL, &r2);
         }
     }
     ret += r1 + r2;
