@@ -83,7 +83,7 @@ kfft_eval_conv_scalar(kfft_plan_scnv* plan, const kfft_scalar* fin_A, const kfft
                 KFFT_OMP(omp section) { retB = kfft_eval_scalar(plan->plan_fwd, fin_B, bufB); }
             }
             if ((retA == KFFT_RET_SUCCESS) && (retB == KFFT_RET_SUCCESS)) {
-                VEXFUNC(plan, kfft_math_adamar_cpx, bufB, bufA, plan->nfft);
+                VEXFUNC(plan, kfft_math_hadamard_cpx, bufB, bufA, plan->nfft);
                 ret = kfft_evali_scalar(plan->plan_inv, bufB, fout);
             } else {
                 ret = (retA != KFFT_RET_SUCCESS) ? retA : retB;

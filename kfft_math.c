@@ -40,7 +40,7 @@ kfft_math_prmni(uint32_t a, uint32_t m) {
 #endif /* KFFT_RADER_ALGO */
 
 void
-kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
+kfft_math_hadamard_cpx(kfft_cpx* Fout, const kfft_cpx* Fin, uint32_t size) {
     kfft_cpx tmp;
     KFFT_OMP( omp parallel for schedule(static) private(tmp))
     for (uint32_t i = 0; i < size; i++) {
@@ -50,7 +50,7 @@ kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
 }
 
 void
-kfft_math_adamar_scalar(kfft_scalar* Fout, kfft_scalar* Fin, uint32_t size) {
+kfft_math_hadamard_scalar(kfft_scalar* Fout, const kfft_scalar* Fin, uint32_t size) {
     KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t i = 0; i < size; i++) {
         Fout[i] *= Fin[i];

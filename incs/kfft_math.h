@@ -17,21 +17,14 @@
     #include "kfft_custom_math.h"
 #endif
 
-/*
-  Explanation of macros dealing with complex math:
-   C_MUL(m,a,b)         : m = a*b
-   C_SUB( res, a,b)     : res = a - b
-   C_SUBFROM( res , a)  : res -= a
-   C_ADDTO( res , a)    : res += a
- * */
-
 #define UNI_SWAP(tmp, A, B)                                                                        \
     do {                                                                                           \
         tmp = A = B = tmp;                                                                         \
     } while (0)
 
-/// Scalar multoplication
+/// Scalar multiplication
 #define S_MUL(a, b) ((a) * (b))
+
 /// Scalar division
 #define S_DIV(a, b) ((a) / (b))
 
@@ -98,7 +91,7 @@
         (res).i += (a).i;                                                                          \
     } while (0)
 
-/// Complex subtraction, resul in A (A - B)
+/// Complex subtraction, result in A (A - B)
 #define C_SUBFROM(res, a)                                                                          \
     do {                                                                                           \
         (res).r -= (a).r;                                                                          \
@@ -132,6 +125,12 @@ __kfft_sincos_float(kfft_cpx* X, float num) {
 }
         #define kf_cexp(x, phase) __kfft_sincos_float((x), phase)
     #else
+        /*!
+            ![Complex exponent (Euler's formula)](cexp.svg)
+            \param[in] x - complex result
+            \param[in] phase - exponent phase
+            \return None
+         */
         #define kf_cexp(x, phase) kfft_sincos_double(&((x)->r), &((x)->i), phase);
     #endif
 #endif
@@ -141,6 +140,12 @@ __kfft_sincos_float(kfft_cpx* X, float num) {
 #define S_MAX(X, Y) ((X) > (Y)) ? (X) : (Y)
 #define S_MIN(X, Y) ((X) < (Y)) ? (X) : (Y)
 #define S_EQUAL(X, Y) ((X) == (Y)) ? true : false
+
+/*!
+    ![Complex magnitude](norm_abs.svg)
+    \param[in] A - complex number pointer
+    \result A magnitude ::kfft_scalar
+ */
 
 static inline kfft_scalar
 kfft_math_mgnt(const kfft_cpx* A) {
@@ -156,9 +161,11 @@ kfft_math_mgnt(const kfft_cpx* A) {
 /// Equal complex number (by R,I)
 #define C_EQU(X, Y) (((X.r) == (Y.r)) && ((X.i) == (Y.i))) ? true : false
 
-/* Define as static inline because it's very hot functions */
 /*!
-    ![Multiplication by modulo N](modpow.svg)
+    \param[in] x - number
+    \param[in] y - pow
+    \param[in] m - modulo
+    \result ![Multiplication by modulo N](modpow.svg)
  */
 static inline uint32_t
 kfft_math_modpow(uint32_t x, uint32_t y, uint32_t m) {
@@ -169,7 +176,12 @@ kfft_math_modpow(uint32_t x, uint32_t y, uint32_t m) {
 
     return (y % 2 == 0) ? (uint32_t)p : (uint32_t)((x * p) % m);
 }
-
+/*!
+    Greatest common divizor.
+    \param[in] a - argument №1
+    \param[in] b - argument №2
+    \result GCD result
+ */
 static inline uint32_t
 kfft_math_gcd(uint32_t a, uint32_t b) {
     while (b) {
@@ -181,6 +193,14 @@ kfft_math_gcd(uint32_t a, uint32_t b) {
     }
     return a;
 }
+
+/*!
+    Fourier algorithm right exponent twiddle coefficient.
+    \param[in] i - position number
+    \param[in] size - sequence size
+    \param[in] is_inverse - forward/inverse flag
+    \result coefficient
+ */
 static inline kfft_cpx
 kfft_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
     kfft_cpx ret = {0, 0};
@@ -200,24 +220,119 @@ kfft_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
 #endif
 
 #if defined(KFFT_RADER_ALGO)
+/*!
+    Primitive group generator for Rader Q indexes
+    \param[in] num - sequence lenght
+    \result generator num
+ */
 uint32_t
 kfft_math_prmn(uint32_t num);
+/*!
+    Multiplicative inverse primitive group generator Q (Rader -P indexes)
+    \param[in] num - sequence lenght
+    \param[in] q - group generator
+    \result inverse generator num
+ */
 uint32_t
-kfft_math_prmni(uint32_t a, uint32_t m);
+kfft_math_prmni(uint32_t num, uint32_t q);
 #endif /* KFFT_RADER_ALGO */
 
+/*!
+    ![Hadamard operation](hadamard.svg)
+    \param[in] Fout - output buffer
+    \param[in] Fin - input buffer
+    \param[in] size - buffer size (complex units)
+    \result None
+
+    \note function don't validate buffers size
+ */
 void
-kfft_math_adamar_cpx(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size);
+kfft_math_hadamard_cpx(kfft_cpx* Fout, const kfft_cpx* Fin, uint32_t size);
+/*!
+    ![Hadamard operation](hadamard.svg)
+    \param[in] Fout - output buffer
+    \param[in] Fin - input buffer
+    \param[in] size - buffer size (scalar units)
+    \result None
+
+    \note function don't validate buffers size
+ */
+void
+kfft_math_hadamard_scalar(kfft_scalar* Fout, const kfft_scalar* Fin, uint32_t size);
+/*!
+    ![Transpose matrix](transpose.svg)
+
+    \param[in] Fin - complex input buffer
+    \param[in] Fout - complex output buffer
+    \param[in] x - x-coordinate size
+    \param[in] y - y-coordinate size
+    \result None
+
+    \note function don't validate buffers size
+ */
 void
 kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, const uint32_t y);
+/*!
+    ![Transpose matrix](transpose.svg)
+
+    \param[in] Fin - scalar input buffer
+    \param[in] Fout - scalar output buffer
+    \param[in] x - x-coordinate size
+    \param[in] y - y-coordinate size
+    \result None
+
+    \note function don't validate buffers size
+ */
 void
 kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint32_t x,
                            const uint32_t y);
+/*!
+    ![Transpose matrix](transpose.svg)
+
+    \param[in] Fin - complex buffer (in-place operation)
+    \param[in] x - x-coordinate size
+    \param[in] y - y-coordinate size
+    \result None
+
+    \note
+    - in-place operation very much slower standart two-buffer operation
+    - function don't validate buffers size
+ */
 void
 kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y);
+/*!
+    ![Transpose matrix](transpose.svg)
+
+    \param[in] Fin - scalar buffer (in-place operation)
+    \param[in] x - x-coordinate size
+    \param[in] y - y-coordinate size
+    \result None
+
+    \note
+    - in-place operation very much slower standart two-buffer operation
+    - function don't validate buffers size
+ */
 void
 kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t y);
+/*!
+    ::kfft_math_mgnt for normalization buffer
+    \param[in] Fin - input complex buffer
+    \param[in] Fout - output scalar buffer
+    \param[in] size - buffers size
+    \result None
+
+    \note function don't validate buffers size
+ */
 void
 kfft_math_magnitude(const kfft_cpx* Fin, kfft_scalar* Fout, uint32_t size);
+/*!
+    ::kfft_math_mgnt for normalization buffer (in-place)
+
+    \param[in] Fin - input complex buffer
+    \param[in] size - buffers size
+    \result None
+
+    \note function don't validate buffers size
+ */
 void
 kfft_math_magnitude_ip(kfft_cpx* Fin, uint32_t size);

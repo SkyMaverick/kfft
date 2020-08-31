@@ -8,7 +8,7 @@ kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_plan_cpx* P, kfft_plan
     if (Fbuf) {
         kfft_return_t ret = kfft_eval_cpx(P, Fout, Fbuf);
         if (ret == KFFT_RET_SUCCESS) {
-            VEXFUNC(P, kfft_math_adamar_cpx, Fbuf, Fin, P->nfft);
+            VEXFUNC(P, kfft_math_hadamard_cpx, Fbuf, Fin, P->nfft);
             ret = kfft_eval_cpx(Pi, Fbuf, Fout);
         }
 

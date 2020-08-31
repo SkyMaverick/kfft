@@ -4,7 +4,7 @@
 #include "kfft_math_intern.h"
 
 void
-FUNC_SSE(kfft_math_adamar_cpx)(kfft_cpx* Fout, kfft_cpx* Fin, uint32_t size) {
+FUNC_SSE(kfft_math_hadamard_cpx)(kfft_cpx* Fout, const kfft_cpx* Fin, uint32_t size) {
     // FIXME Now primitive algorithm
     //    kfft_math_adamar_cpx(Fout, Fin, size);
     KFFT_OMP( omp parallel for schedule(static) private(tmp))
