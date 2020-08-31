@@ -7,11 +7,11 @@ kfft_shift_cpx(kfft_cpx* buf, const uint32_t size, const bool is_inverse, kfft_p
 
     int64_t k = 0;
     uint32_t c = (uint32_t)((kfft_scalar)size / 2);
-    kfft_cpx tmp = {0, 0};
     if (size % 2 == 0) {
         for (k = 0; k < c; k++)
-            C_SWAP(tmp, buf[k], buf[k + c]);
+            C_SWAP(buf[k], buf[k + c]);
     } else {
+        kfft_cpx tmp = {0, 0};
         if (is_inverse) {
             C_CPY(tmp, buf[size - 1]);
             for (k = c - 1; k >= 0; k--) {
@@ -36,12 +36,12 @@ kfft_shift_scalar(kfft_scalar* buf, const uint32_t size, const bool is_inverse, 
 
     int64_t k = 0;
     uint32_t c = (uint32_t)((kfft_scalar)size / 2);
-    kfft_scalar tmp = 0;
     if (size % 2 == 0) {
         for (k = 0; k < c; k++) {
-            S_SWAP(tmp, buf[k], buf[k + c]);
+            S_SWAP(buf[k], buf[k + c]);
         }
     } else {
+        kfft_scalar tmp = 0;
         if (is_inverse) {
             tmp = buf[size - 1];
             for (k = c - 1; k >= 0; k--) {

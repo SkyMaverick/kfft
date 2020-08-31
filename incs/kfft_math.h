@@ -25,32 +25,35 @@
    C_ADDTO( res , a)    : res += a
  * */
 
+#define UNI_SWAP(tmp, A, B)                                                                        \
+    do {                                                                                           \
+        tmp = A = B = tmp;                                                                         \
+    } while (0)
+
 /// Scalar multoplication
 #define S_MUL(a, b) ((a) * (b))
 /// Scalar division
 #define S_DIV(a, b) ((a) / (b))
+
+/// Scalar swap (a<=>b)
+#define S_SWAP(a, b)                                                                               \
+    do {                                                                                           \
+        kfft_scalar tmp = 0;                                                                       \
+        UNI_SWAP(tmp, a, b);                                                                       \
+    } while (0)
+
+/// Complex swap (A<=>B)
+#define C_SWAP(a, b)                                                                               \
+    do {                                                                                           \
+        S_SWAP(a.r, b.r);                                                                          \
+        S_SWAP(a.i, b.i);                                                                          \
+    } while (0)
 
 /// Complex copy (A = B)
 #define C_CPY(m, a)                                                                                \
     do {                                                                                           \
         (m).r = (a).r;                                                                             \
         (m).i = (a).i;                                                                             \
-    } while (0)
-
-/// Complex swap (A<=>B)
-#define C_SWAP(m, a, b)                                                                            \
-    do {                                                                                           \
-        C_CPY((m), (a));                                                                           \
-        C_CPY((a), (b));                                                                           \
-        C_CPY((b), (m));                                                                           \
-    } while (0)
-
-/// Scalar swap (a<=>b)
-#define S_SWAP(m, a, b)                                                                            \
-    do {                                                                                           \
-        (m) = (a);                                                                                 \
-        (a) = (b);                                                                                 \
-        (b) = (m);                                                                                 \
     } while (0)
 
 /// Complex multyplify (A*B)
@@ -170,18 +173,14 @@ kfft_math_modpow(uint32_t x, uint32_t y, uint32_t m) {
 static inline uint32_t
 kfft_math_gcd(uint32_t a, uint32_t b) {
     while (b) {
-        S_SWAP(a, b);
+        b ^= a;
+        a ^= b;
+        b ^= a;
+
         b = a % b;
     }
-    return (a < 0) ? (-1 * a) : a;
+    return a;
 }
-// static inline uint32_t
-// kfft_math_gcd(uint32_t a, uint32_t b) {
-//     if (a == 0)
-//         return b;
-//     return kfft_math_gcd(b % a, a);
-// }
-//
 static inline kfft_cpx
 kfft_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
     kfft_cpx ret = {0, 0};

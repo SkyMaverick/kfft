@@ -169,7 +169,7 @@ kfft_kinit(kfft_plan_cpx* P) {
                 uint32_t len = sP->prime - 1;
 
                 sP->q = kfft_math_prmn(sP->prime);
-                sP->p = kfft_math_prmni(sP->q, sP->prime);
+                sP->p = kfft_math_prmni(sP->prime, sP->q);
 
     #if !defined(KFFT_MEMLESS_MODE)
                 sP->qidx = kfft_pool_alloc(P->object.mmgr, sizeof(uint32_t) * len);
