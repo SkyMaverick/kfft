@@ -21,7 +21,7 @@ kfft_complex_conv_2d(void) {
         /* Fill complex data to IN buffer HERE !!! */
 
         kfft_args_2d A = {KFFT_ARRAY_X, KFFT_ARRAY_Y};
-        kfft_plan plan = kfft_configuration(KFFT_PLAN_COMPLEX_CONV2D, KFFT_FLAG_NORMAL, &A);
+        kfft_plan plan = kfft_configuration(KFFT_PLAN_COMPLEX_CONV2D, KFFT_FLAG_GENERIC, &A);
         if (plan) {
             ret = kfft_convolution(plan, in1, in2, out);
 
@@ -108,7 +108,8 @@ kfft_complex_1d(void) {
         /* Fill complex data to IN buffer HERE !!! */
 
         size_t A = KFFT_ARRAY_SIZE;
-        kfft_plan plan = kfft_configuration(KFFT_PLAN_COMPLEX, KFFT_FLAG_NORMAL, &A);
+        kfft_plan plan =
+            kfft_configuration(KFFT_PLAN_COMPLEX, KFFT_FLAG_INVERSE | KFFT_FLAG_GENERIC_ONLY, &A);
         if (plan) {
             ret = kfft_evaluation(plan, in, out);
 

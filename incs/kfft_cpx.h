@@ -72,7 +72,7 @@ typedef struct kfft_kstate {
 
   \param[in] nfft - lenght input sequense
   \param[in] flags - operation flags
-  \param[in] A - plan ainternal allocator structure (if need use KFFT_PLAN_MMGR macro)
+  \param[in] A - plan a internal allocator structure (if need use KFFT_PLAN_MMGR macro)
   \param[in] lenmem - vaiable for memory get pointer
   \return complex plan structure or NULL
 

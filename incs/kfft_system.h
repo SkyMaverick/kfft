@@ -1,6 +1,11 @@
 #pragma once
 
+/*!
+    \file
+*/
+
 #define KFFT_MALLOC_UNALIGN(X) calloc(1, (X))
+
 #if defined(KFFT_USE_SIMD)
     #if defined(KFFT_ARCH_INTEL)
         #include <immintrin.h>
@@ -18,6 +23,7 @@
     #define KFFT_MALLOC(X, A) KFFT_MALLOC_UNALIGN(X)
     #define KFFT_FREE(X, A) free(X)
 #endif
+
 #define KFFT_ZEROMEM(M, X) memset((M), 0, (X))
 
 #define KFFT_FREE_NULL(X, A)                                                                       \
@@ -67,7 +73,9 @@ __trace_malloc_aligned(size_t nmem, uint8_t align) {
             #define KFFT_TMP_ALLOC(X, A) KFFT_MALLOC((X), (A))
             #define KFFT_TMP_FREE(X, A) KFFT_FREE((X), (A))
         #endif /* KFFT_TRACE */
-    #else      /* KFFT_USE_SIMD */
+
+    #else /* KFFT_USE_SIMD */
+
         #if defined(KFFT_TRACE)
             #define KFFT_TMP_ALLOC(X, A) __trace_malloc((X))
             #define KFFT_TMP_FREE(X, A)                                                            \

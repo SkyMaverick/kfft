@@ -77,7 +77,7 @@ typedef struct {
     Amalgamited kfft_confg_* functions.
 
     \param[in] T - tiny plan type ::ktiny_plan_type
-    \param[in] F - config flags ::kfft_eval_mods
+    \param[in] F - config flags ::kfft_eval_flags
     \param[in] A - unify pointer for kfft_args_* structure
     \result - configured untiped plan ::kfft_plan
 
