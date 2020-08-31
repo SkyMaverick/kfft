@@ -65,15 +65,47 @@ typedef struct kfft_kstate {
 } kfft_plan_cpx;
 
 /*!
+  \brief Complex plan create and configuration function
+
+  Function create new, configure, reconfigure exists complex plan.
+  It's universal function for prepare fft process operation.
+
   \param[in] nfft - lenght input sequense
   \param[in] flags - operation flags
   \param[in] A - plan ainternal allocator structure (if need use KFFT_PLAN_MMGR macro)
   \param[in] lenmem - vaiable for memory get pointer
-  \return complex plan structure
+  \return complex plan structure or NULL
+
+  \note Typical function usage:
+    - kfft_config_cpx(<lenght>, <flags>, NULL, NULL) : create new standart complex plan (return
+  ::kfft_plan_cpx or NULL if error)
+    - kfft_config_cpx(<lenght>, <flags>, NULL, <valptr>) : return memory needed size in valptr value
+  (return NULL)
+    - kfft_config_cpx(<lenght>, <flags>, <MMGR>, NULL) : create new complex plan object
+  ::kfft_plan_cpx into MMGR (return ::kfft_plan_cpx or NULL if error)
+    - kfft_config_cpx(<lenght>, <flags>, <MMGR>, <valptr>)
+        - if *valptr value >= needed memory: create new complex plan object ::kfft_plan_cpx into
+  MMGR (return ::kfft_plan_cpx or NULL if error and needed memory in *valptr value)
+        - if *valptr value < needed memory: return NULL and needed memory size as *valptr value
+        - if flags ::KFFT_FLAG_RENEW enabled: clear input MMGR and create new plan if the conditions
+  for *valptr
+
+  \warning Function may be allocate memory. Use ::kfft_cleanup for correctly clean and free this
+  memory.
  */
 KFFT_API kfft_plan_cpx*
 kfft_config_cpx(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem);
 /*!
+  \brief Process evaluation function.
+  \param[in] plan - complex plan ::kfft_plan_cpx pointer
+  \param[in] fin - input ::kfft_cpx buffer (don't changed)
+  \param[in] fout - output ::kfft_cpx buffer
+  \result standart ::kfft_ret_flags return status
+
+  \note Is a valide using fin == fout. Despite the fact that the function is NOT in-place
+  evaluation, it can create a temporary buffer for the operation.
+  \warning Function NOT control input and output buffer (such as the NULL, overflow, bad
+  buffers-size etc.). Developer must control this manualy.
  */
 KFFT_API kfft_return_t
 kfft_eval_cpx(kfft_plan_cpx* plan, const kfft_cpx* fin, kfft_cpx* fout);

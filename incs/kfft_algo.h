@@ -1,7 +1,7 @@
 #define KFFT_ALGO_PLAN_PREPARE(plan, flags, type, memneed, pool, len_value)                        \
     do {                                                                                           \
         kfft_pool_t* mm_##type = NULL;                                                             \
-        if (lenmem == NULL) {                                                                      \
+        if (len_value == NULL) {                                                                   \
             mm_##type = (pool) ? pool : kfft_pool_create(memneed);                                 \
             if (mm_##type)                                                                         \
                 plan = kfft_pool_alloc(mm_##type, sizeof(type));                                   \

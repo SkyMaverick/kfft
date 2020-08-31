@@ -1,5 +1,14 @@
 #pragma once
 
+/*!
+    \file
+    \brief Mathematical primitive functions
+
+    Standart mathematical functions don't implements in standart math library (libm)
+    such as complex math, matrix operations, modpow etc.
+ */
+
+/// Standart PI constant
 #define KFFT_CONST_PI 3.141592653589793238462643383279502884197169399375105820974944
 
 #ifdef KFFT_USE_SYSMATH
@@ -16,58 +25,77 @@
    C_ADDTO( res , a)    : res += a
  * */
 
+/// Scalar multoplication
 #define S_MUL(a, b) ((a) * (b))
+/// Scalar division
 #define S_DIV(a, b) ((a) / (b))
 
+/// Complex copy (A = B)
 #define C_CPY(m, a)                                                                                \
     do {                                                                                           \
         (m).r = (a).r;                                                                             \
         (m).i = (a).i;                                                                             \
     } while (0)
+
+/// Complex swap (A<=>B)
 #define C_SWAP(m, a, b)                                                                            \
     do {                                                                                           \
         C_CPY((m), (a));                                                                           \
         C_CPY((a), (b));                                                                           \
         C_CPY((b), (m));                                                                           \
     } while (0)
+
+/// Scalar swap (a<=>b)
 #define S_SWAP(m, a, b)                                                                            \
     do {                                                                                           \
         (m) = (a);                                                                                 \
         (a) = (b);                                                                                 \
         (b) = (m);                                                                                 \
     } while (0)
+
+/// Complex multyplify (A*B)
 #define C_MUL(m, a, b)                                                                             \
     do {                                                                                           \
         (m).r = (a).r * (b).r - (a).i * (b).i;                                                     \
         (m).i = (a).r * (b).i + (a).i * (b).r;                                                     \
     } while (0)
+
+/// Complex mulitiplify with scalar (A * b)
 #define C_MULBYSCALAR(c, s)                                                                        \
     do {                                                                                           \
         (c).r *= (s);                                                                              \
         (c).i *= (s);                                                                              \
     } while (0)
+
+/// Complex division by scalar (A / b)
 #define C_DIVBYSCALAR(c, s)                                                                        \
     do {                                                                                           \
         (c).r /= (s);                                                                              \
         (c).i /= (s);                                                                              \
     } while (0)
 
+/// Complex summary (A + B)
 #define C_ADD(res, a, b)                                                                           \
     do {                                                                                           \
         (res).r = (a).r + (b).r;                                                                   \
         (res).i = (a).i + (b).i;                                                                   \
     } while (0)
+
+/// Complex subtraction (A - B)
 #define C_SUB(res, a, b)                                                                           \
     do {                                                                                           \
         (res).r = (a).r - (b).r;                                                                   \
         (res).i = (a).i - (b).i;                                                                   \
     } while (0)
+
+/// Complex summary, result in A (A + B)
 #define C_ADDTO(res, a)                                                                            \
     do {                                                                                           \
         (res).r += (a).r;                                                                          \
         (res).i += (a).i;                                                                          \
     } while (0)
 
+/// Complex subtraction, resul in A (A - B)
 #define C_SUBFROM(res, a)                                                                          \
     do {                                                                                           \
         (res).r -= (a).r;                                                                          \
@@ -116,12 +144,19 @@ kfft_math_mgnt(const kfft_cpx* A) {
     return KFFT_SQRT(A->r * A->r + A->i * A->i);
 }
 
+/// Maximal complex number (by magnitude)
 #define C_MAX_ABS(X, Y) (kfft_math_mgnt((X)) > kfft_math_mgnt((Y))) ? (X) : (Y)
+/// Minimal complex number (by magnitude)
 #define C_MIN_ABS(X, Y) (kfft_math_mgnt((X)) < kfft_math_mgnt((Y))) ? (X) : (Y)
+/// Equal complex number (by magnitude)
 #define C_EQU_ABS(X, Y) (kfft_math_mgnt((X)) == kfft_math_mgnt((Y))) ? true : false
+/// Equal complex number (by R,I)
 #define C_EQU(X, Y) (((X.r) == (Y.r)) && ((X.i) == (Y.i))) ? true : false
 
 /* Define as static inline because it's very hot functions */
+/*!
+    ![Multiplication by modulo N](modpow.svg)
+ */
 static inline uint32_t
 kfft_math_modpow(uint32_t x, uint32_t y, uint32_t m) {
     if (y == 0)
@@ -134,11 +169,19 @@ kfft_math_modpow(uint32_t x, uint32_t y, uint32_t m) {
 
 static inline uint32_t
 kfft_math_gcd(uint32_t a, uint32_t b) {
-    if (a == 0)
-        return b;
-    return kfft_math_gcd(b % a, a);
+    while (b) {
+        S_SWAP(a, b);
+        b = a % b;
+    }
+    return (a < 0) ? (-1 * a) : a;
 }
-
+// static inline uint32_t
+// kfft_math_gcd(uint32_t a, uint32_t b) {
+//     if (a == 0)
+//         return b;
+//     return kfft_math_gcd(b % a, a);
+// }
+//
 static inline kfft_cpx
 kfft_kernel_twiddle(uint32_t i, uint32_t size, bool is_inverse) {
     kfft_cpx ret = {0, 0};
