@@ -867,7 +867,8 @@ FILE_PATTERNS          = *.c \
                          *.hxx \
                          *.hpp \
                          *.h++ \
-                         *.inc
+                         *.inc \
+                         *.h.in
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.

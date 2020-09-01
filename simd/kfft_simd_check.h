@@ -1,5 +1,9 @@
 #pragma once
 
+/*!
+    \file
+ */
+
 #include <stdbool.h>
 
 #define HW_ALIGN_X8664_SSE 16
@@ -47,14 +51,36 @@ enum {
 #define HW_AVX512_IFMA 1u << 30
 #define HW_AVX512_VBMI 1u << 31
 
+/*!
+    Run-time analize CPU (use cpuid() function) and detect extensions
+    \result Packed acceleraion info ::kfft_simd_t
+ */
 KFFT_API kfft_simd_t
 kfft_simd_analize(void);
 
+/*!
+    Build-time CPU info.
+    \result Packed acceleraion info ::kfft_simd_t
+ */
+KFFT_API kfft_simd_t
+kfft_simd_info(void);
+
+/*!
+    Check hardware extension support in current acceleration info
+    \param[in] S - packed acceleration info
+    \param[in] flag - checked flag
+    \result true/false enabled or not flag
+ */
 static inline bool
 kfft_simd_check(const kfft_simd_t S, uint32_t flag) {
     return (S.ext & flag);
 }
 
+/*!
+    Memory alignment need for current acceleration info
+    \param[in] S - packed acceleration info
+    \result Align size (0,8,16,32)
+ */
 static inline uint8_t
 kfft_simd_align(const kfft_simd_t S) {
     switch (S.arch) {
@@ -87,9 +113,6 @@ kfft_simd_align(const kfft_simd_t S) {
     }
     return 0;
 }
-
-KFFT_API kfft_simd_t
-kfft_simd_info(void);
 
 #if defined(KFFT_DYNAPI_ENABLE)
 typedef kfft_simd_t (*kfft_callback_simd_analize)(void);

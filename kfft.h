@@ -30,6 +30,7 @@
    - SIMD acceleration transform operations (now support SSE, SSE2, SSE3 (optional)) (build option)
    - Recursive Rader algorithm (https://en.wikipedia.org/wiki/Rader's_FFT_algorithm) for
    prime-number lenght sequenses (build option)
+       ![Rader transform formula](rader.svg)
    - Internal math functions (aka sqrt, sincos etc.) without system libm functions (build
    option)
    - Parallelization with OpenMP framework (build option)
