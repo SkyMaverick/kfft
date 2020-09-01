@@ -1,0 +1,38 @@
+ABOUT
+
+LibKFFT is a free/open-source (ZLib licensed) C library providing fast fourier transform and other related operations for comlex and scalar double or float sequences.
+DEVELOPMENT
+
+LibKFFT is deeply redesigned fork KissFFT project by Mark Borgerding.
+REALISED FEATURES
+
+The features of LibKFFT include:
+
+    complex and scalar fourier transformation operations (forward and inverse)
+        64-bit float type (double) as default
+        32-bit float type (float) if set option KFFT_HALF_SCALAR
+    SIMD acceleration transform operations (now support SSE, SSE2, SSE3 (optional)) (build option)
+    Recursive Rader algorithm for prime-number lenght sequenses (build option)
+    Internal math functions (aka sqrt, sincos etc.) without system libm functions (build option)
+    Parallelization with OpenMP framework (build option)
+    2D, sparse, convolution(+2D) operations as build-time extensions
+    Detail trace log in stdout for diagnostic (build option)
+    Tiny API support for simplify code in trivial usage
+
+BUILD AND TEST
+
+Need sofware: meson >= 55.0, ninja >= 1.8.0
+Test build on OS with CC:
+
+    Linux (x86-64): GCC 9.3, Clang-10
+    Windows (x86-64): MSVC 2015, 2017, Clang-10
+    RPi3 (armhf): GCC 8.3
+
+Build: configure build in meson_options.txt if need and run meson . ./<builddir> && ninja -C ./<builddir>
+Test (don’t implemented on Windows): if change option enable_tests use test ninja -C ./<builddir> <target>
+
+    test_bot - run unit tests (need libcunit for build it)
+    test_speed[_cpx,_scr] - run speed tests and compare with popular implementations
+    test_speed_kfft[_cpx,_scr] - run speed tests for libkfft only (produce SVG and CSV)
+    test_valide[_cpx,_scr] - run validate tests (use FFTW3 for compare)
+
