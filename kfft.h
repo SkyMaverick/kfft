@@ -10,7 +10,7 @@
    \mainpage
 
    \author Alexander Smirnov (https://github.com/SkyMaverick)
-   \version 0.7.1
+   \version 0.8.0
 
    LibKFFT is a free/open-source (ZLib licensed) C library
    providing fast fourier transform and other related operations
