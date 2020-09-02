@@ -336,3 +336,13 @@ kfft_math_magnitude(const kfft_cpx* Fin, kfft_scalar* Fout, uint32_t size);
  */
 KFFT_API void
 kfft_math_magnitude_ip(kfft_cpx* Fin, uint32_t size);
+
+/*!
+    Scalar sequences average value
+
+    \param[in] Fin - input sequence
+    \param[in] size - sequence size
+    \result Average value
+ */
+KFFT_API kfft_scalar
+kfft_math_average(const kfft_scalar* Fin, uint32_t size);

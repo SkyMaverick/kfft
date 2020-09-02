@@ -135,3 +135,14 @@ kfft_math_magnitude_ip(kfft_cpx* Fin, uint32_t size) {
         ((kfft_scalar*)Fin)[i] = kfft_math_mgnt(&Fin[i]);
     }
 }
+
+KFFT_API kfft_scalar
+kfft_math_average(const kfft_scalar* Fin, uint32_t size) {
+    kfft_scalar ret = 0;
+
+    KFFT_OMP( omp parallel for schedule(static) shared(ret))
+    for (uint32_t i = 0; i < size; i++) {
+        ret += Fin[i];
+    }
+    return ret / size;
+}
