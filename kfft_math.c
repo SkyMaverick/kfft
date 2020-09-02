@@ -39,7 +39,7 @@ kfft_math_prmni(uint32_t a, uint32_t m) {
 
 #endif /* KFFT_RADER_ALGO */
 
-void
+KFFT_API void
 kfft_math_hadamard_cpx(kfft_cpx* Fout, const kfft_cpx* Fin, uint32_t size) {
     kfft_cpx tmp;
     KFFT_OMP( omp parallel for schedule(static) private(tmp))
@@ -49,7 +49,7 @@ kfft_math_hadamard_cpx(kfft_cpx* Fout, const kfft_cpx* Fin, uint32_t size) {
     }
 }
 
-void
+KFFT_API void
 kfft_math_hadamard_scalar(kfft_scalar* Fout, const kfft_scalar* Fin, uint32_t size) {
     KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t i = 0; i < size; i++) {
@@ -57,7 +57,7 @@ kfft_math_hadamard_scalar(kfft_scalar* Fout, const kfft_scalar* Fin, uint32_t si
     }
 }
 
-void
+KFFT_API void
 kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, const uint32_t y) {
     KFFT_OMP( omp parallel for schedule(static))
     for (uint64_t n = 0; n < x * y; n++) {
@@ -66,7 +66,7 @@ kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, c
         C_CPY(Fout[n], Fin[x * j + i]);
     }
 }
-void
+KFFT_API void
 kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint32_t x,
                            const uint32_t y) {
     KFFT_OMP( omp parallel for schedule(static))
@@ -77,7 +77,7 @@ kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint
     }
 }
 
-void
+KFFT_API void
 kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y) {
     uint32_t r = y;
     uint32_t c = x;
@@ -99,7 +99,7 @@ kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y) {
         }
     }
 }
-void
+KFFT_API void
 kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t y) {
     uint32_t c = x, r = y;
 
@@ -120,7 +120,7 @@ kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t
     }
 }
 
-void
+KFFT_API void
 kfft_math_magnitude(const kfft_cpx* Fin, kfft_scalar* Fout, uint32_t size) {
     KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t i = 0; i < size; i++) {
@@ -128,7 +128,7 @@ kfft_math_magnitude(const kfft_cpx* Fin, kfft_scalar* Fout, uint32_t size) {
     }
 }
 
-void
+KFFT_API void
 kfft_math_magnitude_ip(kfft_cpx* Fin, uint32_t size) {
     KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t i = 0; i < size; i++) {

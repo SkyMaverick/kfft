@@ -246,7 +246,7 @@ kfft_math_prmni(uint32_t num, uint32_t q);
 
     \note function don't validate buffers size
  */
-void
+KFFT_API void
 kfft_math_hadamard_cpx(kfft_cpx* Fout, const kfft_cpx* Fin, uint32_t size);
 /*!
     ![Hadamard operation](hadamard.svg)
@@ -257,7 +257,7 @@ kfft_math_hadamard_cpx(kfft_cpx* Fout, const kfft_cpx* Fin, uint32_t size);
 
     \note function don't validate buffers size
  */
-void
+KFFT_API void
 kfft_math_hadamard_scalar(kfft_scalar* Fout, const kfft_scalar* Fin, uint32_t size);
 /*!
     ![Transpose matrix](transpose.svg)
@@ -270,7 +270,7 @@ kfft_math_hadamard_scalar(kfft_scalar* Fout, const kfft_scalar* Fin, uint32_t si
 
     \note function don't validate buffers size
  */
-void
+KFFT_API void
 kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, const uint32_t y);
 /*!
     ![Transpose matrix](transpose.svg)
@@ -283,7 +283,7 @@ kfft_math_transpose_cpx(const kfft_cpx* Fin, kfft_cpx* Fout, const uint32_t x, c
 
     \note function don't validate buffers size
  */
-void
+KFFT_API void
 kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint32_t x,
                            const uint32_t y);
 /*!
@@ -298,7 +298,7 @@ kfft_math_transpose_scalar(const kfft_scalar* Fin, kfft_scalar* Fout, const uint
     - in-place operation very much slower standart two-buffer operation
     - function don't validate buffers size
  */
-void
+KFFT_API void
 kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y);
 /*!
     ![Transpose matrix](transpose.svg)
@@ -312,7 +312,7 @@ kfft_math_transpose_ip_cpx(kfft_cpx* Fin, const uint32_t x, const uint32_t y);
     - in-place operation very much slower standart two-buffer operation
     - function don't validate buffers size
  */
-void
+KFFT_API void
 kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t y);
 /*!
     ::kfft_math_mgnt for normalization buffer
@@ -323,7 +323,7 @@ kfft_math_transpose_ip_scalar(kfft_scalar* Fin, const uint32_t x, const uint32_t
 
     \note function don't validate buffers size
  */
-void
+KFFT_API void
 kfft_math_magnitude(const kfft_cpx* Fin, kfft_scalar* Fout, uint32_t size);
 /*!
     ::kfft_math_mgnt for normalization buffer (in-place)
@@ -334,5 +334,5 @@ kfft_math_magnitude(const kfft_cpx* Fin, kfft_scalar* Fout, uint32_t size);
 
     \note function don't validate buffers size
  */
-void
+KFFT_API void
 kfft_math_magnitude_ip(kfft_cpx* Fin, uint32_t size);
