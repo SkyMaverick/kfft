@@ -18,8 +18,6 @@ kfft_config_sparse_scalar(const uint32_t nfft, const uint32_t flags, const uint3
 KFFT_API kfft_return_t
 kfft_eval_sparse_scalar(kfft_plan_ssparse* cfg, const kfft_scalar* fin, kfft_cpx* fout);
 KFFT_API kfft_return_t
-kfft_eval_sparse_scalar_norm(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_scalar* fout);
-KFFT_API kfft_return_t
 kfft_evali_sparse_scalar(kfft_plan_ssparse* cfg, const kfft_cpx* fin, kfft_scalar* fout);
 KFFT_API void
 kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nfft,
@@ -33,8 +31,6 @@ typedef kfft_plan_ssparse*
         const uint32_t dims, uint32_t step, kfft_pool_t* A, size_t* lenmem);
 typedef kfft_return_t
 (*kfft_callback_eval_sparse_scalar)(kfft_plan_ssparse* cfg, const kfft_scalar* fin, kfft_cpx* fout);
-typedef kfft_return_t
-(*kfft_callback_eval_sparse_scalar_norm)(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_scalar* fout);
 typedef kfft_return_t
 (*kfft_callback_evali_sparse_scalar)(kfft_plan_ssparse* cfg, const kfft_cpx* fin, kfft_scalar* fout);
 typedef void (*kfft_callback_shift_sparse_scalar)(kfft_scalar* buf, kfft_scalar* ftmp,

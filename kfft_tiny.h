@@ -20,19 +20,16 @@ extern "C" {
 
 /// KFFT plan type definitions
 enum ktiny_plan_type {
-    KFFT_PLAN_COMPLEX = 0x0000,            ///< 1D complex plan
-    KFFT_PLAN_SCALAR = 0x0001,             ///< 1D scalar plan
-    KFFT_PLAN_SCALAR_NORM = 0x0002,        ///< 1D scalar normalized-out plan
-    KFFT_PLAN_COMPLEX_2D = 0x0003,         ///< 2D complex plan
-    KFFT_PLAN_SCALAR_2D = 0x0004,          ///< 2D scalar plan
-    KFFT_PLAN_SCALAR_2D_NORM = 0x0005,     ///< 2D scalar normalized-out plan
-    KFFT_PLAN_COMPLEX_SPARSE = 0x0006,     ///< 1D Sparse complex plan
-    KFFT_PLAN_SCALAR_SPARSE = 0x0007,      ///< 1D Sparse scalar plan
-    KFFT_PLAN_SCALAR_SPARSE_NORM = 0x0008, ///< 1D Sparse scalar normalized-out plan
-    KFFT_PLAN_COMPLEX_CONV = 0x0009,       ///< 1D complex convolution plan
-    KFFT_PLAN_SCALAR_CONV = 0x000A,        ///< 1D scalar convolution plan
-    KFFT_PLAN_COMPLEX_CONV2D = 0x000B,     ///< 2D complex convolution plan
-    KFFT_PLAN_SCALAR_CONV2D = 0x000C,      ///< 2D scalar convolution plan
+    KFFT_PLAN_COMPLEX = 0x0000,        ///< 1D complex plan
+    KFFT_PLAN_SCALAR = 0x0001,         ///< 1D scalar plan
+    KFFT_PLAN_COMPLEX_2D = 0x0002,     ///< 2D complex plan
+    KFFT_PLAN_SCALAR_2D = 0x0003,      ///< 2D scalar plan
+    KFFT_PLAN_COMPLEX_SPARSE = 0x0004, ///< 1D Sparse complex plan
+    KFFT_PLAN_SCALAR_SPARSE = 0x0005,  ///< 1D Sparse scalar plan
+    KFFT_PLAN_COMPLEX_CONV = 0x0006,   ///< 1D complex convolution plan
+    KFFT_PLAN_SCALAR_CONV = 0x0007,    ///< 1D scalar convolution plan
+    KFFT_PLAN_COMPLEX_CONV2D = 0x0008, ///< 2D complex convolution plan
+    KFFT_PLAN_SCALAR_CONV2D = 0x0009,  ///< 2D scalar convolution plan
 };
 /*!
     Unified amalgamatied plan structure
@@ -134,8 +131,7 @@ kfft_tiny_config(unsigned type, uint32_t flags, uintptr_t args) {
             plan->state = (uintptr_t)kfft_config_cpx(A->nfft, flags, NULL, NULL);
             break;
         }
-        case KFFT_PLAN_SCALAR:
-        case KFFT_PLAN_SCALAR_NORM: {
+        case KFFT_PLAN_SCALAR: {
             kfft_args_norm* A = (kfft_args_norm*)args;
             plan->state = (uintptr_t)kfft_config_scalar(A->nfft, flags, NULL, NULL);
             break;
@@ -146,8 +142,7 @@ kfft_tiny_config(unsigned type, uint32_t flags, uintptr_t args) {
             plan->state = (uintptr_t)kfft_config2_cpx(A->x, A->y, flags, NULL, NULL);
             break;
         }
-        case KFFT_PLAN_SCALAR_2D:
-        case KFFT_PLAN_SCALAR_2D_NORM: {
+        case KFFT_PLAN_SCALAR_2D: {
             kfft_args_2d* A = (kfft_args_2d*)args;
             plan->state = (uintptr_t)kfft_config2_scalar(A->x, A->y, flags, NULL, NULL);
             break;
@@ -161,8 +156,7 @@ kfft_tiny_config(unsigned type, uint32_t flags, uintptr_t args) {
                 (uintptr_t)kfft_config_sparse_cpx(A->nfft, flags, A->dims, A->step, NULL, NULL);
             break;
         }
-        case KFFT_PLAN_SCALAR_SPARSE:
-        case KFFT_PLAN_SCALAR_SPARSE_NORM: {
+        case KFFT_PLAN_SCALAR_SPARSE: {
             kfft_args_sparse* A = (kfft_args_sparse*)args;
             plan->state =
                 (uintptr_t)kfft_config_sparse_scalar(A->nfft, flags, A->dims, A->step, NULL, NULL);
@@ -223,9 +217,6 @@ kfft_tiny_eval(const kfft_plan plan, const kfft_scalar* fin, kfft_scalar* fout) 
             return kfft_eval_scalar(KTINY_CAST(sclr, plan), fin, KTINY_CPX(fout));
         }
 
-    case KFFT_PLAN_SCALAR_NORM:
-        return kfft_eval_scalar_norm(KTINY_CAST(sclr, plan), fin, fout);
-
 #if defined(KFFT_2D_ENABLE)
     case KFFT_PLAN_COMPLEX_2D:
         return kfft_eval2_cpx(KTINY_CAST(c2d, plan), KTINY_CPX(fin), KTINY_CPX(fout));
@@ -237,8 +228,6 @@ kfft_tiny_eval(const kfft_plan plan, const kfft_scalar* fin, kfft_scalar* fout) 
             return kfft_eval2_scalar(KTINY_CAST(s2d, plan), fin, KTINY_CPX(fout));
         }
 
-    case KFFT_PLAN_SCALAR_2D_NORM:
-        return kfft_eval2_scalar_norm(KTINY_CAST(s2d, plan), fin, fout);
 #endif /* KFFT_2D_ENABLE */
 
 #if defined(KFFT_SPARSE_ENABLE)
@@ -251,9 +240,6 @@ kfft_tiny_eval(const kfft_plan plan, const kfft_scalar* fin, kfft_scalar* fout) 
         } else {
             return kfft_eval_sparse_scalar(KTINY_CAST(ssparse, plan), fin, KTINY_CPX(fout));
         }
-
-    case KFFT_PLAN_SCALAR_SPARSE_NORM:
-        return kfft_eval_sparse_scalar_norm(KTINY_CAST(ssparse, plan), fin, fout);
     };
 #endif /* KFFT_SPARSE_ENABLE */
     return KFFT_RET_IMPROPER_PLAN;

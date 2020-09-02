@@ -244,34 +244,6 @@ kfft_evali_scalar(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scalar* fout) 
     return kfft_evali_scalar_internal(plan, fin, fout, NULL);
 }
 
-kfft_return_t
-kfft_eval_scalar_norm_internal(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_scalar* fout,
-                               kfft_cpx* ftmp) {
-    kfft_return_t ret = KFFT_RET_SUCCESS;
-    size_t memneed = 2 * sizeof(kfft_cpx) * plan->nfft;
-
-    kfft_cpx* fbuf = (ftmp == NULL) ? KFFT_TMP_ALLOC(memneed, KFFT_PLAN_ALIGN(plan)) : ftmp;
-    if (fbuf) {
-        KFFT_TMP_ZEROMEM(fbuf, memneed);
-        kfft_cpx* ftemp = fbuf + plan->nfft;
-
-        ret = kfft_eval_scalar_internal((kfft_plan_sclr*)plan, fin, fbuf, ftemp);
-        if (ret == KFFT_RET_SUCCESS) {
-            kfft_math_magnitude(fbuf, fout, plan->nfft);
-        }
-
-        KFFT_TMP_FREE(fbuf, KFFT_PLAN_ALIGN(plan));
-    } else {
-        ret = KFFT_RET_BUFFER_FAIL;
-    }
-    return ret;
-}
-
-KFFT_API kfft_return_t
-kfft_eval_scalar_norm(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_scalar* fout) {
-    return kfft_eval_scalar_norm_internal(plan, fin, fout, NULL);
-}
-
 /* ********************************************************************************
       TODO  Functionality
 ******************************************************************************** */

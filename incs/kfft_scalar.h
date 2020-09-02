@@ -47,21 +47,6 @@ kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, si
 KFFT_API kfft_return_t
 kfft_eval_scalar(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_cpx* fout);
 /*!
-  \brief Process forward evaluation function.
-  \param[in] plan - scalar plan ::kfft_plan_sclr pointer
-  \param[in] fin - input ::kfft_scalar buffer (don't changed)
-  \param[in] fout - output ::kfft_scalar buffer
-  \result standart ::kfft_ret_flags return status
-
-  \note Temporary use normalization with formula
-    ![Absolute complex value](norm_abs.svg)
-
-  \warning Function NOT control input and output buffer (such as the NULL, overflow, bad
-  buffers-size etc.). Developer must control this manualy.
- */
-KFFT_API kfft_return_t
-kfft_eval_scalar_norm(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_scalar* fout);
-/*!
   \brief Process inverse evaluation function.
   \param[in] plan - scalar plan ::kfft_plan_sclr pointer
   \param[in] fin - input ::kfft_cpx buffer (don't changed)
@@ -124,8 +109,6 @@ typedef kfft_plan_sclr*
                                kfft_pool_t* A, size_t* lenmem);
 typedef kfft_return_t
 (*kfft_callback_eval_scalar)(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_cpx* fout);
-typedef kfft_return_t
-(*kfft_callback_eval_scalar_norm)(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_scalar* fout);
 typedef kfft_return_t
 (*kfft_callback_evali_scalar)(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scalar* fout);
 // clang-format on
