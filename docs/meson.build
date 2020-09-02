@@ -1,4 +1,4 @@
-doxy_app = find_program('doxygen')
+doxy_app = find_program('doxygen', required: false)
 
 if doxy_app.found()
     doxy_file = files('''
