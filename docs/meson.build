@@ -1,12 +1,13 @@
-doxy_app = find_program('doxygen', required: false)
+app_doxy = find_program('doxygen', required: false)
 
-if doxy_app.found()
+if app_doxy.found()
     doxy_file = files('''
         Doxyfile
     '''.split())
 
     doc_target = run_target ( 'docs',
-                              command:[doxy_app, doxy_file])
+                              command:[app_doxy, doxy_file])
 else
-    warning ('Documentation files not create. Please install doxygen and run this target again.')
+    warning ('''Documentation files not create.
+              Please install doxygen and run this target again.''')
 endif
