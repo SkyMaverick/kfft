@@ -132,7 +132,7 @@ kf_factor(kfft_plan_cpx* P) {
                 p = n; /* no more factors, skip to end */
         }
 #if defined(KFFT_RADER_ALGO)
-        if (P->level < KFFT_PLAN_LEVEL && p > KFFT_BFLY_LEVEL && p > KFFT_RADER_LIMIT) {
+        if (P->level < KFFT_PLAN_LEVEL && p > KFFT_BFLY_LEVEL && p >= KFFT_RADER_LIMIT) {
             pbuf->prime = p;
             P->prm_count++;
             pbuf++;

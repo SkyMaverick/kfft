@@ -39,7 +39,7 @@ option ('build_library_api', type : 'combo', choices: ['export', 'import', 'none
 option ('enable_dynamical_api', type: 'boolean', value: 'true',
         description: 'enable dynamicaly linked callbacks in build headers')
 
-option ('limit_rader', type: 'integer', value: '25',
+option ('limit_rader', type: 'integer', value: '11',
         description: 'barier use rader or generic algorithm')
 option ('level_plan_max', type: 'integer', value: '7',
         description: 'max reqursive subplan level')
