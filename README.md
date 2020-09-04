@@ -1,7 +1,7 @@
 ## ABOUT
 LibKFFT is a free/open-source (ZLib licensed) C library providing fast fourier transform and other related operations for comlex and scalar double or float sequences.
 ## DEVELOPMENT
-LibKFFT is deeply redesigned fork  [KissFFT project](https://github.com/mborgerding/kissfft) by Mark Borgerding.
+LibKFFT is deeply redesigned fork [KissFFT project](https://github.com/mborgerding/kissfft) by Mark Borgerding.
 
 ## REALISED FEATURES
 The features of LibKFFT include:
@@ -36,7 +36,7 @@ Compare with popular implementations
 Test machine:
 *   __CPU__ - Intel i5-2540M (Sandy)
 *   __RAM__ - Kingstone DDR3 1333MHz 16Gb
-*   __OS__  - Linux Mint 20
+*   __OS__  - Linux Mint 20 (GCC 9.3.0)
 
 Implementation:
 *   FFTW (3.3.8)
@@ -47,7 +47,7 @@ Build options:
 *   __libfftw__: *build in Ubuntu 20.04 repo*
 *   __libkiss__: `-DFIXED_POINT=32`
 *   __libkfft__: `-DKFFT_USE_SIMD -DKFFT_USE_SYSMATH -DKFFT_USE_OPENMP -DKFFT_RADER_ALGO -DKFFT_RADER_LIMIT=25 -DKFFT_PLAN_LEVEL=7 -DKFFT_BFLY_LEVEL=5`
-... libkfft and libkiss make with [Meson](http://https://mesonbuild.com) mode `Release build with PGO and LTO
+... libkfft and libkiss make with [Meson](http://https://mesonbuild.com) mode `release` build with PGO and LTO
 
 Bench variants:
 *   __Range__: 1 .. 1000000
