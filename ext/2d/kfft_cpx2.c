@@ -22,7 +22,7 @@ kfft_trace_plan(kfft_plan_c2d* P) {
 
 static inline kfft_return_t
 kfft_init(kfft_plan_c2d* st) {
-    if (st->x != st->y) {
+    if (__likely__(st->x != st->y)) {
         KFFT_OMP(omp parallel sections shared(st)) {
             KFFT_OMP(omp section) {
                 st->plan_x =
@@ -45,8 +45,8 @@ kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
     size_t ret = sizeof(kfft_plan_c2d);
     size_t r1 = 0;
 
-    if (szy > 1) {
-        if (szx == szy) {
+    if (__likely__(szy > 1)) {
+        if (__unlikely__(szx == szy)) {
             kfft_config_cpx(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1);
             ret += r1;
         } else {
@@ -72,13 +72,13 @@ kfft_config2_cpx(const uint32_t x_size, const uint32_t y_size, const uint32_t fl
     size_t memneeded = kfft_calculate(x_size, y_size, flags);
 
     KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_plan_c2d, memneeded, A, lenmem);
-    if (st) {
+    if (__likely__(st)) {
         st->nfft = x_size * y_size;
         st->x = x_size;
         st->y = y_size;
         st->flags = flags;
 
-        if (kfft_init(st) != KFFT_RET_SUCCESS) {
+        if (__unlikely__(kfft_init(st) != KFFT_RET_SUCCESS)) {
             KFFT_ALGO_PLAN_TERMINATE(st, A);
             return NULL;
         }
@@ -94,29 +94,29 @@ kfft_2transform_normal(kfft_plan_c2d* st, const kfft_cpx* fin, kfft_cpx* fout) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_cpx* ftmp = KFFT_TMP_ALLOC(st->nfft * sizeof(kfft_cpx), KFFT_PLAN_ALIGN(st));
-    if (ftmp) {
+    if (__likely__(ftmp)) {
         kfft_trace_2d("%s: %p\n", "X-axes transform with plan", (void*)(st->plan_x));
 
-    KFFT_OMP( omp parallel for schedule(static))
-    for (uint32_t i = 0; i < st->y; i++) {
-        uint64_t bp = st->x * i;
-        ret = kfft_eval_cpx(st->plan_x, &(fin[bp]), &(ftmp[bp]));
-    }
+        KFFT_OMP( omp parallel for schedule(static))
+        for (uint32_t i = 0; i < st->y; i++) {
+            uint64_t bp = st->x * i;
+            ret = kfft_eval_cpx(st->plan_x, &(fin[bp]), &(ftmp[bp]));
+        }
 
-    kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
-    kfft_math_transpose_cpx(ftmp, fout, st->x, st->y);
+        kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
+        kfft_math_transpose_cpx(ftmp, fout, st->x, st->y);
 
-    kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
+        kfft_trace_2d("%s: %p\n", "Y-axes transform with plan", (void*)(st->plan_y));
 
-    KFFT_OMP( omp parallel for schedule(static))
-    for (uint32_t i = 0; i < st->x; i++) {
-        uint64_t bp = st->y * i;
-        ret = kfft_eval_cpx(st->plan_y, &(fout[bp]), &(ftmp[bp]));
-    }
-    kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
-    kfft_math_transpose_cpx(ftmp, fout, st->y, st->x);
+        KFFT_OMP( omp parallel for schedule(static))
+        for (uint32_t i = 0; i < st->x; i++) {
+            uint64_t bp = st->y * i;
+            ret = kfft_eval_cpx(st->plan_y, &(fout[bp]), &(ftmp[bp]));
+        }
+        kfft_trace_2d("%s: %p\n", "Transposition matrix plan", (void*)st);
+        kfft_math_transpose_cpx(ftmp, fout, st->y, st->x);
 
-    KFFT_TMP_FREE(ftmp, KFFT_PLAN_ALIGN(st));
+        KFFT_TMP_FREE(ftmp, KFFT_PLAN_ALIGN(st));
     } else {
         ret = KFFT_RET_BUFFER_FAIL;
     }
@@ -159,17 +159,17 @@ kfft_eval2_cpx(kfft_plan_c2d* cfg, const kfft_cpx* fin, kfft_cpx* fout) {
 
     size_t memneeded = cfg->nfft * sizeof(kfft_cpx);
 #if defined(KFFT_MEMLESS_MODE)
-    if (cfg->flags & KFFT_FLAG_GENERIC_ONLY) {
-        if (fin != fout)
+    if (__unlikely__(cfg->flags & KFFT_FLAG_GENERIC_ONLY)) {
+        if (__likely__(fin != fout))
             memcpy(fout, fin, memneeded);
         ret = kfft_2transform_memless(cfg, fout);
     } else {
 #endif /* KFFT_MEMLESS_MODE */
-        if (fin == fout) {
+        if (__unlikely__(fin == fout)) {
             kfft_cpx* Fbuf = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(cfg));
-            if (Fbuf) {
+            if (__likely__(Fbuf)) {
                 ret = kfft_2transform_normal(cfg, fin, Fbuf);
-                if (ret == KFFT_RET_SUCCESS) {
+                if (__likely__(ret == KFFT_RET_SUCCESS)) {
                     memcpy(fout, Fbuf, memneeded);
                 }
                 KFFT_TMP_FREE(Fbuf, KFFT_PLAN_ALIGN(cfg));
@@ -195,7 +195,7 @@ shift_internal(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_
         uint64_t bp = sz_x * i;
         kfft_shift_cpx(&(buf[bp]), sz_x, is_inverse, mmgr);
     }
-    if (ftmp != NULL) {
+    if (__likely__(ftmp != NULL)) {
         kfft_trace_2d("%s\n", "Transposition matrix");
         kfft_math_transpose_cpx(buf, ftmp, sz_x, sz_y);
 
@@ -228,9 +228,9 @@ KFFT_API void
 kfft_shift2_cpx(kfft_cpx* buf, kfft_cpx* ftmp, const uint32_t sz_x, const uint32_t sz_y,
                 const bool is_inverse, kfft_pool_t* mmgr) {
 #if !defined(KFFT_MEMLESS_MODE)
-    if (ftmp == NULL) {
+    if (__unlikely__(ftmp == NULL)) {
         kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * sz_x * sz_y, mmgr->align);
-        if (tbuf) {
+        if (__likely__(tbuf)) {
             shift_internal(buf, tbuf, sz_x, sz_y, is_inverse, mmgr);
             KFFT_TMP_FREE(tbuf, mmgr->align);
         }

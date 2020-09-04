@@ -59,14 +59,14 @@ kfft_config2_conv_scalar(const uint32_t x, const uint32_t y, const uint32_t flag
     kfft_plan_s2cnv* plan = NULL;
     size_t memneeded = kfft_calculate(x, y, flags);
     KFFT_ALGO_PLAN_PREPARE(plan, flags, kfft_plan_s2cnv, memneeded, A, lenmem);
-    if (plan) {
+    if (__likely__(plan)) {
 
         plan->nfft = x * y;
         plan->x = x;
         plan->y = y;
         plan->flags = flags;
 
-        if (kfft_init(plan) != KFFT_RET_SUCCESS) {
+        if (__unlikely__(kfft_init(plan) != KFFT_RET_SUCCESS)) {
             KFFT_ALGO_PLAN_TERMINATE(plan, A);
             return NULL;
         }
@@ -85,14 +85,14 @@ kfft_eval2_conv_scalar(kfft_plan_s2cnv* plan, const kfft_scalar* fin_A, const kf
     ret = retA = retB = KFFT_RET_BUFFER_FAIL;
 
     kfft_cpx* bufA = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * plan->nfft, KFFT_PLAN_ALIGN(plan));
-    if (bufA) {
+    if (__likely__(bufA)) {
         kfft_cpx* bufB = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * plan->nfft, KFFT_PLAN_ALIGN(plan));
-        if (bufB) {
+        if (__likely__(bufB)) {
             KFFT_OMP(omp parallel sections shared(plan)) {
                 KFFT_OMP(omp section) { retA = kfft_eval2_scalar(plan->plan_fwd, fin_A, bufA); }
                 KFFT_OMP(omp section) { retB = kfft_eval2_scalar(plan->plan_fwd, fin_B, bufB); }
             }
-            if ((retA == KFFT_RET_SUCCESS) && (retB == KFFT_RET_SUCCESS)) {
+            if (__likely__((retA == KFFT_RET_SUCCESS) && (retB == KFFT_RET_SUCCESS))) {
                 VEXFUNC(plan, kfft_math_hadamard_cpx, bufB, bufA, plan->nfft);
                 ret = kfft_evali2_scalar(plan->plan_inv, bufB, fout);
             } else {

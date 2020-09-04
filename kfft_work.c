@@ -4,7 +4,7 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_cpx* Fout_beg = Fout;
-    if (plan->flags & KFFT_FLAG_GENERIC_ONLY) {
+    if (__unlikely__(plan->flags & KFFT_FLAG_GENERIC_ONLY)) {
         ret = kf_bfly_generic(Fout, 1, plan, 1, plan->nfft);
     } else {
         const uint32_t p = *factors++; /* the radix  */
@@ -13,7 +13,7 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
 
         kfft_trace_core(plan->level, "Work: p - %u | m - %u\n", p, m);
 
-        if (m == 1) {
+        if (__likely__(m == 1)) {
             do {
                 *Fout = *f;
                 f += fstride * in_stride;
@@ -26,7 +26,7 @@ kf_work(kfft_cpx* Fout, const kfft_cpx* f, const uint32_t fstride, uint32_t in_s
                 // each one takes a decimated version of the input
                 ret = kf_work(Fout, f, fstride * p, in_stride, factors, plan);
 
-                if (ret != KFFT_RET_SUCCESS)
+                if (__unlikely__(ret != KFFT_RET_SUCCESS))
                     goto bailout;
 
                 f += fstride * in_stride;

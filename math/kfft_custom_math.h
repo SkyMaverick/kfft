@@ -7,6 +7,7 @@
     without libm dependency
  */
 
+#include "kfft_macro.h"
 #include "kfft_types.h"
 
 /// SinCos function return codes
@@ -41,7 +42,7 @@ kfft_sincos_double(double* co, double* si, double x);
 
 static inline kfft_scalar
 kfft_math_sqrt(const kfft_scalar number) {
-    if (number <= 0)
+    if (__unlikely__(number <= 0))
         return 0;
 
     const kfft_scalar ACCURACY = 0.001;

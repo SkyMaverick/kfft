@@ -5,9 +5,9 @@
 static inline kfft_return_t
 kfft_part_convolution(kfft_cpx* Fout, kfft_cpx* Fin, kfft_plan_cpx* P, kfft_plan_cpx* Pi) {
     kfft_cpx* Fbuf = KFFT_TMP_ALLOC(P->nfft * sizeof(kfft_cpx), KFFT_PLAN_ALIGN(P));
-    if (Fbuf) {
+    if (__likely__(Fbuf)) {
         kfft_return_t ret = kfft_eval_cpx(P, Fout, Fbuf);
-        if (ret == KFFT_RET_SUCCESS) {
+        if (__likely__(ret == KFFT_RET_SUCCESS)) {
             VEXFUNC(P, kfft_math_hadamard_cpx, Fbuf, Fin, P->nfft);
             ret = kfft_eval_cpx(Pi, Fbuf, Fout);
         }
@@ -47,7 +47,7 @@ rader_method_eval(kfft_cpx* Fout, kfft_cpx* Ftmp, const size_t fstride, const kf
     }
 
     ret = kfft_part_convolution(&Ftmp[1], sP->shuffle_twiddles, sP->plan, sP->plan_inv);
-    if (ret == KFFT_RET_SUCCESS) {
+    if (__likely__(ret == KFFT_RET_SUCCESS)) {
         // Reshuffle buffer
         k = u;
 
@@ -105,18 +105,19 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_plan_cpx* plan,
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     kfft_cpx* scratch = (kfft_cpx*)KFFT_TMP_ALLOC(sizeof(kfft_cpx) * p, KFFT_PLAN_ALIGN(plan));
-    if (scratch) {
+    if (__likely__(scratch)) {
         KFFT_ALLOCA_CLEAR(scratch, sizeof(kfft_cpx) * p);
 
         for (uint32_t u = 0; u < m; ++u) {
 #if defined(KFFT_RADER_ALGO)
-            if ((p >= KFFT_RADER_LIMIT) &&
-                (!((plan->flags & KFFT_FLAG_GENERIC) || (plan->flags & KFFT_FLAG_GENERIC_ONLY))) &&
-                plan->prm_count) {
+            if (__likely__((p >= KFFT_RADER_LIMIT) &&
+                           (!((plan->flags & KFFT_FLAG_GENERIC) ||
+                              (plan->flags & KFFT_FLAG_GENERIC_ONLY))) &&
+                           plan->prm_count)) {
                 kfft_trace_core(plan->level, "%s: %u\n", "Use Rader algorithm for resolve", p);
                 ret = rader_method_eval(Fout, scratch, fstride, plan, u, m, p);
 
-                if (ret != KFFT_RET_SUCCESS) {
+                if (__unlikely__(ret != KFFT_RET_SUCCESS)) {
                     break;
                 }
             } else {
@@ -125,7 +126,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_plan_cpx* plan,
                 kfft_trace_core(plan->level, "%s: %u\n", "Use standart algorithm for resolve", p);
                 ret = VEXFUNC(plan, std_method_eval, Fout, scratch, fstride, plan, u, m, p);
 
-                if (ret != KFFT_RET_SUCCESS) {
+                if (__unlikely__(ret != KFFT_RET_SUCCESS)) {
                     break;
                 }
 #if defined(KFFT_RADER_ALGO)

@@ -43,14 +43,14 @@ kfft_config_sparse_scalar(const uint32_t nfft, const uint32_t flags, const uint3
     size_t memneeded = kfft_calculate(dim_nfft, flags);
 
     KFFT_ALGO_PLAN_PREPARE(st, flags, kfft_plan_ssparse, memneeded, A, lenmem);
-    if (st) {
+    if (__likely__(st)) {
         st->nfft = dim_nfft;
         st->dims = dims;
         st->step = step;
 
         st->flags = flags;
 
-        if (kfft_init(st) != KFFT_RET_SUCCESS) {
+        if (__unlikely__(kfft_init(st) != KFFT_RET_SUCCESS)) {
             KFFT_ALGO_PLAN_TERMINATE(st, A);
             return NULL;
         }
@@ -68,7 +68,7 @@ kfft_eval_process_memless(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
     kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
-    if (fbuf_cpx) {
+    if (__likely__(fbuf_cpx)) {
         for (uint32_t n = 0; n < plan->dims; n++) {
             kfft_scalar* fbuf_scr = (kfft_scalar*)((kfft_cpx*)fbuf_cpx + plan->nfft);
             // forward scramble input buffer
@@ -76,7 +76,7 @@ kfft_eval_process_memless(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_
                 fbuf_scr[i] = fin[i * (plan->dims + plan->step) + n];
             }
             ret = kfft_eval_scalar(plan->subst, fbuf_scr, fbuf_cpx);
-            if (ret == KFFT_RET_SUCCESS) {
+            if (__likely__(ret == KFFT_RET_SUCCESS)) {
                 // backward put values in output buffer
                 for (uint32_t i = 0; i < plan->nfft; i++) {
                     C_CPY(fout[i * (plan->dims + plan->step) + n], fbuf_cpx[i]);
@@ -100,14 +100,14 @@ kfft_eval_process(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_cpx* fou
     KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t n = 0; n < plan->dims; n++) {
         kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
-        if (fbuf_cpx) {
+        if (__likely__(fbuf_cpx)) {
             kfft_scalar* fbuf_scr = (kfft_scalar*)((kfft_cpx*)fbuf_cpx + plan->nfft);
             // forward scramble input buffer
             for (uint32_t i = 0; i < plan->nfft; i++) {
                 fbuf_scr[i] = fin[i * (plan->dims + plan->step) + n];
             }
             ret = kfft_eval_scalar(plan->subst, fbuf_scr, fbuf_cpx);
-            if (ret == KFFT_RET_SUCCESS) {
+            if (__likely__(ret == KFFT_RET_SUCCESS)) {
                 // backward put values in output buffer
                 for (uint32_t i = 0; i < plan->nfft; i++) {
                     C_CPY(fout[i * (plan->dims + plan->step) + n], fbuf_cpx[i]);
@@ -123,7 +123,7 @@ kfft_eval_process(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_cpx* fou
 
 KFFT_API kfft_return_t
 kfft_eval_sparse_scalar(kfft_plan_ssparse* plan, const kfft_scalar* fin, kfft_cpx* fout) {
-    if ((plan->dims < 2) && (plan->step))
+    if (__unlikely__((plan->dims < 2) && (plan->step)))
         return kfft_eval_scalar(plan->subst, fin, fout);
 
 #if defined(KFFT_MEMLESS_MODE)
@@ -140,7 +140,7 @@ kfft_evali_process_memless(kfft_plan_ssparse* plan, const kfft_cpx* fin, kfft_sc
     uint32_t memneeded = plan->nfft * (sizeof(kfft_scalar) + sizeof(kfft_cpx));
 
     kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
-    if (fbuf_cpx) {
+    if (__likely__(fbuf_cpx)) {
         for (uint32_t n = 0; n < plan->dims; n++) {
             kfft_scalar* fbuf_scr = (kfft_scalar*)((kfft_cpx*)fbuf_cpx + plan->nfft);
             // forward scramble input buffer
@@ -148,7 +148,7 @@ kfft_evali_process_memless(kfft_plan_ssparse* plan, const kfft_cpx* fin, kfft_sc
                 C_CPY(fbuf_cpx[i], fin[i * (plan->dims + plan->step) + n]);
             }
             ret = kfft_evali_scalar(plan->subst, fbuf_cpx, fbuf_scr);
-            if (ret == KFFT_RET_SUCCESS) {
+            if (__likely__(ret == KFFT_RET_SUCCESS)) {
                 // backward put values in output buffer
                 for (uint32_t i = 0; i < plan->nfft; i++) {
                     fout[i * (plan->dims + plan->step) + n] = fbuf_scr[i];
@@ -170,15 +170,17 @@ kfft_evali_process(kfft_plan_ssparse* plan, const kfft_cpx* fin, kfft_scalar* fo
 
     KFFT_OMP( omp parallel for schedule(static))
     for (uint32_t n = 0; n < plan->dims; n++) {
+
         kfft_cpx* fbuf_cpx = KFFT_TMP_ALLOC(memneeded, KFFT_PLAN_ALIGN(plan));
-        if (fbuf_cpx) {
+        if (__likely__(fbuf_cpx)) {
             kfft_scalar* fbuf_scr = (kfft_scalar*)((kfft_cpx*)fbuf_cpx + plan->nfft);
             // forward scramble input buffer
             for (uint32_t i = 0; i < plan->nfft; i++) {
                 C_CPY(fbuf_cpx[i], fin[i * (plan->dims + plan->step) + n]);
             }
+
             ret = kfft_evali_scalar(plan->subst, fbuf_cpx, fbuf_scr);
-            if (ret == KFFT_RET_SUCCESS) {
+            if (__likely__(ret == KFFT_RET_SUCCESS)) {
                 // backward put values in output buffer
                 for (uint32_t i = 0; i < plan->nfft; i++) {
                     fout[i * (plan->dims + plan->step) + n] = fbuf_scr[i];
@@ -194,7 +196,7 @@ kfft_evali_process(kfft_plan_ssparse* plan, const kfft_cpx* fin, kfft_scalar* fo
 
 KFFT_API kfft_return_t
 kfft_evali_sparse_scalar(kfft_plan_ssparse* plan, const kfft_cpx* fin, kfft_scalar* fout) {
-    if ((plan->dims < 2) && (plan->step))
+    if (__unlikely__((plan->dims < 2) && (plan->step)))
         return kfft_evali_scalar(plan->subst, fin, fout);
 
 #if defined(KFFT_MEMLESS_MODE)
@@ -224,9 +226,9 @@ kfft_shift_sparse_scalar(kfft_scalar* buf, kfft_scalar* ftmp, const uint32_t nff
                          kfft_pool_t* mmgr) {
     size_t dim_nfft = (nfft + step) / (dims + step);
 #if !defined(KFFT_MEMLESS_MODE)
-    if (ftmp == NULL) {
+    if (__unlikely__(ftmp == NULL)) {
         kfft_scalar* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_scalar) * dim_nfft, mmgr->align);
-        if (tbuf) {
+        if (__likely__(tbuf)) {
             shift_internal(buf, tbuf, dim_nfft, dims, step, is_inverse, mmgr);
             KFFT_TMP_FREE(tbuf, mmgr->align);
         }

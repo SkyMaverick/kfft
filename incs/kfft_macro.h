@@ -138,7 +138,6 @@
 
 #define KFFT_UNUSED_VAR(X) (void)(X)
 #if defined(KFFT_CC_MSVC)
-// TODO
     #define KFFT_UNUSED_FUNC
 #else //__GNUC__ - may need other defines for different compilers
     #define KFFT_UNUSED_FUNC __attribute__((__unused__))
@@ -149,6 +148,22 @@
 #else //__GNUC__ - may need other defines for different compilers
     #define KFFT_PRAGMA(X) _Pragma(#X)
 #endif
+
+#ifndef __likely__
+    #if defined(KFFT_CC_GNU) && !defined(__COVERITY__)
+        #define __likely__(cond) __builtin_expect(!!(cond), 1)
+    #else
+        #define __likely__(x) (x)
+    #endif
+#endif /* __likely__ */
+
+#ifndef __unlikely__
+    #if defined(KFFT_CC_GNU) && !defined(__COVERITY__)
+        #define __unlikely__(cond) __builtin_expect(!!(cond), 0)
+    #else
+        #define __unlikely__(x) (x)
+    #endif
+#endif /* __unlikely__ */
 
 #define KFFT_STRINGIZE_DETAIL(X) #X
 #define KFFT_STRINGIZE(X) KFFT_STRINGIZE_DETAIL(X)

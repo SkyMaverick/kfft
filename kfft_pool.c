@@ -9,7 +9,7 @@
 static inline kfft_pool_t*
 kfft_pool_init(void* mem, const size_t nmem, kfft_simd_t vex, uint8_t align) {
     kfft_pool_t* ret = (kfft_pool_t*)mem;
-    if (mem && (nmem >= sizeof(kfft_pool_t))) {
+    if (__likely__(mem && (nmem >= sizeof(kfft_pool_t)))) {
         ret->allocated = nmem;
         ret->vex = vex;
         ret->align = align;
@@ -51,9 +51,9 @@ kfft_pool_alloc(kfft_pool_t* A, const size_t nmem) {
     uint8_t* ret = NULL;
 
     KFFT_OMP(omp critical(alloc_block)) {
-        if (A && (nmem > 0)) {
+        if (__likely__(A && (nmem > 0))) {
             kfft_trace_kia("%s: %zu byte\n", "Allocate - ", nmem);
-            if (A->cur + nmem <= A->tail) {
+            if (__likely__(A->cur + nmem <= A->tail)) {
                 ret = A->cur;
                 A->cur += nmem;
             } else {
@@ -68,8 +68,8 @@ kfft_pool_alloc(kfft_pool_t* A, const size_t nmem) {
 
 void
 kfft_pool_zmem(const kfft_pool_t* A, void* ptr, const size_t size) {
-    if (A && ptr && (size > 0))
-        if ((uint8_t*)ptr + size <= A->tail)
+    if (__likely__(A && ptr && (size > 0)))
+        if (__likely__((uint8_t*)ptr + size <= A->tail))
             KFFT_ZEROMEM(ptr, size);
 }
 

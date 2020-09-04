@@ -60,9 +60,9 @@ kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, si
 
     KFFT_ALGO_PLAN_PREPARE(P, flags, kfft_plan_sclr, memneeded, A, lenmem);
 
-    if (P) {
+    if (__likely__(P)) {
         P->basis = kfft_config_cpx(nfft, KFFT_CHECK_FLAGS(flags), P->object.mmgr, NULL);
-        if (P->basis == NULL) {
+        if (__unlikely__(P->basis == NULL)) {
             KFFT_ALGO_PLAN_TERMINATE(P, A);
             return NULL;
         }
@@ -71,9 +71,9 @@ kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, si
         P->flags = P->basis->flags;
 
 #if !defined(KFFT_MEMLESS_MODE)
-        if (nfft > 1) {
+        if (__likely__(nfft > 1)) {
             P->super_twiddles = kfft_pool_alloc(P->object.mmgr, sizeof(kfft_cpx) * (nfft / 2));
-            if (P->super_twiddles == NULL) {
+            if (__unlikely__(P->super_twiddles == NULL)) {
                 KFFT_ALGO_PLAN_TERMINATE(P, A);
                 return NULL;
             }
@@ -128,7 +128,7 @@ eval_func(kfft_plan_sclr* plan, kfft_cpx* ftmp, const kfft_scalar* fin, kfft_cpx
         fout[i].i = 0;
     }
     ret = kfft_eval_cpx(plan->basis, fout, ftmp);
-    if (ret == KFFT_RET_SUCCESS) {
+    if (__likely__(ret == KFFT_RET_SUCCESS)) {
         ret = eval_forward_internal(plan, ftmp, fout);
     }
 
@@ -142,14 +142,14 @@ kfft_eval_scalar_internal(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_cpx
     /* input buffer timedata is stored row-wise */
     kfft_plan_sclr* P = (kfft_plan_sclr*)plan;
 
-    if (P->basis->flags & KFFT_FLAG_INVERSE) {
+    if (__unlikely__(P->basis->flags & KFFT_FLAG_INVERSE)) {
         return KFFT_RET_IMPROPER_PLAN;
     }
 
     uint32_t ncfft = plan->nfft;
-    if (ftmp == NULL) {
+    if (__unlikely__(ftmp == NULL)) {
         kfft_cpx* tbuf = KFFT_TMP_ALLOC(sizeof(kfft_cpx) * ncfft, KFFT_PLAN_ALIGN(plan));
-        if (tbuf) {
+        if (__likely__(tbuf)) {
             ret = eval_func(plan, tbuf, fin, fout);
             KFFT_TMP_FREE(tbuf, KFFT_PLAN_ALIGN(plan));
         } else {
@@ -200,10 +200,10 @@ evali_func(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scalar* fout, kfft_cp
     KFFT_TMP_ZEROMEM(ftmp, sizeof(kfft_cpx) * ncfft);
 
     ret = eval_inverse_internal(plan, fin, ftmp);
-    if (ret == KFFT_RET_SUCCESS) {
+    if (__likely__(ret == KFFT_RET_SUCCESS)) {
         kfft_cpx* fbuf = ftmp + plan->nfft;
         ret = kfft_eval_cpx(plan->basis, ftmp, fbuf);
-        if (ret == KFFT_RET_SUCCESS) {
+        if (__likely__(ret == KFFT_RET_SUCCESS)) {
             for (uint32_t i = 0; i < ncfft; i++) {
                 fout[i] = fbuf[i].r / 2;
             }
@@ -218,15 +218,15 @@ kfft_evali_scalar_internal(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scala
     kfft_return_t ret = KFFT_RET_SUCCESS;
     kfft_plan_sclr* P = (kfft_plan_sclr*)plan;
 
-    if (!(P->basis->flags & KFFT_FLAG_INVERSE)) {
+    if (__unlikely__(!(P->basis->flags & KFFT_FLAG_INVERSE))) {
         return KFFT_RET_IMPROPER_PLAN;
     }
 
     uint32_t ncfft = P->nfft;
 
-    if (ftmp == NULL) {
+    if (__unlikely__(ftmp == NULL)) {
         kfft_cpx* tbuf = KFFT_TMP_ALLOC(2 * sizeof(kfft_cpx) * ncfft, KFFT_PLAN_ALIGN(plan));
-        if (tbuf) {
+        if (__likely__(tbuf)) {
             ret = evali_func(plan, fin, fout, tbuf);
             KFFT_TMP_FREE(tbuf, KFFT_PLAN_ALIGN(plan));
         } else {

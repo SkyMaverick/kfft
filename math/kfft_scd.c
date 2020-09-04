@@ -28,7 +28,7 @@ int_fract(int* sign, unsigned short* dest, double src) {
         return (KFFT_MATH_NORMAL);
     } else
         return (KFFT_MATH_ISNAN);
-    if (src > (double)0xffffffff)
+    if (__unlikely__(src > (double)0xffffffff))
         return (*sign == 1 ? KFFT_MATH_OVERFLOW : KFFT_MATH_UNDERFLOW);
     intp = (unsigned long)src;
     src -= (double)intp;
@@ -61,7 +61,7 @@ kfft_sincos_double(double* co, double* si, double x) {
     int i, k, as;
     double st, ct, *sit, *cot;
 
-    if (!((co) && (si)))
+    if (__unlikely__(!((co) && (si))))
         return (KFFT_MATH_ISNAN);
     /* divide x by 2*pi */
     x /= M_2PI;
