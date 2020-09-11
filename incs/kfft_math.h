@@ -185,11 +185,11 @@ kfft_math_modpow(uint32_t x, uint32_t y, uint32_t m) {
 static inline uint32_t
 kfft_math_gcd(uint32_t a, uint32_t b) {
     while (b) {
+        a %= b;
+
         b ^= a;
         a ^= b;
         b ^= a;
-
-        b = a % b;
     }
     return a;
 }

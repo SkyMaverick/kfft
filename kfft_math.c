@@ -34,7 +34,7 @@ kfft_math_prmn(uint32_t num) {
 
 uint32_t
 kfft_math_prmni(uint32_t a, uint32_t m) {
-    return (kfft_math_gcd(a, m) != 1) ? 0 : kfft_math_modpow(a, m - 2, m);
+    return (kfft_math_gcd(a, m) != 1) ? 0 : kfft_math_modpow(m, a - 2, a);
 }
 
 #endif /* KFFT_RADER_ALGO */
