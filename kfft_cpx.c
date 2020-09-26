@@ -90,11 +90,6 @@ kfft_rader_idxs(uint32_t* idx, const uint32_t root, const uint32_t size) {
 
 #endif /* KFFT_RADER_ALGO */
 
-/*
-    Inline needed source modules for transformation .
-    Select SIMD files HERE //TODO
- */
-
 #include "kfft_bfly.c"    /* Butterfly transformations (Cooley - Tukey)*/
 #include "kfft_generic.c" /* Generic or Rader algorithm for prime-size lengt sequences*/
 

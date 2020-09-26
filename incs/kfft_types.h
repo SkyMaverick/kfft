@@ -50,8 +50,9 @@ enum kfft_eval_flags {
     /*!< Reuse plan object for new plan if the size allows it
       \warning Dangerous flag blocking for use by nested structures with ::KFFT_CHECK_FLAGS
      */
-    KFFT_FLAG_GENERIC = 1 << 2,      ///< Manual use of the generic algorithm for prime-size blocks
-    KFFT_FLAG_GENERIC_ONLY = 1 << 3, ///< Use ONLY generic algorithm for all sequence
+    KFFT_FLAG_GENERIC = 1 << 2,       ///< Manual use of the generic algorithm for prime-size blocks
+    KFFT_FLAG_GENERIC_ONLY = 1 << 3,  ///< Use ONLY generic algorithm for all sequence
+    KFFT_FLAG_EXPAND_SCALAR = 1 << 4, ///< expand scalar buffer to full lenght (1D scalar only)
 };
 
 /*!

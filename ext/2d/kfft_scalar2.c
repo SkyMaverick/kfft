@@ -49,15 +49,17 @@ kfft_calculate(const uint32_t szx, const uint32_t szy, const uint32_t flags) {
 
     if (__likely__(szy > 1)) {
         if (__unlikely__(szx == szy)) {
-            kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1);
+            kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags | KFFT_FLAG_EXPAND_SCALAR), NULL, &r1);
             ret += r1;
         } else {
             KFFT_OMP(omp parallel sections) {
                 KFFT_OMP(omp section) {
-                    kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags), NULL, &r1);
+                    kfft_config_scalar(szx, KFFT_CHECK_FLAGS(flags | KFFT_FLAG_EXPAND_SCALAR), NULL,
+                                       &r1);
                 }
                 KFFT_OMP(omp section) {
-                    kfft_config_scalar(szy, KFFT_CHECK_FLAGS(flags), NULL, &r2);
+                    kfft_config_scalar(szy, KFFT_CHECK_FLAGS(flags | KFFT_FLAG_EXPAND_SCALAR), NULL,
+                                       &r2);
                 }
             }
             ret += r1 + r2;
