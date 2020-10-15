@@ -118,10 +118,10 @@ evali_trivial(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scalar* fout, kfft
 }
 
 /*******************************************************************************
-                Symmetric signal (use Nayquist frequences N/2)
+                Symmetric signal (use nyquist frequences N/2)
  ******************************************************************************/
 static inline size_t
-calculate_nayquist(const uint32_t nfft, const uint32_t flags) {
+calculate_nyquist(const uint32_t nfft, const uint32_t flags) {
     size_t ret = 0;
     kfft_config_cpx(nfft / 2, flags, NULL, &ret);
     if (ret > 0) {
@@ -134,9 +134,9 @@ calculate_nayquist(const uint32_t nfft, const uint32_t flags) {
 }
 
 static kfft_plan_sclr*
-config_nayquist(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem) {
+config_nyquist(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem) {
     kfft_plan_sclr* P = NULL;
-    size_t memneeded = calculate_nayquist(nfft, flags);
+    size_t memneeded = calculate_nyquist(nfft, flags);
 
     KFFT_ALGO_PLAN_PREPARE(P, flags, kfft_plan_sclr, memneeded, A, lenmem);
 
@@ -154,13 +154,13 @@ config_nayquist(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_
         }
 
 #if !defined(KFFT_MEMLESS_MODE)
-        if (__likely__(half_nfft > 1)) {
+//        if (__likely__(half_nfft > 1)) {
             P->super_twiddles = kfft_pool_alloc(P->object.mmgr, sizeof(kfft_cpx) * (half_nfft));
             if (__unlikely__(P->super_twiddles == NULL)) {
                 KFFT_ALGO_PLAN_TERMINATE(P, A);
                 return NULL;
             }
-        }
+//        }
         for (uint32_t i = 0; i < half_nfft; ++i) {
             P->super_twiddles[i] = kfft_sclr_twiddle(i, P);
         }
@@ -207,6 +207,7 @@ rebuild_forward(const kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_cpx* fout)
     }
 
     if (__unlikely__(plan->flags & KFFT_FLAG_EXPAND_SCALAR)) {
+        kfft_trace_scalar("Expand buffer with plan: %p\n", plan);
         for (k = 1; k < nfft; k++) {
             fout[nfft - k].r = fout[k].r;
             fout[nfft - k].i = -fout[k].i;
@@ -243,7 +244,7 @@ rebuild_inverse(const kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_cpx* fout)
 }
 
 static kfft_return_t
-eval_nayquist(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_cpx* fout, kfft_cpx* ftmp) {
+eval_nyquist(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_cpx* fout, kfft_cpx* ftmp) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     size_t seq_size = plan->basis->nfft + 1;
@@ -267,7 +268,7 @@ eval_nayquist(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_cpx* fout, kfft
 }
 
 static kfft_return_t
-evali_nayquist(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scalar* fout, kfft_cpx* ftmp) {
+evali_nyquist(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scalar* fout, kfft_cpx* ftmp) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
 
     size_t seq_size = plan->basis->nfft + 1;
@@ -301,7 +302,7 @@ kfft_eval_scalar_internal(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_cpx
         return KFFT_RET_IMPROPER_PLAN;
 
     return (plan->nfft % 2) ? eval_trivial(plan, fin, fout, ftmp)
-                            : eval_nayquist(plan, fin, fout, ftmp);
+                            : eval_nyquist(plan, fin, fout, ftmp);
 }
 
 kfft_return_t
@@ -312,13 +313,13 @@ kfft_evali_scalar_internal(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scala
         return KFFT_RET_IMPROPER_PLAN;
 
     return (plan->nfft % 2) ? evali_trivial(plan, fin, fout, ftmp)
-                            : evali_nayquist(plan, fin, fout, ftmp);
+                            : evali_nyquist(plan, fin, fout, ftmp);
 }
 
 KFFT_API kfft_plan_sclr*
 kfft_config_scalar(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t* lenmem) {
     return (nfft % 2) ? config_trivial(nfft, flags, A, lenmem)
-                      : config_nayquist(nfft, flags, A, lenmem);
+                      : config_nyquist(nfft, flags, A, lenmem);
 }
 KFFT_API kfft_return_t
 kfft_eval_scalar(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_cpx* fout) {
