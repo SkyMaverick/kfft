@@ -154,13 +154,13 @@ config_nyquist(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_t
         }
 
 #if !defined(KFFT_MEMLESS_MODE)
-//        if (__likely__(half_nfft > 1)) {
-            P->super_twiddles = kfft_pool_alloc(P->object.mmgr, sizeof(kfft_cpx) * (half_nfft));
-            if (__unlikely__(P->super_twiddles == NULL)) {
-                KFFT_ALGO_PLAN_TERMINATE(P, A);
-                return NULL;
-            }
-//        }
+        //        if (__likely__(half_nfft > 1)) {
+        P->super_twiddles = kfft_pool_alloc(P->object.mmgr, sizeof(kfft_cpx) * (half_nfft));
+        if (__unlikely__(P->super_twiddles == NULL)) {
+            KFFT_ALGO_PLAN_TERMINATE(P, A);
+            return NULL;
+        }
+        //        }
         for (uint32_t i = 0; i < half_nfft; ++i) {
             P->super_twiddles[i] = kfft_sclr_twiddle(i, P);
         }
@@ -207,7 +207,7 @@ rebuild_forward(const kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_cpx* fout)
     }
 
     if (__unlikely__(plan->flags & KFFT_FLAG_EXPAND_SCALAR)) {
-        kfft_trace_scalar("Expand buffer with plan: %p\n", plan);
+        kfft_trace_scalar("Expand buffer with plan: %p\n", (void*)plan);
         for (k = 1; k < nfft; k++) {
             fout[nfft - k].r = fout[k].r;
             fout[nfft - k].i = -fout[k].i;

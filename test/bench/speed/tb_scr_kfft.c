@@ -57,12 +57,12 @@ main(int argc, char* argv[]) {
         double ivals[TEST_COUNT];
         size_t size = atol(argv[1]);
 
-        kfft_scalar* kfft_spectr = kfft_malloc(size * (sizeof(kfft_cpx) + sizeof(kfft_scalar)));
+        kfft_scalar* kfft_spectr = kfft_malloc(size * (sizeof(kfft_scalar)));
         if (kfft_spectr) {
-            kfft_scalar* temp = kfft_spectr + size;
+            kfft_scalar* temp = kfft_malloc(size * (sizeof(kfft_cpx)));
 
             for (int32_t i = 0; i < TEST_COUNT; i++) {
-                memset(kfft_spectr, 0, size * (sizeof(kfft_cpx) + sizeof(kfft_scalar)));
+                memset(kfft_spectr, 0, size * (sizeof(kfft_scalar)));
 
                 srand(time(NULL));
                 for (size_t j = 0; j < size; j++) {
@@ -76,6 +76,7 @@ main(int argc, char* argv[]) {
             }
             stdout_time(ivals);
 
+            kfft_free(temp);
             kfft_free(kfft_spectr);
         }
         return 0;

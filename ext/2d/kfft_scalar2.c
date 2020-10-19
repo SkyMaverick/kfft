@@ -27,17 +27,20 @@ kfft_init(kfft_plan_s2d* plan) {
     if (__likely__(plan->x != plan->y)) {
         KFFT_OMP(omp parallel sections shared(plan)) {
             KFFT_OMP(omp section) {
-                plan->plan_x = kfft_config_scalar(plan->x, KFFT_CHECK_FLAGS(plan->flags | KFFT_FLAG_EXPAND_SCALAR),
-                                                  plan->object.mmgr, NULL);
+                plan->plan_x = kfft_config_scalar(
+                    plan->x, KFFT_CHECK_FLAGS(plan->flags | KFFT_FLAG_EXPAND_SCALAR),
+                    plan->object.mmgr, NULL);
             }
             KFFT_OMP(omp section) {
-                plan->plan_y = kfft_config_scalar(plan->y, KFFT_CHECK_FLAGS(plan->flags | KFFT_FLAG_EXPAND_SCALAR),
-                                                  plan->object.mmgr, NULL);
+                plan->plan_y = kfft_config_scalar(
+                    plan->y, KFFT_CHECK_FLAGS(plan->flags | KFFT_FLAG_EXPAND_SCALAR),
+                    plan->object.mmgr, NULL);
             }
         }
     } else {
         plan->plan_y = plan->plan_x =
-            kfft_config_scalar(plan->x, KFFT_CHECK_FLAGS(plan->flags | KFFT_FLAG_EXPAND_SCALAR), plan->object.mmgr, NULL);
+            kfft_config_scalar(plan->x, KFFT_CHECK_FLAGS(plan->flags | KFFT_FLAG_EXPAND_SCALAR),
+                               plan->object.mmgr, NULL);
     }
     return (plan->plan_y && plan->plan_x) ? KFFT_RET_SUCCESS : KFFT_RET_ALLOC_FAIL;
 }

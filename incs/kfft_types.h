@@ -53,6 +53,7 @@ enum kfft_eval_flags {
     KFFT_FLAG_GENERIC = 1 << 2,       ///< Manual use of the generic algorithm for prime-size blocks
     KFFT_FLAG_GENERIC_ONLY = 1 << 3,  ///< Use ONLY generic algorithm for all sequence
     KFFT_FLAG_EXPAND_SCALAR = 1 << 4, ///< expand scalar buffer to full lenght (1D scalar only)
+    KFFT_FLAG_DISABLE_NORM = 1 << 5,  ///< disable 1/N normalization for inverse transform
 };
 
 /*!

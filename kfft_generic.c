@@ -113,7 +113,7 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_plan_cpx* plan,
             if (__likely__((p >= KFFT_RADER_LIMIT) &&
                            (!((plan->flags & KFFT_FLAG_GENERIC) ||
                               (plan->flags & KFFT_FLAG_GENERIC_ONLY))) &&
-                           plan->prm_count)) {
+                           plan->prm_count && (m == 1))) {
                 kfft_trace_core(plan->level, "%s: %u\n", "Use Rader algorithm for resolve", p);
                 ret = rader_method_eval(Fout, scratch, fstride, plan, u, m, p);
 

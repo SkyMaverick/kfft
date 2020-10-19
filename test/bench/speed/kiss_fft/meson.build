@@ -16,7 +16,6 @@ else
         -funroll-loops
         -dA
         -fverbose-asm
-        -DFIXED_POINT=32
     '''.split()
 endif
 kiss_dep = dependency ('openmp', language: 'c')
