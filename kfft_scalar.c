@@ -327,9 +327,5 @@ kfft_eval_scalar(kfft_plan_sclr* plan, const kfft_scalar* fin, kfft_cpx* fout) {
 }
 KFFT_API kfft_return_t
 kfft_evali_scalar(kfft_plan_sclr* plan, const kfft_cpx* fin, kfft_scalar* fout) {
-    kfft_return_t ret = kfft_evali_scalar_internal(plan, fin, fout, NULL);
-    if (ret == KFFT_RET_SUCCESS)
-        for (uint32_t i = 0; i < plan->nfft; i++)
-            fout[i] = S_DIV(fout[i], 2);
-    return ret;
+    return kfft_evali_scalar_internal(plan, fin, fout, NULL);
 }

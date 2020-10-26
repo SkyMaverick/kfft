@@ -17,10 +17,18 @@ enum { RETURN_EQUAL = 0, RETURN_NONEQUAL = 1, RETURN_MMFAIL = 2, RETURN_ARGFAIL 
     #define fft_scalar double
 #endif
 
-#define TEST_PRECISION 0.001
+#define TEST_PRECISION 0.1
+#define AMP_LIMIT 1000
 
 FFTW(complex) * fftw_in, *fftw_out;
 kfft_cpx *kfft_in, *kfft_out;
+
+#define TRACE_FAULT(P, F, K)                                                                       \
+    fprintf(stderr,                                                                                \
+            "Fault on %zu position:\nFFTW:\n\treal\t%f\n\timg\t%f\nKFFT:\n\treal\t%f\n\timg "      \
+            "\t%f\nDiff:\n\treal\t%f\n\timg\t%f\n",                                                \
+            (P), (F)[(P)][0], (F)[(P)][1], (K)[(P)].r, (K)[(P)].i, (F)[(P)][0] - (K)[(P)].r,       \
+            (F)[(P)][1] - (K)[(P)].i)
 
 static unsigned
 compare_spectr_inv(size_t size) {
@@ -43,10 +51,12 @@ compare_spectr_inv(size_t size) {
             for (size_t i = 0; i < size; i++) {
                 if (fabs(fftw_in[i][0] - kfft_in[i].r) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
+                    TRACE_FAULT(i, fftw_in, kfft_in);
                     goto bailout;
                 }
                 if (fabs(fftw_in[i][1] - kfft_in[i].i) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
+                    TRACE_FAULT(i, fftw_in, kfft_in);
                     goto bailout;
                 }
             }
@@ -78,10 +88,12 @@ compare_spectr_fwd(size_t size) {
             for (size_t i = 0; i < size; i++) {
                 if (fabs(fftw_out[i][0] - kfft_out[i].r) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
+                    TRACE_FAULT(i, fftw_out, kfft_out);
                     goto bailout;
                 }
                 if (fabs(fftw_out[i][1] - kfft_out[i].i) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
+                    TRACE_FAULT(i, fftw_out, kfft_out);
                     goto bailout;
                 }
             }
@@ -110,10 +122,10 @@ main(int argc, char* argv[]) {
 
             if (kfft_in && kfft_out) {
                 for (size_t i = 0; i < size; i++) {
-                    kfft_in[i].r = /*(fft_scalar)rand()*/i + 1;
+                    kfft_in[i].r = (fft_scalar)(rand() % (AMP_LIMIT + 1));
                     fftw_in[i][0] = kfft_in[i].r;
 
-                    kfft_in[i].i = /*(fft_scalar)rand()*/0;
+                    kfft_in[i].i = (fft_scalar)(rand() % (AMP_LIMIT + 1));
                     fftw_in[i][1] = kfft_in[i].i;
                 }
                 ret = compare_spectr_fwd(size);

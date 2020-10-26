@@ -17,214 +17,96 @@ enum { RETURN_EQUAL = 0, RETURN_NONEQUAL = 1, RETURN_MMFAIL = 2, RETURN_ARGFAIL 
     #define fft_scalar double
 #endif
 
-#define TEST_PRECISION 0.001
+#define TEST_PRECISION 0.1
+#define AMP_LIMIT 1000
+
+FFTW(complex) *fftw_out;
+kfft_cpx *kfft_out;
+
+fft_scalar *fftw_in, *kfft_in;
+
+#define TRACE_FAULT_CPX(P, F, K)                                                                       \
+    fprintf(stderr,                                                                                \
+            "Fault on %zu position:\nFFTW:\n\treal\t%f\n\timg\t%f\nKFFT:\n\treal\t%f\n\timg "      \
+            "\t%f\nDiff:\n\treal\t%f\n\timg\t%f\n",                                                \
+            (P), (F)[(P)][0], (F)[(P)][1], (K)[(P)].r, (K)[(P)].i, (F)[(P)][0] - (K)[(P)].r,       \
+            (F)[(P)][1] - (K)[(P)].i)
+
+#define TRACE_FAULT_SCALAR(P, F, K)                                                                       \
+    fprintf(stderr,                                                                                \
+            "Fault on %zu position:\nFFTW:\n\treal\t%f\nKFFT:\n\treal\t%f\nDiff:\n\treal\t%f\n",   \
+            (P), (F)[(P)], (K)[(P)], (F)[(P)] - (K)[(P)])
 
 static unsigned
-compare_forward(size_t size) {
+compare_spectr_inv(size_t size) {
     unsigned ret = RETURN_MMFAIL;
 
-    fft_scalar* fftw_in = FFTW(malloc)(size * sizeof(fft_scalar));
-    fft_scalar* kfft_in = kfft_malloc(size * sizeof(fft_scalar));
+    FFTW(plan)
+    fftw_plan = FFTW(plan_dft_c2r_1d)(size, fftw_out, fftw_in, FFTW_ESTIMATE);
+    if (fftw_plan) {
+        kfft_plan_sclr* kfft_plan =
+            kfft_config_scalar(size, KFFT_FLAG_INVERSE | KFFT_FLAG_DISABLE_NORM, NULL, NULL);
+        if (kfft_plan) {
+            // processing FFTW
+            FFTW(execute)(fftw_plan);
+            // processing KFFT
+            kfft_evali_scalar(kfft_plan, kfft_out, kfft_in);
 
-    if (fftw_in && kfft_in) {
+            // COMPARE SEQUENCES
+            ret = RETURN_EQUAL;
 
-        for (uint32_t i = 0; i < size; i++) {
-            fftw_in[i] = i;
-            kfft_in[i] = i;
-        }
-
-        FFTW(complex)* fftw_out = FFTW(malloc)(size * sizeof(FFTW(complex)));
-        kfft_cpx* kfft_out = kfft_malloc(size * sizeof(kfft_cpx));
-
-        if (fftw_out && kfft_out) {
-            FFTW(plan)
-            fftw_plan = FFTW(plan_dft_r2c_1d)(size, fftw_in, fftw_out, FFTW_ESTIMATE);
-
-            if (fftw_plan) {
-                kfft_plan_sclr* kfft_plan = kfft_config_scalar(size, KFFT_FLAG_NORMAL, NULL, NULL);
-
-                if (kfft_plan) {
-                    // processing FFTW
-                    FFTW(execute)(fftw_plan);
-                    // processing KFFT
-                    kfft_eval_scalar(kfft_plan, kfft_in, kfft_out);
-
-                    // COMPARE SEQUENCES
-                    ret = RETURN_EQUAL;
-                    for (size_t i = 0; i < size / 2; i++) {
-                        //                        fprintf (stdout, "[%zu] Real %5.3f - %5.3f  ", i,
-                        //                        fftw_out[i][0], kfft_out[i].r); fprintf (stdout,
-                        //                        "Image %5.3f - %5.3f\n", fftw_out[i][1],
-                        //                        kfft_out[i].i);
-                        fprintf(stdout, "[%zu] Diff %5.3f - %5.3f\n", i,
-                                fftw_out[i][0] - kfft_out[i].r, fftw_out[i][1] - kfft_out[i].i);
-                        if (fabs(fftw_out[i][0] - kfft_out[i].r) > TEST_PRECISION) {
-                            ret = RETURN_NONEQUAL;
-                            goto bailout;
-                        }
-                        if (fabs(fftw_out[i][1] - kfft_out[i].i) > TEST_PRECISION) {
-                            ret = RETURN_NONEQUAL;
-                            goto bailout;
-                        }
-                    }
-
-                bailout:
-                    kfft_cleanup(kfft_plan);
+            for (size_t i = 0; i < size; i++) {
+                if (fabs(fftw_in[i] - kfft_in[i]) > TEST_PRECISION) {
+                    ret = RETURN_NONEQUAL;
+                    TRACE_FAULT_SCALAR(i, fftw_in, kfft_in);
+                    goto bailout;
                 }
-                FFTW(destroy_plan)(fftw_plan);
             }
-            FFTW(free)(fftw_out);
-            kfft_free(kfft_out);
-        }
-        FFTW(free)(fftw_in);
-        kfft_free(kfft_in);
-    }
 
+        bailout:
+            kfft_cleanup(kfft_plan);
+        }
+        FFTW(destroy_plan)(fftw_plan);
+    }
     return ret;
 }
 
 static unsigned
-compare_inverse(size_t size) {
+compare_spectr_fwd(size_t size) {
     unsigned ret = RETURN_MMFAIL;
 
-    FFTW(complex)* fftw_in = FFTW(malloc)(size * sizeof(FFTW(complex)));
-    kfft_cpx* kfft_in = kfft_malloc(size * sizeof(kfft_cpx));
+    FFTW(plan)
+    fftw_plan = FFTW(plan_dft_r2c_1d)(size, fftw_in, fftw_out, FFTW_ESTIMATE);
+    if (fftw_plan) {
+        kfft_plan_sclr* kfft_plan = kfft_config_scalar(size, KFFT_FLAG_NORMAL, NULL, NULL);
+        if (kfft_plan) {
+            // processing FFTW
+            FFTW(execute)(fftw_plan);
+            // processing KFFT
+            kfft_eval_scalar(kfft_plan, kfft_in, kfft_out);
 
-    if (fftw_in && kfft_in) {
-
-        for (uint32_t i = 0; i < size; i++) {
-            fftw_in[i][0] = size - i;
-            kfft_in[i].r = size - i;
-            fftw_in[i][1] = 0;
-            kfft_in[i].i = 0;
-        }
-
-        fft_scalar* fftw_out = FFTW(malloc)(size * sizeof(fft_scalar));
-        fft_scalar* kfft_out = kfft_malloc(size * sizeof(fft_scalar));
-
-        if (fftw_out && kfft_out) {
-            FFTW(plan)
-            fftw_plan = FFTW(plan_dft_c2r_1d)(size / 2, fftw_in, fftw_out, FFTW_ESTIMATE);
-
-            if (fftw_plan) {
-                kfft_plan_sclr* kfft_plan = kfft_config_scalar(size, KFFT_FLAG_INVERSE, NULL, NULL);
-
-                if (kfft_plan) {
-                    // processing FFTW
-                    FFTW(execute)(fftw_plan);
-                    // processing KFFT
-                    kfft_evali_scalar(kfft_plan, kfft_in, kfft_out);
-
-                    // COMPARE SEQUENCES
-                    ret = RETURN_EQUAL;
-                    for (size_t i = 0; i < size / 2; i++) {
-                        fprintf(stdout, "[%zu] Real %5.3f - %5.3f  ", i, fftw_out[i], kfft_out[i]);
-                        //                        fprintf (stdout, "Image %5.3f - %5.3f\n",
-                        //                        fftw_out[i], kfft_out[i]); fprintf (stdout, "[%zu]
-                        //                        Diff %5.3f - %5.3f\n", i, fftw_out[i] -
-                        //                        kfft_out[i], fftw_out[i] - kfft_out[i]);
-                        if (fabs(fftw_out[i] - kfft_out[i]) > TEST_PRECISION) {
-                            ret = RETURN_NONEQUAL;
-                            goto bailout;
-                        }
-                    }
-
-                bailout:
-                    kfft_cleanup(kfft_plan);
+            // COMPARE SEQUENCES
+            ret = RETURN_EQUAL;
+            for (size_t i = 0; i < size / 2; i++) {
+                if (fabs(fftw_out[i][0] - kfft_out[i].r) > TEST_PRECISION) {
+                    ret = RETURN_NONEQUAL;
+                    TRACE_FAULT_CPX(i, fftw_out, kfft_out);
+                    goto bailout;
                 }
-                FFTW(destroy_plan)(fftw_plan);
+                if (fabs(fftw_out[i][1] - kfft_out[i].i) > TEST_PRECISION) {
+                    ret = RETURN_NONEQUAL;
+                    TRACE_FAULT_CPX(i, fftw_out, kfft_out);
+                    goto bailout;
+                }
             }
-            FFTW(free)(fftw_out);
-            kfft_free(kfft_out);
-        }
-        FFTW(free)(fftw_in);
-        kfft_free(kfft_in);
-    }
 
+        bailout:
+            kfft_cleanup(kfft_plan);
+        }
+        FFTW(destroy_plan)(fftw_plan);
+    }
     return ret;
 }
-
-// static unsigned
-// compare_spectr_inv(fft_scalar* fftw_buffer, fft_scalar* kfft_buffer, size_t size) {
-//     unsigned ret = RETURN_MMFAIL;
-//     fft_scalar* fftw_out = FFTW(malloc)(size * sizeof(fft_scalar));
-//     fft_scalar* kfft_out = kfft_malloc(size * sizeof(fft_scalar));
-//
-//     if (fftw_out && kfft_out) {
-//
-//         FFTW(plan) fftw_plan = FFTW(plan_dft_c2r_1d)(size, (FFTW(complex)*)fftw_buffer, fftw_out,
-//         FFTW_ESTIMATE); if (fftw_plan) {
-//             kfft_plan_sclr* kfft_plan = kfft_config_scalar(size, KFFT_FLAG_INVERSE, NULL, NULL);
-//             if (kfft_plan) {
-//                 // processing FFTW
-//                 FFTW(execute)(fftw_plan);
-//                 // processing KFFT
-//                 kfft_evali_scalar(kfft_plan, (kfft_cpx*)kfft_buffer, kfft_out);
-//
-//                 ret = RETURN_EQUAL;
-//                 // COMPARE SEQUENCES
-//                 for (size_t i = 0; i < size; i++) {
-//                     if (fabs(fftw_out[i] - kfft_out[i]) > TEST_PRECISION) {
-//                         ret = RETURN_NONEQUAL;
-//                         goto bailout;
-//                     }
-//                 }
-//
-//             bailout:
-//                 kfft_cleanup(kfft_plan);
-//             }
-//             FFTW(destroy_plan)(fftw_plan);
-//         }
-//         FFTW(free)(fftw_out);
-//         kfft_free(kfft_out);
-//     }
-//     return ret;
-// }
-//
-// static unsigned
-// compare_spectr_fwd(fft_scalar* fftw_buffer, fft_scalar* kfft_buffer, size_t size) {
-//     unsigned ret = RETURN_MMFAIL;
-//
-//     FFTW(complex)* fftw_out = FFTW(malloc)(size * sizeof(FFTW(complex)));
-//     kfft_cpx* kfft_out = kfft_malloc(size * sizeof(kfft_cpx));
-//
-//     if (fftw_out && kfft_out) {
-//
-//         FFTW(plan) fftw_plan = FFTW(plan_dft_r2c_1d)(size, fftw_buffer, fftw_out, FFTW_ESTIMATE);
-//         if (fftw_plan) {
-//             kfft_plan_sclr* kfft_plan = kfft_config_scalar(size, KFFT_FLAG_NORMAL, NULL, NULL);
-//             if (kfft_plan) {
-//                 // processing FFTW
-//                 FFTW(execute)(fftw_plan);
-//                 // processing KFFT
-//                 kfft_eval_scalar(kfft_plan, kfft_buffer, kfft_out);
-//
-//                 // COMPARE SEQUENCES
-//
-//                 ret = RETURN_EQUAL;
-//                 for (size_t i = 0; i < size; i++) {
-//                     printf("BOOO\n");
-//                     if (fabs(fftw_out[i][0] - kfft_out[i].r) > TEST_PRECISION) {
-//                         ret = RETURN_NONEQUAL;
-//                         goto bailout;
-//                     }
-//                     if (fabs(fftw_out[i][1] - kfft_out[i].i) > TEST_PRECISION) {
-//                         ret = RETURN_NONEQUAL;
-//                         goto bailout;
-//                     }
-//                 }
-//
-//             bailout:
-//                 kfft_cleanup(kfft_plan);
-//             }
-//             FFTW(destroy_plan)(fftw_plan);
-//         }
-//         FFTW(free)(fftw_out);
-//         kfft_free(kfft_out);
-//     }
-//
-//     return ret;
-// }
 
 int
 main(int argc, char* argv[]) {
@@ -232,28 +114,37 @@ main(int argc, char* argv[]) {
     if (argc > 1) {
         size_t size = atol(argv[1]);
 
-        ret = compare_forward(size);
-        if (ret == RETURN_EQUAL)
-            ret = compare_inverse(size);
-        //        fft_scalar* fftw_buffer = FFTW(malloc)(size * sizeof(fft_scalar));
-        //        if (fftw_buffer) {
-        //            fft_scalar* kfft_buffer = kfft_malloc(size * sizeof(fft_scalar));
-        //            if (kfft_buffer) {
-        //                for (size_t i = 0; i < size; i++) {
-        //                    kfft_buffer[i] = (fft_scalar)i;
-        //                    fftw_buffer[i] = kfft_buffer[i];
-        //                }
-        //
-        //                ret = compare_spectr_fwd(fftw_buffer, kfft_buffer, size);
-        ////                if (ret == RETURN_EQUAL)
-        ////                    ret = compare_spectr_inv(fftw_buffer, kfft_buffer, size);
-        //                kfft_free(kfft_buffer);
-        //            }
-        //            FFTW(free)(fftw_buffer);
-        //        }
+        fftw_in = FFTW(malloc)(size * sizeof(fft_scalar));
+        fftw_out = FFTW(malloc)(size * sizeof(FFTW(complex)));
+
+        if (fftw_in && fftw_out) {
+
+            kfft_in = kfft_malloc(size * sizeof(kfft_scalar));
+            kfft_out = kfft_malloc(size * sizeof(kfft_cpx));
+
+            if (kfft_in && kfft_out) {
+                for (size_t i = 0; i < size; i++) {
+                    kfft_in[i] = (fft_scalar)(rand() % (AMP_LIMIT + 1))/* i+1 */;
+                    fftw_in[i] = kfft_in[i];
+                }
+                ret = compare_spectr_fwd(size);
+                if (ret == RETURN_EQUAL) {
+                    memset(fftw_in, 0, size * sizeof(fft_scalar));
+                    memset(kfft_in, 0, size * sizeof(fft_scalar));
+                    ret = compare_spectr_inv(size);
+                }
+
+                kfft_free(kfft_in);
+                kfft_free(kfft_out);
+            }
+
+            FFTW(free)(fftw_in);
+            FFTW(free)(fftw_out);
+        }
+
+        return ret;
     } else {
         fprintf(stderr, "%s\n", "Need sequense size as parameter");
         return RETURN_ARGFAIL;
     }
-    return ret;
 }
