@@ -58,5 +58,3 @@ This step may test all variants such as: normal lenght, prime-lenght and other d
 ## Bench result
 __Complex test evaluation compare__
 ![complex test](https://raw.githubusercontent.com/SkyMaverick/kfft/master/docs/img/cmpcpx.svg "Complex 1D sequence transform")
-__Scalar test evaluation compare__
-![scalar test](https://raw.githubusercontent.com/SkyMaverick/kfft/master/docs/img/cmpscr.svg "Scalar 1D sequence transform")

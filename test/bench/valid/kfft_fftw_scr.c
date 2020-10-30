@@ -20,19 +20,19 @@ enum { RETURN_EQUAL = 0, RETURN_NONEQUAL = 1, RETURN_MMFAIL = 2, RETURN_ARGFAIL 
 #define TEST_PRECISION 0.1
 #define AMP_LIMIT 1000
 
-FFTW(complex) *fftw_out;
-kfft_cpx *kfft_out;
+FFTW(complex) * fftw_out;
+kfft_cpx* kfft_out;
 
 fft_scalar *fftw_in, *kfft_in;
 
-#define TRACE_FAULT_CPX(P, F, K)                                                                       \
+#define TRACE_FAULT_CPX(P, F, K)                                                                   \
     fprintf(stderr,                                                                                \
             "Fault on %zu position:\nFFTW:\n\treal\t%f\n\timg\t%f\nKFFT:\n\treal\t%f\n\timg "      \
             "\t%f\nDiff:\n\treal\t%f\n\timg\t%f\n",                                                \
             (P), (F)[(P)][0], (F)[(P)][1], (K)[(P)].r, (K)[(P)].i, (F)[(P)][0] - (K)[(P)].r,       \
             (F)[(P)][1] - (K)[(P)].i)
 
-#define TRACE_FAULT_SCALAR(P, F, K)                                                                       \
+#define TRACE_FAULT_SCALAR(P, F, K)                                                                \
     fprintf(stderr,                                                                                \
             "Fault on %zu position:\nFFTW:\n\treal\t%f\nKFFT:\n\treal\t%f\nDiff:\n\treal\t%f\n",   \
             (P), (F)[(P)], (K)[(P)], (F)[(P)] - (K)[(P)])
@@ -124,7 +124,7 @@ main(int argc, char* argv[]) {
 
             if (kfft_in && kfft_out) {
                 for (size_t i = 0; i < size; i++) {
-                    kfft_in[i] = (fft_scalar)(rand() % (AMP_LIMIT + 1))/* i+1 */;
+                    kfft_in[i] = (fft_scalar)(rand() % (AMP_LIMIT + 1)) /* i+1 */;
                     fftw_in[i] = kfft_in[i];
                 }
                 ret = compare_spectr_fwd(size);

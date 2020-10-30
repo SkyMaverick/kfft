@@ -110,10 +110,11 @@ kf_bfly_generic(kfft_cpx* Fout, const size_t fstride, const kfft_plan_cpx* plan,
 
         for (uint32_t u = 0; u < m; ++u) {
 #if defined(KFFT_RADER_ALGO)
-            if (__likely__((p >= KFFT_RADER_LIMIT) &&
-                           (!((plan->flags & KFFT_FLAG_GENERIC) ||
-                              (plan->flags & KFFT_FLAG_GENERIC_ONLY))) &&
-                           plan->prm_count && (m == 1))) {
+            if (__likely__((m == 1) &&                // only solid buffer
+                           (p >= KFFT_RADER_LIMIT) && // over Rader limit barrier (build option)
+                           (!((plan->flags & KFFT_FLAG_GENERIC) || // if NOT GENERIC flag enabled
+                              (plan->flags & KFFT_FLAG_GENERIC_ONLY))) && // also ^
+                           plan->prm_count)) { // if prime numbers plans created
                 kfft_trace_core(plan->level, "%s: %u\n", "Use Rader algorithm for resolve", p);
                 ret = rader_method_eval(Fout, scratch, fstride, plan, u, m, p);
 
