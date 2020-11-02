@@ -144,17 +144,17 @@ kf_factor(kfft_plan_cpx* P) {
 static inline kfft_return_t
 kfft_kinit(kfft_plan_cpx* P) {
     kfft_return_t ret = KFFT_RET_SUCCESS;
-    /* Generate twiddles  */
-    // #if defined(KFFT_MEMLESS_MODE)
-    //     (void)P; // unused warning disable
-    // #else
+/* Generate twiddles  */
+#if defined(KFFT_MEMLESS_MODE)
+    (void)P; // unused warning disable
+#else
     //     #if defined(KFFT_RADER_ALGO)
     //     if (CHECK_PLAN_NOTPRIME(P))
     //     #endif /* KFFT_RADER_ALGO */
     for (uint32_t i = 0; i < P->nfft; ++i) {
         P->twiddles[i] = kfft_kernel_twiddle(i, P->nfft, P->flags & KFFT_FLAG_INVERSE);
     }
-    // #endif     /* KFFT_MEMLESS_MODE */
+#endif /* KFFT_MEMLESS_MODE */
 
 #if defined(KFFT_RADER_ALGO)
     if (P->prm_count > 0) {
@@ -215,14 +215,14 @@ kfft_calculate(const uint32_t nfft, const uint32_t flags, const uint8_t level, k
     KFFT_UNUSED_VAR(P);
 #endif /* KFFT_RADER_ALGO */
 
-    // #if !defined(KFFT_MEMLESS_MODE)
+#if !defined(KFFT_MEMLESS_MODE)
     //     #if defined(KFFT_RADER_ALGO)
     //     if (CHECK_PLAN_NOTPRIME(P))
     //     #endif /* KFFT_RADER_ALGO */
     ret += sizeof(kfft_cpx) * nfft;
-    //#else
-    //    KFFT_UNUSED_VAR(nfft);
-    //#endif /* not KFFT_MEMLESS_MODE */
+#else
+    KFFT_UNUSED_VAR(nfft);
+#endif /* not KFFT_MEMLESS_MODE */
 
     if (__likely__(!(flags & KFFT_FLAG_GENERIC_ONLY))) {
 #if defined(KFFT_RADER_ALGO)
@@ -272,7 +272,7 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
         memcpy(&(tmp.object), &(P->object), sizeof(kfft_object_t));
         memcpy(P, &tmp, sizeof(kfft_plan_cpx));
 
-        // #if !defined(KFFT_MEMLESS_MODE)
+#if !defined(KFFT_MEMLESS_MODE)
         //
         //     #if defined(KFFT_RADER_ALGO)
         //         if (CHECK_PLAN_NOTPRIME(P)) {
@@ -284,11 +284,11 @@ kfft_config_lvlcpx(const uint32_t nfft, const uint32_t flags, const uint8_t leve
             return NULL;
         }
 
-        //    #if defined(KFFT_RADER_ALGO)
-        //        }
-        //    #endif /* KFFT_RADER_ALGO */
-        //
-        //#endif /* not KFFT_MEMLESS_MODE */
+//    #if defined(KFFT_RADER_ALGO)
+//        }
+//    #endif /* KFFT_RADER_ALGO */
+//
+#endif /* not KFFT_MEMLESS_MODE */
         if (__unlikely__(kfft_kinit(P) != KFFT_RET_SUCCESS)) {
             KFFT_ALGO_PLAN_TERMINATE(P, A);
             return NULL;
