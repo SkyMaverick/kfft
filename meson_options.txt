@@ -14,7 +14,7 @@ option ('enable_simd', type: 'boolean', value: 'true',
         description: 'use SIMD optimized code')
 option ('enable_alloca', type: 'boolean', value: 'false',
         description: 'use alloca for temporary buffers (dangerouse)')
-option ('enable_sysmath', type: 'boolean', value: 'true',
+option ('enable_sysmath', type: 'boolean', value: 'false',
         description: 'use system (or custom) defines and math functions')
 option ('enable_fastmath', type: 'boolean', value: 'true',
         description: 'use -ffast-math optimization (maybe dangerouse)')

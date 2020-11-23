@@ -100,8 +100,10 @@
 
 #ifdef KFFT_USE_SYSMATH
     #define KFFT_SQRT(X) sqrt((X))
+    #define KFFT_FABS(X) fabs((X))
 #else
     #define KFFT_SQRT(X) kfft_math_sqrt((X))
+    #define KFFT_FABS(X) kfft_math_fabs((X))
 #endif
 
 #ifdef KFFT_USE_SYSMATH

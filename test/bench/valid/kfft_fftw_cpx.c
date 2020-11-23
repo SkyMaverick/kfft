@@ -49,12 +49,12 @@ compare_spectr_inv(size_t size) {
             ret = RETURN_EQUAL;
 
             for (size_t i = 0; i < size; i++) {
-                if (fabs(fftw_in[i][0] - kfft_in[i].r) > TEST_PRECISION) {
+                if (KFFT_FABS(fftw_in[i][0] - kfft_in[i].r) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
                     TRACE_FAULT(i, fftw_in, kfft_in);
                     goto bailout;
                 }
-                if (fabs(fftw_in[i][1] - kfft_in[i].i) > TEST_PRECISION) {
+                if (KFFT_FABS(fftw_in[i][1] - kfft_in[i].i) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
                     TRACE_FAULT(i, fftw_in, kfft_in);
                     goto bailout;
@@ -86,12 +86,12 @@ compare_spectr_fwd(size_t size) {
             // COMPARE SEQUENCES
             ret = RETURN_EQUAL;
             for (size_t i = 0; i < size; i++) {
-                if (fabs(fftw_out[i][0] - kfft_out[i].r) > TEST_PRECISION) {
+                if (KFFT_FABS(fftw_out[i][0] - kfft_out[i].r) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
                     TRACE_FAULT(i, fftw_out, kfft_out);
                     goto bailout;
                 }
-                if (fabs(fftw_out[i][1] - kfft_out[i].i) > TEST_PRECISION) {
+                if (KFFT_FABS(fftw_out[i][1] - kfft_out[i].i) > TEST_PRECISION) {
                     ret = RETURN_NONEQUAL;
                     TRACE_FAULT(i, fftw_out, kfft_out);
                     goto bailout;

@@ -65,3 +65,8 @@ kfft_math_sqrt(const kfft_scalar number) {
     }
     return (lower + upper) / 2;
 }
+
+static inline kfft_scalar
+kfft_math_fabs(const kfft_scalar number) {
+    return (number < 0) ? number * (-1) : number;
+}
