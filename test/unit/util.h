@@ -19,16 +19,20 @@
     }
 
 #define _MSG_OFF(out, err)                                                                         \
-    dup2(STDOUT_FILENO, out);                                                                      \
-    dup2(STDERR_FILENO, err);                                                                      \
-    close(STDOUT_FILENO);                                                                          \
-    close(STDERR_FILENO);
+    do {                                                                                           \
+        dup2(STDOUT_FILENO, (out));                                                                \
+        dup2(STDERR_FILENO, (err));                                                                \
+        close(STDOUT_FILENO);                                                                      \
+        close(STDERR_FILENO);                                                                      \
+    } while (0)
 
 #define _MSG_ON(out, err)                                                                          \
-    dup2(out, STDOUT_FILENO);                                                                      \
-    dup2(err, STDERR_FILENO);                                                                      \
-    close(out);                                                                                    \
-    close(err);
+    do {                                                                                           \
+        dup2((out), STDOUT_FILENO);                                                                \
+        dup2((err), STDERR_FILENO);                                                                \
+        close((out));                                                                              \
+        close((err));                                                                              \
+    } while (0)
 
 #define STDIO_OFF(id)                                                                              \
     int _mfdout_##id = 0, _mfderr_##id = 0;                                                        \
