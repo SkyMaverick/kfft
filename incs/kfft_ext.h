@@ -51,6 +51,12 @@ kfft_free_null(void** mem);
  */
 KFFT_API kfft_return_t
 kfft_cleanup(void* mem);
+/// Service macro for ::kfft_cleanup
+#define kfft_release(X)                                                                            \
+    do {                                                                                           \
+        if (kfft_cleanup((void*)(X)) == KFFT_RET_SUCCESS)                                          \
+            (X) = NULL;                                                                            \
+    } while (0)
 /*!
     Return text interpratation ::kfft_ret_flags return code.
     \param[in] code - return code

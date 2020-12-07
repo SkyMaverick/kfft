@@ -157,9 +157,12 @@ kfft_kinit(kfft_plan_cpx* P) {
 #endif /* KFFT_MEMLESS_MODE */
 
 #if defined(KFFT_RADER_ALGO)
+
     if (P->prm_count > 0) {
         if (__likely__(!(P->flags & KFFT_FLAG_GENERIC_ONLY))) {
-            for (uint32_t i = 0; i < P->prm_count; i++) {
+            for (uint32_t i = 0; ((i < P->prm_count) && (ret == KFFT_RET_SUCCESS)); i++) {
+                ret = KFFT_RET_ALLOC_FAIL;
+
                 kfft_plan_rader* sP = &(P->primes[i]);
                 uint32_t len = sP->prime - 1;
 
@@ -174,29 +177,36 @@ kfft_kinit(kfft_plan_cpx* P) {
                     kfft_rader_idxs(sP->qidx, sP->q, sP->prime);
                     kfft_rader_idxs(sP->pidx, sP->p, sP->prime);
     #endif /* not KFFT_MEMLESS_MODE */
+
+                    /* Create forward Rader - plan */
                     sP->plan =
                         kfft_config_lvlcpx(len, KFFT_CHECK_FLAGS(P->flags & (~KFFT_FLAG_INVERSE)),
                                            P->level + 1, P->object.mmgr, NULL);
-                    sP->plan_inv =
-                        kfft_config_lvlcpx(len, (KFFT_CHECK_FLAGS(P->flags | KFFT_FLAG_INVERSE)),
-                                           P->level + 1, P->object.mmgr, NULL);
+                    if (__likely__(sP->plan)) {
 
-                    sP->shuffle_twiddles = kfft_pool_alloc(P->object.mmgr, sizeof(kfft_cpx) * len);
-                    if (__likely__(sP->shuffle_twiddles)) {
-                        for (uint32_t j = 0; j < len; j++) {
-                            uint32_t ip = RAD_INVERSE_IDX(j, sP);
+                        /* Create inverse Rader - plan */
+                        sP->plan_inv = kfft_config_lvlcpx(
+                            len, (KFFT_CHECK_FLAGS(P->flags | KFFT_FLAG_INVERSE)), P->level + 1,
+                            P->object.mmgr, NULL);
+                        if (__likely__(sP->plan_inv)) {
 
-                            sP->shuffle_twiddles[j] =
-                                kfft_kernel_twiddle(ip, sP->prime, P->flags & KFFT_FLAG_INVERSE);
+                            /* Create suffle twiddles buffer */
+                            sP->shuffle_twiddles =
+                                kfft_pool_alloc(P->object.mmgr, sizeof(kfft_cpx) * len);
+                            if (__likely__(sP->shuffle_twiddles)) {
+                                for (uint32_t j = 0; j < len; j++) {
+                                    uint32_t ip = RAD_INVERSE_IDX(j, sP);
+
+                                    sP->shuffle_twiddles[j] = kfft_kernel_twiddle(
+                                        ip, sP->prime, P->flags & KFFT_FLAG_INVERSE);
+                                }
+
+                                ret = kfft_eval_cpx(sP->plan, sP->shuffle_twiddles,
+                                                    sP->shuffle_twiddles);
+                            }
                         }
-
-                        ret = kfft_eval_cpx(sP->plan, sP->shuffle_twiddles, sP->shuffle_twiddles);
-                    } else {
-                        ret = KFFT_RET_ALLOC_FAIL;
                     }
     #if !defined(KFFT_MEMLESS_MODE)
-                } else {
-                    ret = KFFT_RET_ALLOC_FAIL;
                 }
     #endif /* not KFFT_MEMLESS_MODE */
             }
