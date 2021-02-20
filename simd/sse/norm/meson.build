@@ -32,4 +32,6 @@ if cc.compiles('''
             kfft_config += {'KFFT_HAVE_SSE3': true}
         endif
     endif
+else
+    error ('Target machine don\'t support SSE2 instructions')
 endif

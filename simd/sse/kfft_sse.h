@@ -1,5 +1,5 @@
 #pragma once
-#include "kfft_simd_compat.h"
+#include "kfft_headers.h"
 #include "kfft_simd.h"
 
 #define FUNC_SSE(X) X##_sse
