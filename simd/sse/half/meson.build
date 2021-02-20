@@ -31,14 +31,4 @@ if cc.compiles('''
             kfft_config += {'KFFT_HAVE_SSE3': true}
         endif
     endif
-
-    kfft_vex += {
-        'name' : 'sse',
-        'src' : files ('''
-                  kfft_bfly.c
-                  kfft_generic.c
-                  kfft_math.c
-                '''.split()),
-        'cargs': sse_args,
-    }
 endif

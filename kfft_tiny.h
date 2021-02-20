@@ -20,12 +20,12 @@ extern "C" {
 
 /// KFFT plan type definitions
 enum ktiny_plan_type {
-    KFFT_PLAN_COMPLEX = 0x0000,        ///< 1D complex plan
-    KFFT_PLAN_SCALAR = 0x0001,         ///< 1D scalar plan
-    KFFT_PLAN_COMPLEX_2D = 0x0002,     ///< 2D complex plan
-    KFFT_PLAN_SCALAR_2D = 0x0003,      ///< 2D scalar plan
-//    KFFT_PLAN_COMPLEX_SPARSE = 0x0004, ///< 1D Sparse complex plan
-//    KFFT_PLAN_SCALAR_SPARSE = 0x0005,  ///< 1D Sparse scalar plan
+    KFFT_PLAN_COMPLEX = 0x0000,    ///< 1D complex plan
+    KFFT_PLAN_SCALAR = 0x0001,     ///< 1D scalar plan
+    KFFT_PLAN_COMPLEX_2D = 0x0002, ///< 2D complex plan
+    KFFT_PLAN_SCALAR_2D = 0x0003,  ///< 2D scalar plan
+    //    KFFT_PLAN_COMPLEX_SPARSE = 0x0004, ///< 1D Sparse complex plan
+    //    KFFT_PLAN_SCALAR_SPARSE = 0x0005,  ///< 1D Sparse scalar plan
     KFFT_PLAN_COMPLEX_CONV = 0x0006,   ///< 1D complex convolution plan
     KFFT_PLAN_SCALAR_CONV = 0x0007,    ///< 1D scalar convolution plan
     KFFT_PLAN_COMPLEX_CONV2D = 0x0008, ///< 2D complex convolution plan
@@ -64,7 +64,7 @@ typedef struct {
 } kfft_args_2d;
 
 ///*! Amalgamited sparse config arguments type. @see kfft_config_sparse_cpx */
-//typedef struct {
+// typedef struct {
 //    uint32_t nfft; ///< sequence lenght
 //    uint32_t dims; ///< columns count
 //    uint32_t step; ///< step size
@@ -159,7 +159,8 @@ kfft_tiny_config(unsigned type, uint32_t flags, uintptr_t args) {
 //        case KFFT_PLAN_SCALAR_SPARSE: {
 //            kfft_args_sparse* A = (kfft_args_sparse*)args;
 //            plan->state =
-//                (uintptr_t)kfft_config_sparse_scalar(A->nfft, flags, A->dims, A->step, NULL, NULL);
+//                (uintptr_t)kfft_config_sparse_scalar(A->nfft, flags, A->dims, A->step, NULL,
+//                NULL);
 //            break;
 //        }
 //#endif /* KFFT_SPARSE_ENABLE */

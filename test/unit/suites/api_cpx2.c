@@ -11,23 +11,14 @@
 
 #define TEST_PRECISION 0.001
 
-
-_TEST(simple_valid_23){
-}
-_TEST(simple_valid_53){
-}
-_TEST(simple_valid_79){
-}
-_TEST(simple_valid_1011){
-}
-_TEST(simple_inverse_valid_23){
-}
-_TEST(simple_inverse_valid_53){
-}
-_TEST(simple_inverse_valid_79){
-}
-_TEST(simple_inverse_valid_1011){
-}
+_TEST(simple_valid_23) {}
+_TEST(simple_valid_53) {}
+_TEST(simple_valid_79) {}
+_TEST(simple_valid_1011) {}
+_TEST(simple_inverse_valid_23) {}
+_TEST(simple_inverse_valid_53) {}
+_TEST(simple_inverse_valid_79) {}
+_TEST(simple_inverse_valid_1011) {}
 
 void
 _run_suite(void) {

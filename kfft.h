@@ -157,18 +157,18 @@ extern "C" {
     // clang-format off
     #if defined(KFFT_HAVE_SSE3) // if define SSE3 support function
         #if defined(KFFT_HALF_SCALAR)
-            #define VEX_CHECK_SSE(S)                                                                \
+            #define VEX_CHECK_SSE(S)                                                            \
                 kfft_simd_check(__VEXST((S)),(HW_SSE2 | HW_SSE3))
         #else /* KFFT_HALF_SCALAR */
-            #define VEX_CHECK_SSE(S)                                                                \
+            #define VEX_CHECK_SSE(S)                                                            \
                 kfft_simd_check(__VEXST((S)),(HW_SSE | HW_SSE3))
         #endif /* KFFT_HALF_SCALAR */
     #else /* KFFT_HAVE_SSE3 */
         #if defined(KFFT_HALF_SCALAR)
-            #define VEX_CHECK_SSE(S)                                                                \
+            #define VEX_CHECK_SSE(S)                                                            \
                 kfft_simd_check(__VEXST((S)),(HW_SSE2))
         #else /* KFFT_HALF_SCALAR */
-            #define VEX_CHECK_SSE(S)                                                                \
+            #define VEX_CHECK_SSE(S)                                                            \
                 kfft_simd_check(__VEXST((S)),(HW_SSE))
         #endif /*KFFT_HALF_SCALAR*/
     #endif
