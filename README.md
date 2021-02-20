@@ -12,7 +12,7 @@ The features of LibKFFT include:
 *   Recursive  [Rader algorithm](https://en.wikipedia.org/wiki/Rader's_FFT_algorithm) for prime-number lenght sequenses (build option)
 *   Internal math functions (aka sqrt, sincos etc.) without system libm functions (build option)
 *   Parallelization with OpenMP framework (build option)
-*   2D, sparse, convolution(+2D) operations as build-time extensions
+*   2D, convolution(+2D) operations as build-time extensions (with the ability to easily create custom extensions)
 *   Detail trace log in stdout for diagnostic (build option)
 *   Tiny API support for simplify code in trivial usage
 

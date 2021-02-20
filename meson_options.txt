@@ -27,7 +27,7 @@ option ('enable_half_scalar', type: 'boolean', value: 'false',
 option ('enable_openmp', type: 'boolean', value: 'false',
         description: 'enable openmp parallel pragmas (uses 2d, sparse extensions)')
 
-option ('list_extensions', type: 'array', value: ['2d', 'conv', 'conv2d', 'sparse'],
+option ('list_extensions', type: 'array', value: ['2d', 'conv', 'conv2d'],
         description: 'enable extensions')
 option ('list_vex86', type: 'array', choices: ['sse'], value: ['sse'],
         description: 'enable vector extensioins support')
