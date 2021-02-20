@@ -17,8 +17,11 @@
         kfft_pool_t* mm_##type = NULL;                                                             \
         if (len_value == NULL) {                                                                   \
             mm_##type = (pool) ? pool : kfft_pool_create(memneed);                                 \
-            if (__likely__(mm_##type))                                                             \
+            if (__likely__(mm_##type)) {                                                           \
+                if (__unlikely__(((pool) && (flags)&KFFT_FLAG_RENEW)))                             \
+                    kfft_pool_clear(mm_##type);                                                    \
                 plan = kfft_pool_alloc(mm_##type, sizeof(type));                                   \
+            }                                                                                      \
             if (__unlikely__((plan == NULL) && (pool == NULL)))                                    \
                 kfft_pool_free(mm_##type);                                                         \
         } else {                                                                                   \

@@ -4,21 +4,44 @@
 #include "util.h"
 #include "CUnit/Basic.h"
 
-_TEST(foo) {
-    //  CU_ASSERT_EQUAL(0,1);
-}
+#include "defs_cpx2.h"
 
-_TEST(foo1) {
-    //  CU_ASSERT_EQUAL(1,1);
+#define BUFSZ(X) (X) * sizeof(kfft_cpx)
+#define BUFSZ2(X, Y) (X) * (Y) * sizeof(kfft_cpx)
+
+#define TEST_PRECISION 0.001
+
+
+_TEST(simple_valid_23){
+}
+_TEST(simple_valid_53){
+}
+_TEST(simple_valid_79){
+}
+_TEST(simple_valid_1011){
+}
+_TEST(simple_inverse_valid_23){
+}
+_TEST(simple_inverse_valid_53){
+}
+_TEST(simple_inverse_valid_79){
+}
+_TEST(simple_inverse_valid_1011){
 }
 
 void
 _run_suite(void) {
     // ... all startup functionality
-    CU_pSuite suite = CUnitCreateSuite("SuiteName");
+    CU_pSuite suite = CUnitCreateSuite("2d complex API");
     if (suite) {
-        _ADD_TEST(suite, foo);
-        _ADD_TEST(suite, foo1);
+        _ADD_TEST(suite, simple_valid_23);
+        _ADD_TEST(suite, simple_valid_53);
+        _ADD_TEST(suite, simple_valid_79);
+        _ADD_TEST(suite, simple_valid_1011);
+        _ADD_TEST(suite, simple_inverse_valid_23);
+        _ADD_TEST(suite, simple_inverse_valid_53);
+        _ADD_TEST(suite, simple_inverse_valid_79);
+        _ADD_TEST(suite, simple_inverse_valid_1011);
     }
     return;
 }

@@ -63,7 +63,7 @@ kfft_pool_alloc(kfft_pool_t* A, const size_t nmem) {
         }
     }
 
-    return (void*)ret;
+    return (ret) ? (void*)ret : NULL;
 }
 
 void
