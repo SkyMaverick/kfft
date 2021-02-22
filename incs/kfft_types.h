@@ -57,6 +57,15 @@ enum kfft_eval_flags {
 };
 
 /*!
+  Macro to protecting nested plans from destructive operations
+  \param[in] X - plan object
+  \return None
+ */
+
+#define KFFT_CHECK_FLAGS(X) ((X) & (~KFFT_FLAG_RENEW))
+
+
+/*!
   \brief Library build information structure
 
   Structure is used to pass information about the library assembly configuration

@@ -1,4 +1,5 @@
 #include "kfft.h"
+#include "kfft_simd.h"
 #include "kfft_trace.h"
 
 // clang-format off

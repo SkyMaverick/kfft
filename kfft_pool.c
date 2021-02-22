@@ -1,6 +1,10 @@
 #include "kfft.h"
 #include "kfft_trace.h"
 
+#if defined(KFFT_USE_SIMD)
+    #include "kfft_simd.h"
+#endif
+
 // clang-format off
 #define kfft_trace_kia(fmt, ...)                                                                   \
     kfft_trace("[KIA]"" " fmt,__VA_ARGS__)

@@ -1,4 +1,7 @@
 #include "kfft.h"
+#if defined(KFFT_USE_SIMD)
+    #include "kfft_simd_check.h"
+#endif
 
 KFFT_API void
 kfft_info(kfft_info_t* info) {

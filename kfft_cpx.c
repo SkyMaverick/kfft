@@ -1,4 +1,5 @@
 #include "kfft.h"
+#include "kfft_simd.h"
 
 #if defined(KFFT_RADER_ALGO)
     #define CHECK_PLAN_NOTPRIME(S)                                                                 \

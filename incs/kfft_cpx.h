@@ -110,6 +110,38 @@ kfft_config_cpx(const uint32_t nfft, const uint32_t flags, kfft_pool_t* A, size_
 KFFT_API kfft_return_t
 kfft_eval_cpx(kfft_plan_cpx* plan, const kfft_cpx* fin, kfft_cpx* fout);
 
+/*!
+  Macro to get the memory manager of a plan object
+  \param[in] X - plan object
+  \return plan memory manager pointer (kfft_pool_t*)
+ */
+#define KFFT_PLAN_MMGR(X) (*((kfft_pool_t**)(X)))
+
+/*!
+  Macro to get the memory manager of a plan object if it's enabled
+  or NULL if plan is NULL. Required for the assignment operation.
+  \param[in] X - plan object
+  \return plan memory manager pointer (kfft_pool_t*) or NULL
+ */
+#define KFFT_PLAN_MMGR_NULL(X) ((X != NULL) ? KFFT_PLAN_MMGR((X)) : NULL)
+
+/*!
+  Macro to get the align information of a plan object
+  \param[in] X - plan object
+  \return uint8_t number memory align for plan (0, 16, 32)
+ */
+#define KFFT_PLAN_ALIGN(X) ((X != NULL) ? KFFT_PLAN_MMGR((X))->align : 0)
+
+/*!
+  Macro to get the acceleration info of a plan object
+
+  \param[in] X - plan object
+  \warning argument (X) mustn't NULL
+
+  \return kfft_simd_t vector extension information
+ */
+#define KFFT_PLAN_VEX(X) KFFT_PLAN_MMGR((X))->vex
+
 #if defined(KFFT_DYNAPI_ENABLE)
 // clang-format off
 typedef kfft_plan_cpx*
